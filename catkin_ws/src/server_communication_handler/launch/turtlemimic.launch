@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<!-- play_wave.launch -->
+<launch>
+    <!-- Launch the sound_play node -->
+    <node name="soundplay_node" pkg="sound_play" type="soundplay_node.py"/>
+
+    <!-- Play a wave file -->
+    <node name="play_wave" pkg="sound_play" type="soundplay_client.py" output="screen" args="playbuiltin.py 2"/>
+</launch>

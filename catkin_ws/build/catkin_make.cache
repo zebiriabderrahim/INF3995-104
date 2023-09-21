@@ -1,0 +1,2 @@
+server_communication_handler
+-DCATKIN_DEVEL_PREFIX=/home/abderrahim/catkin_ws/devel -DCMAKE_INSTALL_PREFIX=/home/abderrahim/catkin_ws/install -G Unix Makefiles
