@@ -1,2 +1,2 @@
-limo/limo_description
+limo/limo_description:limo/limo_gazebo_sim
 -DCATKIN_DEVEL_PREFIX=/home/abderrahim/INF3995-104/embedded/gz_sim_ws/devel -DCMAKE_INSTALL_PREFIX=/home/abderrahim/INF3995-104/embedded/gz_sim_ws/install -G Unix Makefiles
