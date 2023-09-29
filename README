@@ -17,5 +17,5 @@ source devel/setup.bash
 ```
 ## Étape 4 : Lancer la Simulation et le serveur rosbridge
 ```
-roslaunch limo_gazebo_sim sim_rosbridge_ser.launch
+roslaunch limo_gazebo_sim sim_rosbrige_ser.launch
 ```
