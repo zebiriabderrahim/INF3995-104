@@ -1,0 +1,121 @@
+.container {
+  position: relative;
+  width: 800px;
+  height: 100px;
+  color: black;
+  box-shadow: 0px 0px 17px 3px rgba(0, 0, 0, 0.25);
+}
+
+.header {
+  z-index: 1;
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 30px;
+  line-height: 30px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.7);
+  background-color: black;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: inset 0 -15px 35px -5px rgba(0, 0, 0, 0.3);
+}
+
+.title {
+  position: absolute;
+  width: 100%;
+  display: inline-block;
+  left: 1%;
+  font-size: 16px;
+  font-weight: 500;
+  margin-top: 1px;
+  color: #fff;
+}
+
+.system-check {
+  position: absolute;
+  right: 40%;
+  font-size: 16px;
+  font-weight: 500;
+  margin-top: 1px;
+  color: #fff;
+}
+
+.command-check {
+  position: absolute;
+  right: 19%;
+  font-size: 16px;
+  font-weight: 500;
+  margin-top: 1px;
+  color: #fff;
+}
+
+.other-check {
+  position: absolute;
+  right: 1%;
+  font-size: 16px;
+  font-weight: 500;
+  margin-top: 1px;
+  color: #fff;
+}
+
+.logbox {
+  position: relative;
+  width: 800px;
+  height: 70%;
+  border-radius: 5px;
+  font-size: 15px;
+  overflow-y: scroll;
+}
+
+li {
+  margin-bottom: 2%;
+}
+
+.other {
+  position: relative;
+  width: 70%;
+  height: 1px;
+  color: white;
+  display: inline-block;
+  padding: 5px;
+  border-radius: 15px 2px 15px 15px;
+  margin-right: 5%;
+}
+
+.other .name {
+  font-weight: bold;
+  color: #5090c0;
+}
+
+.system {
+  position: relative;
+  width: 70%;
+  height: 1px;
+  color: white;
+  display: inline-block;
+  padding: 5px;
+  border-radius: 15px 2px 15px 15px;
+  margin-right: 5%;
+}
+
+.system .name {
+  font-weight: bold;
+  color: #c0506e;
+}
+
+.command {
+  position: relative;
+  width: 70%;
+  height: 1px;
+  color: white;
+  display: inline-block;
+  padding: 5px;
+  border-radius: 15px 2px 15px 15px;
+  margin-right: 5%;
+}
+
+.command .name {
+  font-weight: bold;
+  color: #7873b5;
+}

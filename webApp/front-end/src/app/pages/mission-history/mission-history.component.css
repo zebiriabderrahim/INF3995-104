@@ -1,0 +1,176 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.custom-head {
+    background: linear-gradient(to bottom,  #333, #040b11);
+    padding: 15px;
+    text-align: center;
+    color: #fff;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+    letter-spacing: 1px;
+    border-radius: 5px; 
+    display: flex;
+    justify-content: flex-start; 
+    align-items: center; 
+}
+
+.custom-head h2 {
+    color: #fff;
+}
+
+.mission-history-container {
+    background: linear-gradient(to bottom,  #333, #040b11);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1); 
+    color: #fff; 
+
+    flex-direction: column;
+    height: 80vh;
+}
+
+h2 {
+    font-size: 28px; 
+    margin-bottom: 20px;
+    color: #fff; 
+}
+
+.mission-list {
+    list-style: none;
+    padding: 0;
+}
+
+.mission-card {
+    background-color: #f4f0f0; 
+    border: 1px solid #ddd; 
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    margin-bottom: 20px;
+    transition: transform 0.2s;
+}
+
+.mission-card:hover {
+    transform: translateY(-5px); 
+}
+
+.mission-info {
+    margin-bottom: 10px;
+}
+
+.mission-name {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+}
+
+.mission-date {
+    font-size: 16px;
+    color: #555; 
+}
+
+.view-mission-btn,
+.show-logs-btn {
+    background-color: #8b1218;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    margin-right: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    align-items: center; 
+}
+
+.view-mission-btn .mat-icon,
+.show-logs-btn .mat-icon {
+    font-size: 24px;
+    margin-right: 10px; 
+  }
+
+.view-mission-btn:hover,
+.show-logs-btn:hover {
+    background-color: #6d0c13;
+    transform: scale(1.05);
+}
+
+
+.no-missions-message {
+text-align: center;
+font-size: 18px;
+font-weight: bold;
+color: #555;
+margin: 20px 0; 
+}
+
+.left-button-container {
+position: absolute;
+top: 20px; 
+left: 20px; 
+z-index: 1; 
+}
+
+.home-button {
+position: absolute;
+bottom: 120px; 
+background-color: #8b1218; 
+color: #fff; 
+border: none;
+border-radius: 5px;
+font-size: 16px;
+font-weight: bold;
+cursor: pointer;
+transition: background-color 0.3s, transform 0.2s;
+display: flex;
+align-items: center; 
+justify-content: center;
+}
+
+.home-button:hover {
+background-color: #6d0c13; 
+transform: scale(1.05);
+}
+
+
+.footer {
+    background: linear-gradient(to bottom,  #333, #040b11); 
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+    font-size: 14px;
+    font-family: Arial, sans-serif;
+}
+
+.team-name {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.footer p span {
+    display: inline-block;
+}
+
+@media screen and (max-width: 768px) {
+
+    .mission-history-container {
+    padding: 10px; 
+    }
+
+    .mission-card {
+        padding: 10px; 
+        font-size: 14px; 
+        display: block;
+        text-align: center;
+    }
+
+    .mission-card .mission-info,
+    .mission-card .show-logs-btn {
+    text-align: center;
+    }
+}
