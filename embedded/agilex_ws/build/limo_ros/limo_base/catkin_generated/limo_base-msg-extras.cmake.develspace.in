@@ -1,0 +1,2 @@
+set(limo_base_MESSAGE_FILES "/home/nvidia/INF3995-104/embedded/agilex_ws/src/limo_ros/limo_base/msg/LimoStatus.msg")
+set(limo_base_SERVICE_FILES "")
