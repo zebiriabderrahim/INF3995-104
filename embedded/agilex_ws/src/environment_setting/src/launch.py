@@ -10,7 +10,7 @@ def launch_callback(msg):
         rospy.loginfo(f"Received launch command: {launch_command}")
 
         # Execute the received launch command
-        subprocess.Popen(['roslaunch'] + launch_command.split())
+        subprocess.Popen(['roslaunch /home/nvidia/INF3995-104/embedded/agilex_ws/src/launch_pkg/src/'] + launch_command.split())
 
     except Exception as e:
         rospy.logerr(f"Error executing launch command: {str(e)}")
