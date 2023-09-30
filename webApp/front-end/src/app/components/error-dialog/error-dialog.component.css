@@ -1,0 +1,39 @@
+.custom-error-dialog {
+    background-color: #333;
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+    border-radius: 10px;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.5);
+  }
+  
+  .custom-error-dialog h2 {
+    font-size: 24px;
+  }
+  
+  .custom-error-dialog p {
+    font-size: 18px;
+    margin-bottom: 20px;
+  }
+  
+  .custom-error-dialog button {
+    background-color: #8b1218;
+    color: #fff;
+    font-size: 15px;
+  }
+  
+
+  @media (max-width: 600px) {
+    .custom-error-dialog {
+      padding: 10px;
+    }
+  
+    .custom-error-dialog h2 {
+      font-size: 20px;
+    }
+  
+    .custom-error-dialog p {
+      font-size: 16px;
+    }
+}
+  

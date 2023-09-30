@@ -1,0 +1,78 @@
+.mission-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    position: relative;
+  }
+
+  .robot-info {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+    z-index: 1;
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .log-box{
+    position: absolute;
+    bottom: 20px;
+    left: 20%;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+    z-index: 1;
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .button-container {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    z-index: 1;
+  }
+
+  .btn {
+    background-color: #8b1218;
+    color: #fff;
+    margin-left: 10px;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+  }
+
+  .btn:hover {
+    background-color: #d92231;
+    transform: scale(1.05);
+  }
+
+  .map-container {
+    display: flex;
+    flex: 1;
+    position: relative;
+    background-image: url('https://via.placeholder.com/800x600.png?text=Map+Background');
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center center;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .example-sidenav {
+    padding: 50px;
+    visibility: hidden;
+  }

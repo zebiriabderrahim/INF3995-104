@@ -1,0 +1,12 @@
+flask
+flask-cors
+pymongo
+aiohttp
+asyncio
+motor
+fastapi
+python-dotenv
+flask_socketio
+datetime
+roslibpy
+arrow
