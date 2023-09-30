@@ -1,0 +1,151 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.custom-head {
+    background: linear-gradient(to bottom,  #333, #040b11);
+    padding: 1%;
+    text-align: center;
+    color: #fff;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+    letter-spacing: 1px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-top: -1%;
+    margin-left: -1%;
+    margin-right: -1%;
+    font-size: 3rem;
+    min-height: 10vh;
+    max-height: 13vh;
+}
+
+.custom-head h2 {
+    color: #fff;
+}
+
+h2 {
+    margin: 0;
+    line-height: 0;
+}
+
+.custom-slide-toggle {
+    font-size: 24px; 
+    font-family: 'Roboto', sans-serif; 
+  }
+
+::ng-deep .mat-slide-toggle.mat-checked:not(.mat-disabled) .mat-slide-toggle-thumb {
+    background-color: green !important;
+}
+
+::ng-deep .mat-slide-toggle:not(.mat-checked):not(.mat-disabled) .mat-slide-toggle-thumb {
+    background-color: #8b1218 !important;
+}
+
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: -1%;
+    margin-right: -1%;
+    min-height: 77.3vh;
+}
+
+.left-half {
+    flex: 1;
+    background-color: #f4f0f0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.right-half {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.image-container {
+    max-width: 100%;
+    text-align: center;
+    margin-top: 3%;
+}
+
+.image-container img {
+    max-width: 65%;
+    height: auto;
+    max-height: 70%;
+}
+
+.btn-container {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.text-with-buttons {
+    display: flex;
+    align-items: center;
+    margin: 10px 0px;
+    margin-bottom: 30px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    color:  #333;
+}
+
+.btn {
+    background-color:#8b1218;
+    color: #fff;
+    width: 250px;
+    height: 60px;
+    margin: 10px 0;
+    border: none;
+    cursor: pointer;
+    border-radius: 10px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-family: 'Roboto', sans-serif;
+    font-size: 18px;
+}
+
+.footer {
+    background: linear-gradient(to bottom,  #333, #040b11);
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+    font-size: 14px;
+    font-family: Arial, sans-serif;
+}
+
+.team-name {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+footer p span {
+    display: inline-block;
+}
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+    .left, .right {
+        flex: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .button {
+        width: 80px;
+    }
+}

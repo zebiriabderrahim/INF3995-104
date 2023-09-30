@@ -1,0 +1,19 @@
+<body>
+    <div class="mission-container" >
+        <div class="robot-info">
+          <p *ngIf="room">Robot Name: {{room.robot.name }}</p>
+          <p>Status: {{ room.robot.state }}</p>
+          <p>Batterie: {{ room.robot.batteryLevel }}%</p>
+        </div>
+        <app-log-box class="log-box" [hidden]="!showLogs"></app-log-box>
+
+        <div class="button-container">
+          <button mat-raised-button class="btn"  (click)=handleStopMissionClick(room.robot)>Arreter la mission</button>
+          <button mat-raised-button class="btn">Retourner a la base</button>
+          <button mat-raised-button class="btn" (click)="showLogs = !showLogs">Logs</button>
+        </div>
+
+        <div class="map-container">
+        </div>
+    </div>
+</body>
