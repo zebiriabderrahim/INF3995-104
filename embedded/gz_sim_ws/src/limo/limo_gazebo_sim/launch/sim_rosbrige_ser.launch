@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- Include your existing launch file -->
+    <include file="$(find limo_gazebo_sim)/launch/sim.launch" />
+
+    <!-- Include rosbridge_server -->
+    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
+        <!-- Add any arguments or parameters if needed -->
+    </include>
+</launch>

@@ -1,0 +1,29 @@
+# Catkin build and workspace specific ignores
+/build/
+# /devel/
+# /install/
+# /logs/
+# /.catkin_tools/
+
+# Python bytecode files
+*.pyc
+__pycache__/
+
+# Compiled C++ files
+*.so
+*.out
+
+# IDE and text editor specific files and directories
+.idea/
+.vscode/
+*.swp
+*~
+*.swo
+.DS_Store
+Thumbs.db
+
+# ROS-specific ignores
+# /rosdep/
+# /rosinstall/
+# /build_isolated/
+# /install_isolated/
