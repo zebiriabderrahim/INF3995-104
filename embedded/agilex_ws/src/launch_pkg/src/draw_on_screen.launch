@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<launch>
+	<node name="draw_screen_node" pkg="robot_identification" type="draw_screen.py" output="screen" />
+</launch>
