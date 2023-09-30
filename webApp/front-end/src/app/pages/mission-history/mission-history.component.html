@@ -1,0 +1,51 @@
+<body>
+    <header class="custom-head">
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <h2>Systeme de controle pour AgileX limo</h2>
+    </header>
+
+    <div class="mission-history-container">
+        <h2>Mission History</h2>
+            
+        <ng-container class="mission-list" *ngIf="missions ; else noMissions">
+            <button mat-raised-button class="show-logs-btn home-button" [routerLink]="['/home']">
+                <mat-icon>home</mat-icon>
+                Home
+            </button>
+            <li *ngFor="let mission of missions" class="mission-card">
+                <div class="mission-info">
+                  <p class="mission-name">Mission Name: {{ mission.name }}</p>
+                  <p class="mission-date">Date: {{ mission.date | date }}</p>
+                </div>
+    
+                <button mat-raised-button class="show-logs-btn" (click)="openMissionOverview()">
+                    <mat-icon>visibility</mat-icon>
+                    View
+                </button>
+                <button mat-raised-button class="show-logs-btn">
+                    <mat-icon>list</mat-icon>
+                    Logs
+                </button>
+
+            </li>
+        </ng-container>
+    
+        <div>
+            <ng-template #noMissions>
+                <p class="no-missions-message mission-card">No missions available yet.</p>
+            </ng-template>
+            </div>
+        </div>
+
+
+      <footer class="footer">
+        <h4 class="team-name">Équipe 104</h4>
+        <p>
+          <span>Thibault Demagny</span>, <span>Aymane Chalh</span>, <span>Abderrahim Zebiri</span>,
+          <span>Anass El Kettani</span>, <span>Lina Khial</span>, <span>Nada Alami-chentoufi</span>
+        </p>
+    </footer>
+</body>
+
+  
