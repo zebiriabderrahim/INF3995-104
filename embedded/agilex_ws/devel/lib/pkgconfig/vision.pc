@@ -1,0 +1,8 @@
+prefix=/home/nvidia/INF3995-104/embedded/agilex_ws/devel
+
+Name: vision
+Description: Description of vision
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 
