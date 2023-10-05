@@ -8,7 +8,7 @@ main = Blueprint("main", __name__)
 @main.route('/simulate', methods=['GET'])
 def simulate_mission():
     try:
-        robot_controls.simulate_mission(0.1)
+        robot.simulate_mission(0.1)
         return jsonify({"message": "Simulation successful"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -18,15 +18,6 @@ def terminate_simulation():
     try:
         robot_controls.simulate_mission(0.0)
         return jsonify({"message": "Termination successful"}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@main.route('/identify', methods=['POST'])
-def identify_robot():
-    try: 
-        robot = request.args.get('robot')
-        robot_controls.identify_robot(robot)
-        return jsonify({"message": "Identification successful"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -44,4 +35,10 @@ def get_missions():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
- 
+@main.route('/identify', methods=['GET'])
+def identify_robot():
+    try:
+        robot_ip = request.args.get('ip')
+        if robot_ip: return robot_controls.identify_robot(robot_ip)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

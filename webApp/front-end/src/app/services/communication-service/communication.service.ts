@@ -20,7 +20,7 @@ export class CommunicationService {
   }
 
   identifyRobot(robot: Robot): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/identify?robot=${robot.ipAddress}`, robot).pipe(catchError(this.handleError<any>('identifyRobot')));
+    return this.http.get<any>(`${this.baseUrl}/identify?ip=${robot.ipAddress}`).pipe(catchError(this.handleError<any>('identifyRobot')));
   }
 
   getMissions(): Observable<any> { 

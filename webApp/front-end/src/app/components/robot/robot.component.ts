@@ -46,15 +46,15 @@ export class RobotComponent implements OnInit, OnDestroy, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {}
 
-  handleLaunchMissionClick(robot: Robot) {
+  launchMission(robot: Robot) {
     this.commandService.createMissionRoom(robot);
   }
 
-  handleIdentifyButtonClick(robot: Robot) {
+  indentifyRobot(robot: Robot) {
     this.commandService.identifyRobot(robot);
   }
 
-  handleViewMissionClick(robot: Robot) {
+  viewMission(robot: Robot) {
     this.commandService.viewMissionRoom(robot);
   }
 

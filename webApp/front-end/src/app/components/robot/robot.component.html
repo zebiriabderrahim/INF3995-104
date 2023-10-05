@@ -16,17 +16,17 @@
       </span>
 
     <div class="button-section">
-      <button class="icon-button" (click)="handleLaunchMissionClick(robot)" *ngIf="!isAvailableRoom() && !simulation">
+      <button class="icon-button" (click)="launchMission(robot)" *ngIf="!isAvailableRoom() && !simulation">
         <mat-icon class="play-button">play_arrow</mat-icon>
         <span>Lancer mission</span>
       </button>
 
-      <button class="icon-button" (click)="handleViewMissionClick(robot)" *ngIf="isAvailableRoom() && !simulation">
+      <button class="icon-button" (click)="viewMission(robot)" *ngIf="isAvailableRoom() && !simulation">
         <mat-icon class="play-button">play_arrow</mat-icon>
         <span>Voir mission</span>
       </button>
 
-      <button class="icon-button" (click)="handleIdentifyButtonClick(robot)" *ngIf="!simulation">
+      <button class="icon-button" (click)="indentifyRobot(robot)" *ngIf="!simulation">
         <mat-icon class="identify-button">search</mat-icon>
         <span>Identifier</span>
       </button>
