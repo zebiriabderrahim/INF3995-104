@@ -1,6 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { LogBoxComponent } from './log-box.component';
+import { NgModule } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+
+@NgModule({
+  imports: [FormsModule],
+})
+export class DynamicTestModule {}
 
 describe('LogBoxComponent', () => {
   let component: LogBoxComponent;
@@ -8,6 +15,7 @@ describe('LogBoxComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [DynamicTestModule],
       declarations: [ LogBoxComponent ]
     })
     .compileComponents();

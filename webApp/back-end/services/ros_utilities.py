@@ -19,7 +19,7 @@ def send_command(robot_ip, command):
             ros_connections[robot_ip] = ros
 
         create_topic(ros, '/launch_command').publish({'data': command})
-        return jsonify({"message": "Sound command sent successfully"})
+        return jsonify({"message": "Command sent successfully"})
     
     except Exception as e:
         return jsonify({"error": str(e)}), 500

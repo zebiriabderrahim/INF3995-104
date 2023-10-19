@@ -10,3 +10,8 @@ flask_socketio
 datetime
 roslibpy
 arrow
+pytest
+Flask-Testing
+Werkzeug
+requests
+mongomock
