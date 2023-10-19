@@ -7,23 +7,23 @@ def handle_connect():
     print("Client connected!")
 
 @socketio.on("createMissionRoom")
-def handleCreateMission(robot):
+def handle_create_mission(robot):
     socket_manager.create_mission_room(robot)
 
 @socketio.on("getAvailableRooms")
-def getAvailableRooms():
+def get_available_rooms():
     socket_manager.get_available_rooms(request.sid)
 
 @socketio.on("viewMissionRoom")
-def handleViewMissionRoom(robot):
+def handle_view_mission_room(robot):
     socket_manager.view_mission_room(robot)
     
 @socketio.on("stopMission")
-def handleStopMission(robot):
+def handle_stop_mission(robot):
     socket_manager.handle_stop_mission(robot)
 
 @socketio.on("disconnect")
-def handleDisconnect():
+def handle_disconnect():
     socket_manager.handle_disconnect(request.sid)
 
     

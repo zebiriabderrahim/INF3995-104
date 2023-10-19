@@ -4,7 +4,7 @@ class MissionRoom:
         self.robot_info = Robot(robot["name"], robot["ipAddress"], robot["batteryLevel"])
         self.guest_id = []
         
-    def add_robot(self, robot_ip):
+    def add_robot(self, robot_ip): # we don't use this function
         self.robot_ips.append(robot_ip)
         
     def add_guest(self, guest_id):

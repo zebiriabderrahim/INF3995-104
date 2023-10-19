@@ -15,11 +15,11 @@ export class CommunicationService {
 
   constructor(private readonly http: HttpClient) {}
 
-  getRobots(): Observable<any> { 
+  getRobots(): Observable<Robot[]> { 
     return this.http.get<any>(`${this.baseUrl}/robots`).pipe(catchError(this.handleError<any>('getRobots')));
   }
 
-  identifyRobot(robot: Robot): Observable<any> {
+  identifyRobot(robot: Robot): Observable<string> {
     return this.http.get<any>(`${this.baseUrl}/identify?ip=${robot.ipAddress}`).pipe(catchError(this.handleError<any>('identifyRobot')));
   }
 
@@ -35,7 +35,7 @@ export class CommunicationService {
     return this.http.get<any>(`${this.baseUrl}/terminateSim`).pipe(catchError(this.handleError<any>('terminateSim')));
   }
 
-  private handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {
+  handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {
     return () => of(result as T);
   }
 

@@ -31,7 +31,7 @@ def get_robots():
 @main.route('/missions', methods=['GET'])
 def get_missions():
     try:
-        return jsonify( db.fetch_missions())
+        return jsonify(db.fetch_missions()), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
