@@ -1,0 +1,6 @@
+<!-- launch_mission.launch -->
+<launch>
+  <node name="velocity_commander_node" pkg="launch_mission" type="velocity_commander.py" output="screen" />
+</launch>
+
+

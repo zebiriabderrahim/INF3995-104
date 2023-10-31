@@ -42,3 +42,11 @@ def identify_robot():
         if robot_ip: return robot_controls.identify_robot(robot_ip)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+@main.route('/launch', methods=['GET'])
+def launch_mission():
+    try:
+        robot_ip = request.args.get('ip')
+        if robot_ip: return robot_controls.launch_mission(robot_ip)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

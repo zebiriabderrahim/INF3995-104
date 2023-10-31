@@ -1,5 +1,0 @@
-<launch>
-  <arg name="wav_file" default="/home/nvidia/agilex_ws/src/src/scripts/voice/file_example_WAV_2MG.wav" />
-  <node name="play_sound_node" pkg="robot_identification" type="play.sh" args="$(arg wav_file)" output="screen">
-  </node>
-</launch>
