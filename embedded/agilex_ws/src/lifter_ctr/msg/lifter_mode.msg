@@ -1,1 +1,0 @@
-string updown_mode

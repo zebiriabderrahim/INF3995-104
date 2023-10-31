@@ -22,7 +22,13 @@ export class CommandService {
     this.communicationService.identifyRobot(robot).subscribe();
   }
 
+  launchMission(robot: Robot){ 
+    this.communicationService.launchMission(robot).subscribe();
+  }
+
+
   createMissionRoom(robot: Robot) { 
+    this.launchMission(robot);
     this.socketService.createMissionRoom(robot);
   }
 

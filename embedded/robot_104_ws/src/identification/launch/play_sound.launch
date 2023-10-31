@@ -1,0 +1,5 @@
+<launch>
+  <arg name="wav_file" default="/home/nvidia/file_example_WAV_2MG.wav" />
+  <node name="play_sound_node" pkg="identification" type="play.sh" args="$(arg wav_file)" output="screen">
+  </node>
+</launch>
