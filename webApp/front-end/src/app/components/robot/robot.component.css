@@ -12,7 +12,7 @@
 
 .robot-info {
   flex: 1;
-  margin-left:-10% ;
+  margin-left:-10%;
   padding:50px;
 
 }
@@ -88,11 +88,28 @@
     color: #f5f5f5;
 }
 
+.low-battery{
+    background-color: #e09d00;
+}
+
+.critical-battery{
+    background-color: #c25050;
+}
+
 .battery-status-text{
     margin-top: 10px;
     font-size: 20px;
     font-weight: bold;
     color: #a8a8a8;
+}
+
+.grey-out {
+    opacity: 0.5;
+    background-color: #333;
+}
+
+.state {
+    font-size: 15px;
 }
 
 @media (max-width: 768px) {

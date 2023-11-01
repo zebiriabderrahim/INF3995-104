@@ -1,9 +1,11 @@
 from flask import request
 from extensions import socketio
 from services import socket_manager
+from services import ros_utilities
 
 @socketio.on("connect")
 def handle_connect():
+
     print("Client connected!")
 
 @socketio.on("createMissionRoom")
@@ -21,6 +23,11 @@ def handle_view_mission_room(robot):
 @socketio.on("stopMission")
 def handle_stop_mission(robot):
     socket_manager.handle_stop_mission(robot)
+
+@socketio.on("getBatteryLevel")
+def handle_get_battery_level(robot_ip):
+    ros_utilities.subscribe_to_battery(robot_ip)
+    socketio.emit("stopBatteryCall", True)
 
 @socketio.on("disconnect")
 def handle_disconnect():

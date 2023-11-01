@@ -1,13 +1,18 @@
 
   <div class="robot-status">
     <div class="robot-info">
-      <span>{{ robot.name }}</span>
+      <span>{{ robot.name }}</span> <br>
+      <span class="state" *ngIf="!isAvailableRoom() && !simulation">{{ robot.state }}</span>
+      <span class="state" *ngIf="isAvailableRoom() && !simulation">en mission</span>
     </div>
     <span>
       <title>Battery Status</title>
         <div>
             <div class="battery-status">
-              <div class="battery-level">
+              <div class="battery-level" 
+              [class.grey-out]="robot.state === 'Off'"
+              [class.low-battery]="robot.batteryLevel < 40"
+              [class.critical-battery]="robot.batteryLevel < 15">
                 <div class="battery-fill"></div>
                 <span class="battery-percentage">{{ robot.batteryLevel}}%</span>
               </div>
@@ -16,8 +21,8 @@
       </span>
 
     <div class="button-section">
-      <button class="icon-button" (click)="launchMission(robot)" *ngIf="!isAvailableRoom() && !simulation">
-        <mat-icon class="play-button">play_arrow</mat-icon>
+      <button class="icon-button" (click)="launchMission(robot)" *ngIf="!isAvailableRoom() && !simulation" [disabled]="robot.state === 'Off'">
+        <mat-icon class="play-button" [class.grey-out]="robot.state === 'Off'">play_arrow</mat-icon>
         <span>Lancer mission</span>
       </button>
 
@@ -26,8 +31,8 @@
         <span>Voir mission</span>
       </button>
 
-      <button class="icon-button" (click)="indentifyRobot(robot)" *ngIf="!simulation">
-        <mat-icon class="identify-button">search</mat-icon>
+      <button class="icon-button" (click)="indentifyRobot(robot)" *ngIf="!simulation" [disabled]="robot.state === 'Off'">
+        <mat-icon class="identify-button" [class.grey-out]="robot.state === 'Off'">search</mat-icon>
         <span>Identifier</span>
       </button>
     </div>

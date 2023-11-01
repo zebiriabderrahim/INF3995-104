@@ -8,7 +8,7 @@ import { Robot } from 'src/app/interfaces/models';
 })
 export class CommandService {
  
-  constructor(private communicationService: CommunicationService, private socketService: SocketService) { }
+  constructor(private communicationService: CommunicationService, public socketService: SocketService) { }
   
   getRobots(){
     return this.communicationService.getRobots();

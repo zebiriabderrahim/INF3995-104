@@ -12,20 +12,7 @@ import { CommandService } from 'src/app/services/command-service/command.service
 export class HomePageComponent implements OnInit {
   title = 'front-end';
   simulationStatus: boolean = false;
-  robots: Robot[] = [
-    {
-      name: 'Robot 1',
-      ipAddress: '192.168.0.110',
-      state: 'On',
-      batteryLevel: 100,
-    },
-    {
-      name: 'Robot 2',
-      ipAddress: '192.168.0.122',
-      state: 'On',
-      batteryLevel: 100,
-    },
-  ];
+  robots: Robot[] = [];
 
   constructor(
     private commandService: CommandService,
@@ -33,6 +20,9 @@ export class HomePageComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.commandService.socketService.robots.subscribe((robots: Robot[]) => {
+      this.robots = robots;
+    });
     if (this.robots.length === 0) {
       this.openErrorDialog({
         title: 'Error',

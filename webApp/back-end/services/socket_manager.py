@@ -1,6 +1,7 @@
 from flask_socketio import emit, join_room, leave_room, close_room
 from flask import request
 from classes.mission_room import MissionRoom
+from services import socket_service
 
 mission_rooms = {}
 
@@ -35,6 +36,16 @@ def view_mission_room(robot):
         join_room(robot["ipAddress"])
         mission_rooms[robot["ipAddress"]].add_guest(request.sid)
         emit("addedAsViewer", mission_rooms[robot["ipAddress"]].to_dict(), room=str(robot["ipAddress"]))
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
+
+def send_robot_battery(robot_ip, data):
+    try:
+        robot = {
+            "ipAddress": robot_ip,
+            "batteryLevel": round(data['data'])
+        }
+        socket_service.socketio.emit("robotBattery", robot)
     except Exception as e:
         print(f"An error occurred: {str(e)}")
 

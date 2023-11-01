@@ -39,7 +39,7 @@ export class CommunicationService {
     return this.http.get<any>(`${this.baseUrl}/terminateSim`).pipe(catchError(this.handleError<any>('terminateSim')));
   }
 
-  private handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {
+  handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {
     return () => of(result as T);
   }
 
