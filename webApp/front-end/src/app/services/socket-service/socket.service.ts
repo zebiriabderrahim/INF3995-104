@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { MissionRoom, Robot } from 'src/app/interfaces/models';
 import { Router } from '@angular/router';
 import { ClientSocketService } from '../client-socket/client-socket.service';
-import { Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -14,14 +14,31 @@ export class SocketService {
   isRoomDeleted: Subject<boolean>;
   isRoomCreated: Subject<boolean>;
   isHostLeavingRoom: Subject<boolean>;
+  robots: BehaviorSubject<Robot[]>;
+  stopBatteryCall: BehaviorSubject<Boolean>;
 
 
   constructor(private clientSocket: ClientSocketService, public router: Router) {
     this.roomInfo = new Subject<MissionRoom>();
+    this.stopBatteryCall = new BehaviorSubject<Boolean>(false);
     this.availableRooms = new Subject<MissionRoom[]>();
     this.isRoomDeleted = new Subject<boolean>();
     this.isRoomCreated = new Subject<boolean>();
     this.isHostLeavingRoom = new Subject<boolean>();  
+    this.robots = new BehaviorSubject<Robot[]>([
+      {
+        name: 'Robot 1',
+        ipAddress: '192.168.0.110',
+        state: 'Off',
+        batteryLevel: 0,
+      },
+      {
+        name: 'Robot 2',
+        ipAddress: '192.168.0.122',
+        state: 'Off',
+        batteryLevel: 0,
+      },
+    ]);
   }
 
   connect() {
@@ -60,6 +77,10 @@ export class SocketService {
     this.clientSocket.send('stopMission', robot);
   }
 
+  getBatteryLevel(robotIp: String) {
+    this.clientSocket.send('getBatteryLevel', robotIp);
+  }
+
   handleSocket() {
     this.clientSocket.on('createdMissionRoom', (room: any) => {
       this.currentRoom = room;
@@ -82,5 +103,29 @@ export class SocketService {
     this.clientSocket.on('hostLeftRoom', () => {
       this.isHostLeavingRoom.next(true);
     }); 
+
+    this.clientSocket.on('stopBatteryCall', (bool: Boolean) =>{
+      this.stopBatteryCall.next(bool);
+    })
+
+    this.clientSocket.on('robotBattery', (robot: Robot) => {
+      if(this.robots.getValue().length === 0 || !this.robots.value.find((r: Robot) => r.ipAddress === robot.ipAddress)){
+        this.robots.next([...this.robots.value, robot]);
+      }
+      else{
+        this.robots.next(this.robots.value.map((robot_old: Robot) => {
+          if(robot_old.ipAddress === robot.ipAddress && robot_old.batteryLevel != robot.batteryLevel){
+            return {
+              ...robot_old,
+              state: "On",
+              batteryLevel: robot.batteryLevel
+            }
+          }
+          else{
+            return robot_old;
+          }
+        }));
+      }
+    });
   }
 }

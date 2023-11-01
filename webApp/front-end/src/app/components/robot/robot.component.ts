@@ -19,6 +19,13 @@ export class RobotComponent implements OnInit, OnDestroy, OnChanges {
 
   constructor(private commandService: CommandService, private socketService: SocketService) { 
     this.availableRooms = [];
+    
+    this.socketService.stopBatteryCall.asObservable().subscribe((bool: Boolean) => {
+      if (!bool) {
+        this.socketService.getBatteryLevel('192.168.0.122');
+        this.socketService.getBatteryLevel('192.168.0.110');
+      }
+    })
   }
 
   ngOnInit(): void {
@@ -41,7 +48,6 @@ export class RobotComponent implements OnInit, OnDestroy, OnChanges {
         this.socketService.isRoomCreated.next(false);
       }
     });
-
   }
 
   ngOnChanges(changes: SimpleChanges): void {}
