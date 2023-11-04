@@ -1,7 +1,0 @@
-src/camera_info_manager_py
-/mnt/home/nvidia/agilex_ws/devel/.private/camera_info_manager_py/cmake.lock /mnt/home/nvidia/agilex_ws/devel/./cmake.lock
-/mnt/home/nvidia/agilex_ws/devel/.private/camera_info_manager_py/lib/pkgconfig/camera_info_manager_py.pc /mnt/home/nvidia/agilex_ws/devel/lib/pkgconfig/camera_info_manager_py.pc
-/mnt/home/nvidia/agilex_ws/devel/.private/camera_info_manager_py/lib/python3/dist-packages/camera_info_manager/__init__.py /mnt/home/nvidia/agilex_ws/devel/lib/python3/dist-packages/camera_info_manager/__init__.py
-/mnt/home/nvidia/agilex_ws/devel/.private/camera_info_manager_py/lib/camera_info_manager_py/generate_camera_info /mnt/home/nvidia/agilex_ws/devel/lib/camera_info_manager_py/generate_camera_info
-/mnt/home/nvidia/agilex_ws/devel/.private/camera_info_manager_py/share/camera_info_manager_py/cmake/camera_info_manager_pyConfig.cmake /mnt/home/nvidia/agilex_ws/devel/share/camera_info_manager_py/cmake/camera_info_manager_pyConfig.cmake
-/mnt/home/nvidia/agilex_ws/devel/.private/camera_info_manager_py/share/camera_info_manager_py/cmake/camera_info_manager_pyConfig-version.cmake /mnt/home/nvidia/agilex_ws/devel/share/camera_info_manager_py/cmake/camera_info_manager_pyConfig-version.cmake
