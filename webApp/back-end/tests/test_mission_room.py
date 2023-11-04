@@ -4,7 +4,6 @@ from controllers import routes
 from classes import mission_room
 from unittest.mock import patch
 
-
 class MissionRoomTest(unittest.TestCase):
     def setUp(self):
         self.app = Flask(__name__)
@@ -19,7 +18,7 @@ class MissionRoomTest(unittest.TestCase):
         }
 
         self.mission_room = mission_room.MissionRoom('host', self.robot_data)
-        self.robot = mission_room.Robot("Robot2", '0.0.0.1', 70)
+        self.robot = mission_room.Robot("Robot2", '0.0.0.1', '', 70)
 
     def test_add_guest(self):
         self.mission_room.add_guest('guest')
@@ -48,6 +47,5 @@ class MissionRoomTest(unittest.TestCase):
             'batteryLevel': 70
         }, "Robot info is incorrect")
         
-
 if __name__ == '__main__':
     unittest.main()

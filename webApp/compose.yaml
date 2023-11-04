@@ -1,9 +1,24 @@
+version: '3.8'
+
 services:
-  backend:
-    build: ./back-end
+  frontend-service:
+    build:
+      context: ./front-end
+      dockerfile: dockerfile
     ports:
-      - "5000:5000"
-  frontend:
-    build: ./front-end
+      - "4100:4100"
+    volumes:
+      - frontend-volume:/app
+
+  backend-service:
+    build:
+      context: ./back-end 
+      dockerfile: dockerfile
     ports:
-      - "80:80"
+      - "8080:50"
+    volumes:
+      - backend-volume:/app
+
+volumes:
+  frontend-volume:
+  backend-volume:

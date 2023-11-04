@@ -1,78 +1,106 @@
 .mission-container {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    position: relative;
-  }
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+  background-color: grey;
+  padding: 10px; 
+  overflow: hidden; 
+  position: relative; 
+}
 
-  .robot-info {
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-    background-color: rgba(0, 0, 0, 0.7);
-    padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
-    z-index: 1;
-    color: #fff;
-    font-size: 18px;
-    font-weight: bold;
-  }
+.robot-info {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+  z-index: 1;
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+  max-width: 50%; 
+}
 
-  .log-box{
-    position: absolute;
-    bottom: 20px;
-    left: 20%;
-    background-color: rgba(0, 0, 0, 0.7);
-    padding: 10px;
-    border-radius: 10px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
-    z-index: 1;
-    color: #fff;
-    font-size: 18px;
-    font-weight: bold;
-  }
+.log-box{
+  position: absolute;
+  top: 2%;
+  right: 1%;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+  z-index: 1;
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+}
 
-  .button-container {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    display: flex;
-    z-index: 1;
-  }
+.button-container {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  z-index: 1;
+  flex-wrap: wrap; 
+}
 
-  .btn {
-    background-color: #8b1218;
-    color: #fff;
-    margin-left: 10px;
-    border: none;
-    border-radius: 5px;
-    padding: 10px 20px;
-    font-size: 20px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s;
-  }
+.btn {
+  background-color: #8b1218;
+  color: #fff;
+  margin: 10px; 
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 18px; 
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
 
-  .btn:hover {
-    background-color: #d92231;
-    transform: scale(1.05);
-  }
+.btn:hover {
+  background-color: #d92231;
+  transform: scale(1.05);
+}
 
-  .map-container {
-    display: flex;
-    flex: 1;
-    position: relative;
-    background-image: url('https://via.placeholder.com/800x600.png?text=Map+Background');
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center center;
+.example-sidenav {
+  padding: 50px;
+  visibility: hidden;
+}
+
+.app-map-component {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0; 
+}
+
+@media (max-width: 768px) {
+  .mission-container {
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
   }
 
-  .example-sidenav {
-    padding: 50px;
-    visibility: hidden;
+  .robot-info,
+  .log-box,
+  .button-container {
+    position: static;
+    max-width: 100%; 
   }
+
+  .app-map-component {
+    position: absolute; 
+  }
+}
+
+@media (max-width: 480px) {
+  .btn {
+    width: 80px; 
+    padding: 5px 10px; 
+    font-size: 16px; 
+  }
+}

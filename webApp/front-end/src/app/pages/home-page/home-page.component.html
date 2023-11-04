@@ -10,7 +10,7 @@
               <mat-slide-toggle [(ngModel)]="simulationStatus" class="custom-slide-toggle">Simulation</mat-slide-toggle>
 
               <app-robot *ngFor="let robot of robots" [robot]="robot" [simulation]="simulationStatus" class="text-with-buttons"></app-robot>
-              <button mat-raised-button class="btn" (click)="handleSimulation()" *ngIf="simulationStatus">Lancer la simulation</button>
+              <button mat-raised-button class="btn" (click)="handleSimulation()" *ngIf="simulationStatus && simulationRooms.length === 0">Lancer les robots</button>
               <button mat-raised-button class="btn" routerLink="/mission-history">Historique des missions</button>
             </div>
       </div>

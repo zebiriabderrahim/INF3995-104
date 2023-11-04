@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, flush, tick } from '@angular/core/testing';
 
 import { HomePageComponent } from './home-page.component';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -9,7 +9,7 @@ import { LogBoxComponent } from 'src/app/components/log-box/log-box.component';
 import { RobotComponent } from 'src/app/components/robot/robot.component';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Subject, of } from 'rxjs';
+import { BehaviorSubject, Subject, of } from 'rxjs';
 import { SocketService } from 'src/app/services/socket-service/socket.service';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
@@ -22,6 +22,13 @@ describe('HomePageComponent', () => {
   let component: HomePageComponent;
   let fixture: ComponentFixture<HomePageComponent>;
   let commandService: CommandService;
+  const getTestRobot =(): Robot => ({
+    name: "test",
+    ipAddress: "0.0.0.0",
+    state: "on",
+    batteryLevel: 100
+  });
+  
 
   const mockCommandService = {
     getRobots: () => of([]),
@@ -36,10 +43,15 @@ describe('HomePageComponent', () => {
     viewMissionRoom: (robot: Robot) => {},
     getAvailableRooms: () => of([]),
     getAvailableMissionRoomsInfo: () => of([]),
+    getAvailableSimulatedRoomsInfo: () => of([]),
+    navigate: (path: string) => {},
     isRoomCreated: new Subject<boolean>(),
     isRoomDeleted: new Subject<boolean>(),
     isHostLeavingRoom: new Subject<boolean>(),
     roomInfo: new Subject<MissionRoom>(),
+    robots: new BehaviorSubject<Robot[]>([getTestRobot()]),
+    rosConnectionError: new Subject<boolean>(),
+    stopBatteryCall: new BehaviorSubject<Boolean>(false),
   };
 
   beforeEach(async () => {
@@ -60,38 +72,47 @@ describe('HomePageComponent', () => {
     fixture.detectChanges();
   });
 
+  // afterEach(() => {
+  //   component.ngOnDestroy();
+  // });
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('ngOnInit should open an Error Dialog if robots is empty', () => {
-    component.robots = [];
-    const dialogSpy = spyOn((component as any).dialog, 'open').and.stub();
-    component.ngOnInit();
-    expect(dialogSpy).toHaveBeenCalledWith(ErrorDialogComponent, { width: '300px', data: {
-      title: 'Error',
-      message: 'No robots found.',
-      close: 'close',
-    }});
-  });
+  // it('ngOnInit should init the robots properly', () => {
+  //   component.robots = [];
+  //   component.ngOnInit();
+  //   mockSocketService.robots.next([getTestRobot()]);
+  //   expect(component.robots).toEqual([getTestRobot()]);
+  // });
 
-  it('ngOnInit should not open an Error Dialog if robots is not empty', () => {
+  it('ngOnInit should open an Error Dialog if ros connection failed', fakeAsync(() => {
     component.robots = [getTestRobot()];
     const dialogSpy = spyOn((component as any).dialog, 'open').and.stub();
+    
     component.ngOnInit();
+    tick(); // Tick some time to ensure ngOnInit asynchronous operations are completed.
+    
     expect(dialogSpy).not.toHaveBeenCalled();
-  });
+    
+    mockSocketService.rosConnectionError.next(true);
+    tick(); // Tick again to ensure the error handling asynchronous operations are completed.
+  
+    expect(dialogSpy).toHaveBeenCalledWith(ErrorDialogComponent, { width: '300px', data: {
+      title: 'Error',
+      message: 'Ros connection not established',
+      close: 'close',
+    }});
+  
+    // flush(); // This ensures that there are no more remaining asynchronous activities.
+  }));
+  
 
   it('handleSimulation should call simulateMission', () => {
     spyOn(commandService, 'simulateMission');
-    spyOn(component, 'openErrorDialog');
     component.handleSimulation();
     expect(commandService.simulateMission).toHaveBeenCalled();
-    expect(component.openErrorDialog).toHaveBeenCalledWith({
-      title: 'Avertissement',
-      message: 'Veuillez regarder la simulation sur Gazebo',
-      close: 'terminer simulation',
-    });
   });
 
   it('openErrorDialog should open errorDialog', () => {
@@ -99,11 +120,4 @@ describe('HomePageComponent', () => {
     component.openErrorDialog('test');
     expect(dialogSpy).toHaveBeenCalledWith(ErrorDialogComponent, { width: '300px', data: 'test' });
   });
-});
-
-const getTestRobot =(): Robot => ({
-  name: "test",
-  ipAddress: "0.0.0.0",
-  state: "on",
-  batteryLevel: 100
 });

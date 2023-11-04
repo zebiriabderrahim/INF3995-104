@@ -12,22 +12,6 @@ class RoutesTest(unittest.TestCase):
         self.app.config['TESTING'] = True
         self.client = self.app.test_client()
 
-    @patch('services.robot_simulation.simulate_mission')
-    def test_simulate_mission(self, mock_simulate_mission):
-        response = self.client.get('/simulate')
-        mock_simulate_mission.assert_called_with(0.1)
-        data = response.get_json()
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(data["message"], "Simulation successful")
-
-    @patch('services.robot_simulation.simulate_mission')
-    def test_terminate_simulation(self, mock_terminate_mission):
-        response = self.client.get('/terminateSim')
-        mock_terminate_mission.assert_called_with(0.0)
-        data = response.get_json()
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(data["message"], "Termination successful")
-
     @patch('database.database_communication.fetch_missions')
     def test_get_missions(self, mock_db_fetch):
         sample_missions = [{"id": 1, "name": "Mission 1"}, {"id": 2, "name": "Mission 2"}]
@@ -49,8 +33,14 @@ class RoutesTest(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(data["message"], "Command sent successfully")
 
-
+    @patch('services.robot_controls.launch_mission')
+    def test_launch_mission(self, mock_launch_mission):
+        with self.app.app_context():
+            mock_launch_mission.return_value = jsonify({"message": "Command sent successfully"})
+            response = self.client.get('/launch?ip=2')
+            data = response.get_json()
+            mock_launch_mission.assert_called_with('2')
+            self.assertEqual(data["message"], "Command sent successfully")
+        
 if __name__ == '__main__':
     unittest.main()
-    # to run these tests, execute python -m unittest tests.test_route
-    # the test for get_robots was not written since we dont really use it in the frontend --may have to remove the function altogether

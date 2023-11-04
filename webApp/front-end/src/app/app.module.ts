@@ -16,6 +16,8 @@ import { RobotComponent } from './components/robot/robot.component';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { FormsModule } from '@angular/forms';
 import { LogBoxComponent } from './components/log-box/log-box.component';
+import { MapComponentComponent } from './components/map-component/map-component/map-component.component';
+import { MissionHistoryDialog } from './components/mission-history-dialog/mission-history-dialog.component';
 
 @NgModule({
   declarations: [
@@ -23,8 +25,10 @@ import { LogBoxComponent } from './components/log-box/log-box.component';
     MissionPageComponent,
     HomePageComponent,
     MissionHistoryComponent,
+    MissionHistoryDialog,
     RobotComponent,
     LogBoxComponent,
+    MapComponentComponent,
   ],
   imports: [
     BrowserModule,

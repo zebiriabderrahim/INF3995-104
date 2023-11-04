@@ -15,3 +15,7 @@ Flask-Testing
 Werkzeug
 requests
 mongomock
+coverage
+matplotlib
+numpy
+scikit-learn

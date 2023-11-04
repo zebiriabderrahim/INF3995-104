@@ -37,10 +37,18 @@ export class CommandService {
   }
 
   simulateMission() {
-    this.communicationService.simulateMission().subscribe();
+    this.socketService.simulateMission();
+  }
+
+  simulateMissionRobot(robot: Robot) {
+    this.socketService.simulateMissionRobot(robot);
   }
 
   terminateSimulation() {
     this.communicationService.terminateSimulation().subscribe();
+  }
+
+  getRosConnection(robot: Robot) {
+    return this.communicationService.getRosConnection(robot);
   }
 }

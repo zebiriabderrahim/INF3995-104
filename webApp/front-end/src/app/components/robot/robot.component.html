@@ -2,17 +2,17 @@
   <div class="robot-status">
     <div class="robot-info">
       <span>{{ robot.name }}</span> <br>
-      <span class="state" *ngIf="!isAvailableRoom() && !simulation">{{ robot.state }}</span>
-      <span class="state" *ngIf="isAvailableRoom() && !simulation">en mission</span>
+      <span class="state" *ngIf="!isAvailableRoom(undefined) && !simulation">{{ robot.state }}</span>
+      <span class="state" *ngIf="isAvailableRoom(undefined) && !simulation">en mission</span>
     </div>
-    <span>
+    <span *ngIf="!simulation">
       <title>Battery Status</title>
         <div>
             <div class="battery-status">
               <div class="battery-level" 
               [class.grey-out]="robot.state === 'Off'"
               [class.low-battery]="robot.batteryLevel < 40"
-              [class.critical-battery]="robot.batteryLevel < 15">
+              [class.critical-battery]="robot.batteryLevel < 20">
                 <div class="battery-fill"></div>
                 <span class="battery-percentage">{{ robot.batteryLevel}}%</span>
               </div>
@@ -21,12 +21,19 @@
       </span>
 
     <div class="button-section">
-      <button class="icon-button" (click)="launchMission(robot)" *ngIf="!isAvailableRoom() && !simulation" [disabled]="robot.state === 'Off'">
+      <span *ngIf="isAvailableRoom('sim') && simulation && isInSimRoom(robot.name)">Robot en mission</span>
+
+      <button class="icon-button" (click)="launchMission(robot)" *ngIf="!isAvailableRoom(undefined) && !simulation" [disabled]="robot.state === 'Off'">
         <mat-icon class="play-button" [class.grey-out]="robot.state === 'Off'">play_arrow</mat-icon>
         <span>Lancer mission</span>
       </button>
 
-      <button class="icon-button" (click)="viewMission(robot)" *ngIf="isAvailableRoom() && !simulation">
+      <button class="icon-button" (click)="handleSimulationRobot(robot)" *ngIf="!isAvailableRoom('sim') && simulation">
+        <mat-icon class="play-button">play_arrow</mat-icon>
+        <span>Lancer simulation</span>
+      </button>
+
+      <button class="icon-button" (click)="viewMission(robot)" *ngIf="isAvailableRoom(undefined) && !simulation">
         <mat-icon class="play-button">play_arrow</mat-icon>
         <span>Voir mission</span>
       </button>

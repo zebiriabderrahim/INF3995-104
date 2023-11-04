@@ -1,14 +1,14 @@
 <div class="container">
-  <div class="header clearfix">
-      <span class="title">Logs</span>
-      <mat-checkbox class="system-check" [(ngModel)]="systemChecked" (click)="filterLogs('system', systemChecked)" color="warn">Système</mat-checkbox>
-      <mat-checkbox class="command-check" [(ngModel)]="commandChecked" (click)="filterLogs('command', commandChecked)" color="warn">Commandes</mat-checkbox>
-      <mat-checkbox class="other-check" [(ngModel)]="otherChecked" (click)="filterLogs('other', otherChecked)" color="warn">Senseurs</mat-checkbox>
-  </div>
-    <div class="logbox clearfix" #logbox>
-            <li [ngClass]="log.type"
-                *ngFor="let log of logsShown">
-                <span> {{ log.timestamp }}</span> - <strong class="name">[{{log.name}}]</strong> :  {{ log.message }}
-            </li>
+    <div class="header clearfix">
+        <span class="title">Logs</span>
+        <mat-checkbox class="system-check" [(ngModel)]="systemChecked" (click)="filterLogs()" color="warn">sys</mat-checkbox>
+        <mat-checkbox class="command-check" [(ngModel)]="commandChecked" (click)="filterLogs()" color="warn">comm</mat-checkbox>
+        <mat-checkbox class="other-check" [(ngModel)]="otherChecked" (click)="filterLogs()" color="warn">sens</mat-checkbox>
     </div>
-</div>
+    <div class="logbox clearfix" #logboxElement>
+          <li [ngClass]="log.type"
+              *ngFor="let log of logsShown">
+              <span> {{ log.timestamp }}</span> - <strong class="name">[{{log.name}}]</strong> <br>  {{ log.message }}
+          </li>
+    </div>
+  </div>

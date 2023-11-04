@@ -13,26 +13,35 @@ export class RobotComponent implements OnInit, OnDestroy, OnChanges {
   @Input() robot!: Robot;
   @Input() simulation!: boolean;
   availableRooms: MissionRoom[];
+  simulationRooms: MissionRoom[];
   availableRoomsSubscription: Subscription | undefined;
+  availableSimRoomsSubscription: Subscription | undefined;
   roomDeletedSubscription: Subscription | undefined;
   roomCreatedSubscription: Subscription | undefined;
+  batterySubscription: Subscription | undefined;
 
   constructor(private commandService: CommandService, private socketService: SocketService) { 
     this.availableRooms = [];
+    this.simulationRooms = [];
     
-    this.socketService.stopBatteryCall.asObservable().subscribe((bool: Boolean) => {
-      if (!bool) {
-        this.socketService.getBatteryLevel('192.168.0.122');
-        this.socketService.getBatteryLevel('192.168.0.110');
-      }
-    })
+
   }
 
   ngOnInit(): void {
     this.socketService.getAvailableRooms();
-
+    
+    this.batterySubscription=this.socketService.stopBatteryCall.asObservable().subscribe((bool: Boolean) => {
+      if (!bool) {
+        this.socketService.getBatteryLevel(this.robot.ipAddress);
+        // this.socketService.getBatteryLevel('192.168.0.110');
+      }
+    })
     this.availableRoomsSubscription = this.socketService.getAvailableMissionRoomsInfo().subscribe((rooms: MissionRoom[]) => {
       this.availableRooms = rooms;
+    });
+
+    this.availableSimRoomsSubscription = this.socketService.getAvailableSimulatedRoomsInfo().subscribe((rooms: MissionRoom[]) => {
+      this.simulationRooms = rooms;
     });
 
     this.roomDeletedSubscription = this.socketService.isRoomDeleted.asObservable().subscribe((isDeleted: boolean) => {
@@ -48,6 +57,7 @@ export class RobotComponent implements OnInit, OnDestroy, OnChanges {
         this.socketService.isRoomCreated.next(false);
       }
     });
+ 
   }
 
   ngOnChanges(changes: SimpleChanges): void {}
@@ -64,24 +74,41 @@ export class RobotComponent implements OnInit, OnDestroy, OnChanges {
     this.commandService.viewMissionRoom(robot);
   }
 
-  isAvailableRoom(): boolean {
-    if (
-        this.availableRooms?.length > 0 &&
-        this.availableRooms.find((room) => room.robot.ipAddress === this.robot.ipAddress)
-    )
-        return true;
-    else return false;
+  handleSimulationRobot(robot: Robot) {
+    this.commandService.simulateMissionRobot(robot);
+  }
+
+  isAvailableRoom(type: string | undefined): boolean {
+    if (type === 'sim') {
+        return (
+            this.simulationRooms?.some(room => room.robot.ipAddress === this.robot.ipAddress) ||
+            false
+        );
+    } else {
+        return (
+            this.availableRooms?.some(room => room.robot.ipAddress === this.robot.ipAddress && room.robot.state === 'Active on mission') ||
+            false
+        );
+    }
+  }
+
+  isInSimRoom(robotName: string){
+    return this.simulationRooms.some(room => room.robot.name === this.robot.name);
   }
 
   ngOnDestroy(): void {
-    if (this.availableRoomsSubscription) {
-      this.availableRoomsSubscription.unsubscribe();
-    }
-    if (this.roomDeletedSubscription) {
-      this.roomDeletedSubscription.unsubscribe();
-    }
-    if (this.roomCreatedSubscription) {
-      this.roomCreatedSubscription.unsubscribe();
-    }
+    this.batterySubscription?.unsubscribe()
+    // if (this.availableRoomsSubscription) {
+    //   this.availableRoomsSubscription.unsubscribe();
+    // }
+    // if (this.availableSimRoomsSubscription) {
+    //   this.availableSimRoomsSubscription.unsubscribe();
+    // }
+    // if (this.roomDeletedSubscription) {
+    //   this.roomDeletedSubscription.unsubscribe();
+    // }
+    // if (this.roomCreatedSubscription) {
+    //   this.roomCreatedSubscription.unsubscribe();
+    // }
   }
 }
