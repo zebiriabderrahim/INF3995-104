@@ -18,12 +18,12 @@
                   <p class="mission-name">Mission Name: {{ mission.name }}</p>
                   <p class="mission-date">Date: {{ mission.date | date }}</p>
                 </div>
-    
+
                 <button mat-raised-button class="show-logs-btn" (click)="openMissionOverview()">
                     <mat-icon>visibility</mat-icon>
                     View
                 </button>
-                <button mat-raised-button class="show-logs-btn">
+                <button mat-raised-button class="show-logs-btn" (click)="openLogsOverview(mission)">
                     <mat-icon>list</mat-icon>
                     Logs
                 </button>

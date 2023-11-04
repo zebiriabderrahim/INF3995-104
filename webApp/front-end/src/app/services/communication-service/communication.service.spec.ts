@@ -130,6 +130,34 @@ describe('CommunicationServiceService', () => {
       expect(value).toBeUndefined();
     });
   });
+
+  it('should get the ros connection', () => { 
+    service.getRosConnection(robots[0]).subscribe({
+      next: (response: string) => {
+          expect(response).toEqual(robots[0].ipAddress);
+      },
+      error: fail,
+    });
+
+    const request = httpMock.expectOne(`${baseUrl}/robot?ip=${robots[0].ipAddress}`);
+    expect(request.request.method).toBe('GET');
+    request.flush(robots[0].ipAddress);
+
+  });
+
+  it('should launch a mission', () => { 
+    service.launchMission(robots[0]).subscribe({
+      next: (response: string) => {
+          expect(response).toEqual('Mission launched');
+      },
+      error: fail,
+    });
+
+    const request = httpMock.expectOne(`${baseUrl}/launch?ip=${robots[0].ipAddress}`);
+    expect(request.request.method).toBe('GET');
+    request.flush('Mission launched');
+
+  });
   
 
 });

@@ -39,6 +39,14 @@ export class CommunicationService {
     return this.http.get<any>(`${this.baseUrl}/terminateSim`).pipe(catchError(this.handleError<any>('terminateSim')));
   }
 
+  getRosConnection(robot: Robot): Observable<any>  {
+    return this.http.get<any>(`${this.baseUrl}/robot?ip=${robot.ipAddress}`).pipe(catchError(this.handleError<any>('getRosConnection')));
+  }
+  
+  saveMission(mission: any): Observable<any>  {
+    return this.http.post<any>(`${this.baseUrl}/saveMission`, mission).pipe(catchError(this.handleError<any>('saveMission')));
+  }
+
   handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {
     return () => of(result as T);
   }

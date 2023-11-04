@@ -1,11 +1,13 @@
 class MissionRoom:
-    def __init__(self, host_id, robot, guest_id=None):
+    def __init__(self, host_id, robot=None, guest_id=None, type=None):
         self.host_id = host_id
-        self.robot_info = Robot(robot["name"], robot["ipAddress"], robot["batteryLevel"])
+        if type == 'simulation': # one simulated robot
+            self.robot_info = Robot(robot["name"], robot["ipAddress"], "(simulation)")
+        elif robot is None: # both simultaed robots
+            self.robot_info = Robot("Robots", "simulation", "(simulation)")
+        else : # physical robots
+            self.robot_info = Robot(robot["name"], robot["ipAddress"], "", robot["batteryLevel"])
         self.guest_id = []
-        
-    def add_robot(self, robot_ip): # we don't use this function
-        self.robot_ips.append(robot_ip)
         
     def add_guest(self, guest_id):
         self.guest_id.append(guest_id)
@@ -19,10 +21,10 @@ class MissionRoom:
 
 
 class Robot:
-    def __init__(self, name, ip_address, battery_level):
+    def __init__(self, name, ip_address, simulation="", battery_level=None):
         self.name = name
         self.ip_address = ip_address
-        self.state = "Active on mission"
+        self.state = "Active on mission" + simulation
         self.battery_level = battery_level
 
     def change_robot_state(self, state):

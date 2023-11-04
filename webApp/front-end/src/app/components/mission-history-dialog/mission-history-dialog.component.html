@@ -5,4 +5,9 @@
 </div>
 
 <div class="log-box">
+    <div class="logbox clearfix" #logboxElement>
+        <li [ngClass]="log.type" *ngFor="let log of logs">
+            <span> {{ log.timestamp }}</span> - <strong class="name">[{{log.name}}]</strong> <br>  {{ log.message }}
+         </li>
+    </div>
 </div>

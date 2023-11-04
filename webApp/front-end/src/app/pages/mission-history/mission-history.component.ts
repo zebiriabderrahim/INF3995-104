@@ -30,17 +30,25 @@ export class MissionHistoryComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.missionsSubscription) {
-      this.missionsSubscription.unsubscribe();
-    }
-    if (this.isHostLeavingRoomSubscription) {
-      this.isHostLeavingRoomSubscription.unsubscribe();
-    }
+    // if (this.missionsSubscription) {
+    //   this.missionsSubscription.unsubscribe();
+    // }
+    // if (this.isHostLeavingRoomSubscription) {
+    //   this.isHostLeavingRoomSubscription.unsubscribe();
+    // }
   }
   
   openMissionOverview() {
     this.missionHistoryDialog.open(MissionHistoryDialog, {
       data: { missionid: this.missions[0].name },
+      width: '80%',
+      height: '90%',
+  });
+  }
+
+  openLogsOverview(mission: any) {
+    this.missionHistoryDialog.open(MissionHistoryDialog, {
+      data: { missionid: mission.name, logs: mission.logs, showLogs: true },
       width: '80%',
       height: '90%',
   });

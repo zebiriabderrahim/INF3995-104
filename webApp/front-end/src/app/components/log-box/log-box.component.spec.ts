@@ -28,4 +28,17 @@ describe('LogBoxComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+
+  it('#filterLogs should filter logs', () => {
+    component.logsShown = component.logs;
+    component.filterLogs();
+    expect(component.logsShown.length).toEqual(2);
+    component.filterLogs();
+    expect(component.logsShown.length).toEqual(3);
+  });
+
+
 });
+
+

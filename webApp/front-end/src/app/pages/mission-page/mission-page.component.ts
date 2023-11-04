@@ -2,6 +2,8 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { MissionRoom, Robot } from 'src/app/interfaces/models';
 import { SocketService } from 'src/app/services/socket-service/socket.service';
 import { Subscription } from 'rxjs';
+import { CommandService } from 'src/app/services/command-service/command.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-mission-page',
@@ -14,39 +16,59 @@ export class MissionPageComponent implements OnInit, OnDestroy {
   isHostLeavingRoomSubscription: Subscription | undefined;
   availableRoomsSubscription: Subscription | undefined;
   showLogs = false;
+  simulation!: boolean;
 
-  constructor(private socketService: SocketService) { }
+  constructor( public socketService: SocketService, private router: Router) {
+    this.router = router;
+   }
 
   ngOnInit(): void {
+
     if (!this.socketService.isConnected()) {
-      this.socketService.router.navigate(["/home"]);
+      this.router.navigate(["/home"]);
     }
 
     this.roomSubscription = this.socketService.getMissionRoomInfo().subscribe((roomInfo: MissionRoom) => {
       if (!this.room) {
         this.room = roomInfo;
+        this.socketService.getLogs(this.room.robot);
       }
     });
 
     this.isHostLeavingRoomSubscription = this.socketService.isHostLeavingRoom.asObservable().subscribe((isHostLeavingRoom: boolean) => {
       if (isHostLeavingRoom) {
-        this.socketService.router.navigate(['/home']);
+        this.router.navigate(['/home']);
         this.socketService.isHostLeavingRoom.next(false);
         this.socketService.getAvailableRooms();
+      }
+    });
+
+    this.socketService.simulation.asObservable().subscribe((bool) => {
+      this.simulation = bool;
+    })
+    this.socketService.robots.subscribe((robots: Robot[]) => {
+      const robot = robots.find((robot: Robot) => robot.ipAddress === this.room.robot.ipAddress);
+      if (robot) {
+        this.room.robot.batteryLevel = robot.batteryLevel;
       }
     });
   }
 
   handleStopMissionClick(robot: Robot): void {
-    this.socketService.stopMission(robot);
+    if (this.simulation) {
+      this.socketService.terminateSimulationRobot(robot);
+      this.socketService.simulation.next(false);
+    }
+    else this.socketService.stopMission(robot);
   }
 
   ngOnDestroy(): void {
-    if (this.roomSubscription) {
-      this.roomSubscription.unsubscribe();
-    }
-    if (this.isHostLeavingRoomSubscription) {
-      this.isHostLeavingRoomSubscription.unsubscribe();
-    }
+    // if (this.roomSubscription) {
+    //   this.roomSubscription.unsubscribe();
+    // }
+    // if (this.isHostLeavingRoomSubscription) {
+    //   this.isHostLeavingRoomSubscription.unsubscribe();
+    // }
+    this.socketService.stopMission(this.room.robot);
   }
 }

@@ -1,5 +1,5 @@
 <body>
-    <div class="mission-container" >
+    <div class="mission-container">
         <div class="robot-info">
           <p *ngIf="room">Robot Name: {{room.robot.name }}</p>
           <p>Status: {{ room.robot.state }}</p>
@@ -13,7 +13,6 @@
           <button mat-raised-button class="btn" (click)="showLogs = !showLogs">Logs</button>
         </div>
 
-        <div class="map-container">
-        </div>
+        <app-map-component class="mission-container"></app-map-component>
     </div>
 </body>

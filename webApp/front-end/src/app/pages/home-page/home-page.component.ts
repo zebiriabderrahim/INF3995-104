@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { Subscription } from 'rxjs';
 import { ErrorDialogComponent } from 'src/app/components/error-dialog/error-dialog.component';
-import { Robot } from 'src/app/interfaces/models';
+import { MissionRoom, Robot } from 'src/app/interfaces/models';
 import { CommandService } from 'src/app/services/command-service/command.service';
+import { SocketService } from 'src/app/services/socket-service/socket.service';
 
 @Component({
   selector: 'app-home-page',
@@ -12,33 +14,44 @@ import { CommandService } from 'src/app/services/command-service/command.service
 export class HomePageComponent implements OnInit {
   title = 'front-end';
   simulationStatus: boolean = false;
+  simulationRooms: MissionRoom[];
+  availableSimRoomsSubscription: Subscription | undefined;
   robots: Robot[] = [];
+  rosConnectionErrorSubscription: Subscription | undefined;
 
   constructor(
     private commandService: CommandService,
-    private dialog: MatDialog
-  ) {}
+    private dialog: MatDialog,
+    private socketService: SocketService
+  ) {
+    this.simulationRooms = [];
+  }
 
   ngOnInit(): void {
-    this.commandService.socketService.robots.subscribe((robots: Robot[]) => {
+    this.socketService.robots.subscribe((robots: Robot[]) => {
       this.robots = robots;
     });
-    if (this.robots.length === 0) {
-      this.openErrorDialog({
-        title: 'Error',
-        message: 'No robots found.',
-        close: 'close',
-      });
-    }
+
+    this.rosConnectionErrorSubscription=this.socketService.rosConnectionError.subscribe(rosConnectionError => {
+      if (rosConnectionError) {
+        this.openErrorDialog({
+          title: 'Error',
+          message: 'Ros connection not established',
+          close: 'close',
+        });
+        this.socketService.rosConnectionError.next(false);
+      }
+
+      this.socketService.navigate('/home')
+    })
+
+    this.availableSimRoomsSubscription = this.socketService.getAvailableSimulatedRoomsInfo().subscribe((rooms: MissionRoom[]) => {
+      this.simulationRooms = rooms;
+    });
   }
 
   handleSimulation() {
     this.commandService.simulateMission();
-    this.openErrorDialog({
-      title: 'Avertissement',
-      message: 'Veuillez regarder la simulation sur Gazebo',
-      close: 'terminer simulation',
-    });
   }
 
   openErrorDialog(data: any) {
@@ -46,5 +59,18 @@ export class HomePageComponent implements OnInit {
       width: '300px',
       data: data,
     });
+  }
+
+  ngOnDestroy(): void {
+    this.rosConnectionErrorSubscription?.unsubscribe();
+    // if (this.availableSimRoomsSubscription) {
+    //   this.availableSimRoomsSubscription.unsubscribe();
+    // }
+    // if (this.socketService.rosConnectionError) {
+    //   this.socketService.rosConnectionError.unsubscribe();
+    // }
+    // if (this.socketService.robots) {
+    //   this.socketService.robots.unsubscribe();
+    // }
   }
 }

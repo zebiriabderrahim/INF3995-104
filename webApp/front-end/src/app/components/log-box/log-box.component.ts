@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { Log } from 'src/app/interfaces/models';
+import { SocketService } from 'src/app/services/socket-service/socket.service';
 
 @Component({
   selector: 'app-log-box',
@@ -7,39 +8,39 @@ import { Log } from 'src/app/interfaces/models';
   styleUrls: ['./log-box.component.css'],
 })
 
-export class LogBoxComponent {
-  log = '';
-  logs: Log[] = [{
-    type: 'command',
-    name: 'command',
-    message: 'le robot retourne a la base',
-    timestamp: 'sep 13 12:00:01'
-  },
-  {
-    type: 'system',
-    name: 'system',
-    message: 'la batterie est faible',
-    timestamp: 'sep 13 13:02:05'
-  },
-  {
-    type: 'other',
-    name: 'lidar',
-    message: 'objet detecte a 1.3m',
-    timestamp: 'sep 13 13:04:06'
-  }];
-  logsShown: Log[] = this.logs;
-
-
+export class LogBoxComponent implements AfterViewChecked {
+  @ViewChild('logboxElement', { static: false }) logboxElement!: ElementRef;
+  logs: Log[] = [];
+  logsShown: Log[] = [];
   systemChecked = true;
   commandChecked = true;
   otherChecked = true;
 
-  filterLogs(logType: String, wasChecked: boolean) {
-    if (wasChecked) {
-      this.logsShown = this.logsShown.filter(log => log.type !== logType);
-    } else {
-      this.logsShown = this.logsShown.concat(this.logs.filter(log => log.type === logType));
-    }
+  constructor(private socketService: SocketService) { 
+
+    this.socketService.currentLogs.subscribe((logs) => {
+      this.logs = logs;
+      this.filterLogs();
+    });
+  }
+
+  filterLogs() {
+    this.logsShown = this.logs.filter(log => {
+      if (!this.systemChecked && log.type === 'system') return false;
+      if (!this.commandChecked && log.type === 'command') return false;
+      if (!this.otherChecked && log.type === 'other') return false;
+      return true;
+    });
+  }
+
+  ngAfterViewChecked() {
+    this.scrollToBottom();
+  }
+
+  scrollToBottom(): void {
+    try {
+      this.logboxElement.nativeElement.scrollTop = this.logboxElement.nativeElement.scrollHeight;
+    } catch (err) { }
   }
 
 }

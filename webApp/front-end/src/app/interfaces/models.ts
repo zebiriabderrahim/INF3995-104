@@ -17,3 +17,14 @@ export interface Log {
   message: string;
   timestamp: string;
 }
+
+export interface Coordinates {
+  x: number;
+  y: number;
+  z: number;
+}
+
+export interface RobotMarkerInfo {
+  robotId: string;
+  position: Coordinates;
+}

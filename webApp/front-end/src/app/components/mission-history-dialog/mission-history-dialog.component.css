@@ -1,0 +1,62 @@
+
+.logbox {
+    position: relative;
+    width: 110%;
+    height: 95%;
+    border-radius: 5px;
+    font-size: 15px;
+    overflow-y: scroll;
+  }
+  
+  li {
+    margin-bottom: 2%;
+  }
+  
+  .other {
+    position: relative;
+    width: 70%;
+    height: 1px;
+    color: white;
+    display: inline-block;
+    padding: 5px;
+    border-radius: 15px 2px 15px 15px;
+    margin-right: 5%;
+  }
+  
+  .other .name {
+    font-weight: bold;
+    color: #5090c0;
+  }
+  
+  .system {
+    position: relative;
+    width: 70%;
+    height: 1px;
+    color: white;
+    display: inline-block;
+    padding: 5px;
+    border-radius: 15px 2px 15px 15px;
+    margin-right: 5%;
+  }
+  
+  .system .name {
+    font-weight: bold;
+    color: #c0506e;
+  }
+  
+  .command {
+    position: relative;
+    width: 70%;
+    height: 1px;
+    color: white;
+    display: inline-block;
+    padding: 5px;
+    border-radius: 15px 2px 15px 15px;
+    margin-right: 5%;
+  }
+  
+  .command .name {
+    font-weight: bold;
+    color: #7873b5;
+  }
+  
