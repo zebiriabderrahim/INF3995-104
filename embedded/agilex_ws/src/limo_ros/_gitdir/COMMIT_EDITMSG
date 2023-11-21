@@ -1,0 +1,15 @@
+update mcnamu mode support
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# On branch master
+# Your branch is up to date with 'origin/master'.
+#
+# Changes to be committed:
+#	modified:   limo_base/src/limo_driver.cpp
+#	modified:   limo_bringup/launch/limo_amcl.launch
+#	modified:   limo_bringup/launch/limo_navigation_ackerman.launch
+#	modified:   limo_bringup/launch/limo_navigation_diff.launch
+#	renamed:    limo_bringup/param/amcl_params.yaml -> limo_bringup/param/amcl_params_diff.yaml
+#	new file:   limo_bringup/param/amcl_params_omni.yaml
+#

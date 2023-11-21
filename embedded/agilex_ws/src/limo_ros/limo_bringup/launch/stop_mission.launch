@@ -1,0 +1,4 @@
+<launch>
+    <node name="stop_commander" pkg="stop_mission" type="stop_commander.py" output="screen"/>
+</launch>
+

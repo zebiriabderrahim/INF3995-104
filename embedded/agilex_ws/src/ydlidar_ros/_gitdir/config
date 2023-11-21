@@ -1,0 +1,14 @@
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+[remote "origin"]
+	url = git@github.com:YDLIDAR/ydlidar_ros.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[branch "master"]
+	remote = agilex
+	merge = refs/heads/master
+[remote "agilex"]
+	url = git@192.168.0.222:agx/drivers/ydlidar_ros.git
+	fetch = +refs/heads/*:refs/remotes/agilex/*

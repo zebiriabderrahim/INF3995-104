@@ -1,0 +1,5 @@
+<launch>
+    <node name="environment_setting_node" pkg="environment_setting" type="launch_cmds.py" output="screen">
+    </node>
+</launch>
+
