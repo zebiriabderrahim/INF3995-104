@@ -1,0 +1,6 @@
+<launch>
+<group ns="$(arg robot_name)"> 
+    <node name="battery" pkg="battery" type="battery.py" output="screen"/>
+</group>
+</launch>
+
