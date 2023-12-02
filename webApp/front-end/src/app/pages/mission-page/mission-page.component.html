@@ -1,18 +1,28 @@
 <body>
     <div class="mission-container">
         <div class="robot-info">
+          <mat-slide-toggle [(ngModel)]="threeD" class="custom-slide-toggle" *ngIf="simulation">Afficher la carte 3D</mat-slide-toggle>
           <p *ngIf="room">Robot Name: {{room.robot.name }}</p>
           <p>Status: {{ room.robot.state }}</p>
-          <p>Batterie: {{ room.robot.batteryLevel }}%</p>
+          <p  *ngIf="!simulation">Batterie: {{ room.robot.batteryLevel }}%</p>
+          <p  *ngIf="simulation && room.robot.ipAddress==='simulation'">Batterie: robot1: {{ robotSimulationBatteryLevel}}%, robot2: {{ robotSimulationBatteryLevelRobot2}}%</p>
+          <p  *ngIf="simulation && room.robot.ipAddress!=='simulation'">Batterie: {{ robotSimulationBatteryLevel}}%</p>
+        </div>
+
+        <div class="robot-info" *ngFor="let otherRobot of room.otherRobots">
+          <p>Robot Name: {{otherRobot.name}}</p>
+          <p>Status: {{otherRobot.state}}</p>
+          <p>Batterie: {{otherRobot.batteryLevel}}%</p>
         </div>
         <app-log-box class="log-box" [hidden]="!showLogs"></app-log-box>
 
         <div class="button-container">
-          <button mat-raised-button class="btn"  (click)=handleStopMissionClick(room.robot)>Arreter la mission</button>
-          <button mat-raised-button class="btn">Retourner a la base</button>
+          <button mat-raised-button class="btn"  *ngIf="this.room.hostId === this.socketService.clientSocket.socket.id" (click)=handleStopMissionClick(room.robot)>Arreter la mission</button>
+          <button mat-raised-button class="btn"  *ngIf="this.room.hostId === this.socketService.clientSocket.socket.id" (click)=handleReturnToBase()>Retourner a la base</button>
           <button mat-raised-button class="btn" (click)="showLogs = !showLogs">Logs</button>
         </div>
 
-        <app-map-component class="mission-container"></app-map-component>
+        <app-map-component class="mission-container" *ngIf="!threeD"></app-map-component>
+        <app-three-dimensional-map class="mission-container" *ngIf="threeD"></app-three-dimensional-map>
     </div>
 </body>

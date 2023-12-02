@@ -1,13 +1,25 @@
 <div id="title">
     <h1>Mission Overview</h1>
 </div>
-<div class="map-container">
+
+<div class="map-container" *ngIf="!logShown">
+    <app-map-component [map]="map"></app-map-component>
+    <div class="data-box" >
+        <div class="data-content">
+            <h3>Mission Details</h3>
+            <p><strong>Duration:</strong> {{ duration }}</p>
+            <p><strong>Type:</strong> {{ type }}</p>
+            <p><strong>Robots:</strong> {{ robots }}</p>
+            <p><strong>Distance:</strong> {{ distance }}</p>
+        </div>
+    </div>
 </div>
 
-<div class="log-box">
+<div class="log-box"  *ngIf="logShown">
     <div class="logbox clearfix" #logboxElement>
         <li [ngClass]="log.type" *ngFor="let log of logs">
             <span> {{ log.timestamp }}</span> - <strong class="name">[{{log.name}}]</strong> <br>  {{ log.message }}
          </li>
     </div>
 </div>
+

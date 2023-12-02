@@ -20,130 +20,102 @@ class RosUtilities(unittest.TestCase):
         self.mock_topic_class = patch('services.ros_utilities.Topic', autospec=True)
         self.mock_topic = self.mock_topic_class.start()
 
-        self.expected_calls = [
-            call({'data': 'random.launch'}),
-            call({'command': "start"}),
-            call({'command': "stop"})
-        ]
 
     def tearDown(self):
         self.ros_utilities.ros_connections = {}
         self.mock_ros_class.stop()
         self.mock_topic_class.stop()
 
-    def test_create_topic(self):
-        mock_topic = self.mock_topic.return_value
-        sound_topic = self.ros_utilities.create_topic(self.mock_ros.return_value, "Test_Topic")
-        self.mock_topic.assert_called_once_with(self.mock_ros.return_value, "Test_Topic", 'std_msgs/String')
-        mock_topic.advertise.assert_called_once()
-        self.assertIs(sound_topic, mock_topic, "Topic was not created")
 
-    @patch('services.ros_utilities.create_topic')
-    def test_send_command(self, mock_create_topic):
-        mock_ros = self.mock_ros.return_value
-        mock_create_topic.return_value = self.mock_topic.return_value
-
-        with self.app.app_context():
-            response = self.ros_utilities.send_command("0.0.0.0", "random.launch").get_json()
-
-        mock_ros.run.assert_called_once()
-        self.mock_ros.assert_called_once_with('0.0.0.0', 9090)
-        assert self.ros_utilities.ros_connections['0.0.0.0'] == mock_ros, 'Ros instance was successfully created.'
-        mock_create_topic.assert_called_once_with(mock_ros, '/launch_command')
-        mock_create_topic.return_value.publish.assert_called_once_with({'data': 'random.launch'})
-        self.assertEqual(response["message"], "Command sent successfully")
+    @patch('services.ros_utilities.execute_command')
+    @patch('services.ros_utilities.create_ros')
+    def test_terminate_mission(self, mock_create_ros, mock_execute_command):
+        mock_ros_client = self.mock_ros.return_value
+        mock_create_ros.return_value = mock_ros_client
+        self.ros_utilities.terminate_mission({'ipAddress': '192.168.0.110'})
+        self.assertEqual(self.mock_topic.call_count, 2)
+        self.assertEqual(self.mock_topic.return_value.unsubscribe.call_count, 2)
+        mock_execute_command.assert_called_once_with({'ipAddress': '192.168.0.110'}, "rosrun stop_mission stop_commander.py")
 
 
-    @patch('services.ros_utilities.create_topic')
-    def test_send_command_ver2(self, mock_create_topic):
-        mock_ros = self.mock_ros.return_value
-        self.ros_utilities.ros_connections = {'0.0.0.1': mock_ros}
-        mock_create_topic.return_value = self.mock_topic.return_value
+    @patch('services.ros_utilities.execute_command')
+    def test_return_robot_to_base(self, mock_execute_command):
+        self.ros_utilities.return_robot_to_base('192.168.0.110')
+        mock_execute_command.assert_called_once_with({"ipAddress": '192.168.0.110'}, "rosrun return_base return_base.py")
 
-        with self.app.app_context():
-            response = self.ros_utilities.send_command("0.0.0.1", "draw_on_screen.launch").get_json()
-
-        self.mock_ros.assert_not_called()
-        mock_create_topic.assert_called_once_with(mock_ros, '/launch_command')
-        mock_create_topic.return_value.publish.assert_called_once_with({'data': 'draw_on_screen.launch'})
-        self.assertEqual(response["message"], "Command sent successfully")
-
-    @patch('services.ros_utilities.time.sleep', return_value=None)
-    @patch('services.ros_utilities.create_topic')
-    def test_launch_mission(self, mock_create_topic, mock_sleep):    
-        mock_ros = self.mock_ros.return_value
-        mock_create_topic.return_value = self.mock_topic.return_value
-
-        with self.app.app_context():
-            response = self.ros_utilities.launch_mission("0.0.0.0", "random.launch").get_json()
-
-        mock_ros.run.assert_called_once()
-        self.mock_ros.assert_called_once_with('0.0.0.0', 9090)
-        mock_create_topic.assert_called_with(mock_ros, '/launch_command')
-        self.mock_topic.assert_called_once_with(mock_ros, '/control_command', 'launch_mission/ControlCommand')
-        self.mock_topic.return_value.publish.assert_has_calls([
-            call({'data': 'random.launch'}),
-            call({'command': 'start'}),
-            call({'command': 'stop'})
-        ], any_order=False)
-        mock_sleep.assert_has_calls([call(7), call(5)], any_order=False)
-        self.assertEqual(response["message"], "Command sent successfully")
-
-    @patch('services.ros_utilities.time.sleep', return_value=None)
-    @patch('services.ros_utilities.create_topic')
-    def test_launch_mission_2(self, mock_create_topic, mock_sleep):    
-        mock_ros = self.mock_ros.return_value
-        self.ros_utilities.ros_connections = {'0.0.0.1': mock_ros}
-        mock_create_topic.return_value = self.mock_topic.return_value
-
-        with self.app.app_context():
-            response = self.ros_utilities.launch_mission("0.0.0.1", "random.launch").get_json()
-
-        mock_ros.assert_not_called()
-        mock_create_topic.assert_called_with(mock_ros, '/launch_command')
-        self.mock_topic.assert_called_once_with(mock_ros, '/control_command', 'launch_mission/ControlCommand')
-        self.mock_topic.return_value.publish.assert_has_calls([
-            call({'data': 'random.launch'}),
-            call({'command': 'start'}),
-            call({'command': 'stop'})
-        ], any_order=False)
-        mock_sleep.assert_has_calls([call(7), call(5)], any_order=False)
-        self.assertEqual(response["message"], "Command sent successfully")
+    @patch('services.ros_utilities.execute_command')
+    def test_return_robot_to_base_exception(self, mock_execute_command):
+        mock_execute_command.side_effect = Exception('')
+        with self.assertRaises(Exception) as context:
+            self.ros_utilities.return_robot_to_base('192.168.0.110')
+            self.assertEqual(str(context.exception), "error on return robot to base")
+            self.assertIsInstance(context.exception, Exception)
 
     @patch('services.socket_manager.send_robot_battery')
-    @patch('services.ros_utilities.create_topic')
-    def test_subscribe_to_battery(self, mock_create_topic, mock_send_robot_battery):
-        mock_ros = self.mock_ros.return_value
-        mock_create_topic.return_value = self.mock_topic.return_value
+    @patch('services.ros_utilities.execute_command')
+    @patch('services.ros_utilities.create_ros')
+    def test_subscribe_to_battery(self, mock_create_ros, mock_execute_command, mock_send_robot_battery):
+        mock_ros_client = self.mock_ros.return_value
+        mock_create_ros.return_value = mock_ros_client
 
         with self.app.app_context():
-            response = self.ros_utilities.subscribe_to_battery("0.0.0.0").get_json()
+            response = self.ros_utilities.subscribe_to_battery({'ipAddress': '192.168.0.110'}).get_json()
 
-        mock_ros.run.assert_called_once()
-        self.mock_ros.assert_called_once_with('0.0.0.0', 9090)
-        self.mock_topic.assert_called_once_with(mock_ros, '/battery_percentage', 'std_msgs/Float32')
+        mock_create_ros.assert_called_once_with('192.168.0.110')
+        mock_execute_command.assert_called_once_with({'ipAddress': '192.168.0.110'}, "roslaunch battery battery.launch")
+        self.mock_topic.assert_called_once_with(mock_ros_client, '/battery_percentage', 'std_msgs/Float32')
         self.mock_topic.return_value.subscribe.assert_called_once()
         partial_call_args = self.mock_topic.return_value.subscribe.call_args[0][0]
         self.assertIsInstance(partial_call_args, partial)
         self.assertEqual(response["message"], "Command sent successfully")
 
-    @patch('services.socket_manager.send_robot_battery')
-    @patch('services.ros_utilities.create_topic')
-    def test_subscribe_to_battery_v2(self, mock_create_topic, mock_send_robot_battery):
-        mock_ros = self.mock_ros.return_value
-        mock_create_topic.return_value = self.mock_topic.return_value
-        self.ros_utilities.ros_connections = {'0.0.0.1': mock_ros}
+    @patch('services.ros_utilities.create_ros')
+    def test_subscibe_to_battery(self, mock_create_ros):
+        mock_create_ros.side_effect = Exception('')
+        with self.assertRaises(Exception) as context:
+            self.ros_utilities.subscribe_to_battery({'ipAddress': '192.168.0.110'})
+            self.assertEqual(str(context.exception), "error on subscribe to battery")
+            self.assertIsInstance(context.exception, Exception)
 
+    @patch('services.ros_utilities.create_ros')
+    def test_execute_command(self, mock_create_ros):
+        mock_ros_client = self.mock_ros.return_value
+        mock_create_ros.return_value = mock_ros_client
         with self.app.app_context():
-            response = self.ros_utilities.subscribe_to_battery("0.0.0.1").get_json()
+            response = self.ros_utilities.execute_command({'ipAddress': '192.168.0.110'}, 'command.launch').get_json()
 
-        mock_ros.run.assert_not_called()
-        self.mock_ros.assert_not_called()
-        self.mock_topic.assert_called_once_with(mock_ros, '/battery_percentage', 'std_msgs/Float32')
-        self.mock_topic.return_value.subscribe.assert_called_once()
-        partial_call_args = self.mock_topic.return_value.subscribe.call_args[0][0]
-        self.assertIsInstance(partial_call_args, partial)
+        mock_create_ros.assert_called_once_with('192.168.0.110')
+        self.mock_topic.assert_called_once_with(mock_ros_client, "/launch_command", "std_msgs/String")
+        self.mock_topic.return_value.publish.assert_called_once_with({"data": 'command.launch'})
         self.assertEqual(response["message"], "Command sent successfully")
         
+    @patch('services.ros_utilities.create_ros')
+    def test_execute_command_exception(self, mock_create_ros):
+        mock_create_ros.side_effect = Exception('')
+        with self.assertRaises(Exception) as context:
+            self.ros_utilities.execute_command({'ipAddress': '192.168.0.110'}, 'run.launch')
+            self.assertEqual(str(context.exception), "error on execute command")
+            self.assertIsInstance(context.exception, Exception)
+
+    def test_create_ros_if(self):
+        mock_ros_client = self.mock_ros.return_value
+        self.ros_utilities.ros_connections['192.168.0.110'] = mock_ros_client
+        object = self.ros_utilities.create_ros('192.168.0.110')
+        mock_ros_client.run.assert_called_once()
+        self.assertEqual(object, mock_ros_client)
+
+    def test_create_ros_else(self):
+        self.ros_utilities.create_ros('192.168.0.110')
+        self.mock_ros.assert_called_once_with('192.168.0.110', 9090)
+        self.assertEqual(self.ros_utilities.ros_connections, {'192.168.0.110': self.mock_ros.return_value})
+        self.mock_ros.return_value.run.assert_called_once()
+
+    def test_create_topic(self):
+        topic = self.ros_utilities.create_topic(self.mock_ros.return_value, "Test_Topic")
+        self.mock_topic.assert_called_once_with(self.mock_ros.return_value, "Test_Topic", 'std_msgs/String')
+        self.mock_topic.return_value.advertise.assert_called_once()
+        self.assertIs(topic, self.mock_topic.return_value, "Topic was not created")
+
+   
 if __name__ == '__main__':
     unittest.main()

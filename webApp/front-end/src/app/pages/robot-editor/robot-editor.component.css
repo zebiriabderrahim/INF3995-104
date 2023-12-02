@@ -1,0 +1,135 @@
+.editor-page {
+  display: flex;
+  height: 75%;
+}
+
+.file-panel {
+  width: 15%;
+  background-color: #f4f0f0;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.file-list {
+  list-style: none;
+  padding: 0;
+}
+
+.selected {
+  font-weight: bold;
+}
+
+.editor-container {
+  flex-grow: 1;
+  padding: 20px;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.button-container {
+  display: flex;
+  padding-top: 20px;
+}
+
+.text-editor {
+  width: 100%;
+  height: 75%;
+  border: 1px solid #ccc;
+  padding: 10px;
+  font-family: 'Roboto', sans-serif;
+  flex: content;
+  flex-direction: column;
+}
+
+.save-btn {
+  background-color: #8b1218;
+  color: #fff;
+  margin: 0 5px;
+  border-radius: 5px;
+}
+
+.save-btn:hover {
+  background-color: #8b1218;
+  transform: scale(1.05);
+}
+
+.custom-head {
+  background: linear-gradient(to bottom,  #333, #040b11);
+  padding: 15px;
+  text-align: center;
+  color: #fff;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+  letter-spacing: 1px;
+  border-radius: 5px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.custom-head h2 {
+  color: #fff;
+}
+
+.footer {
+  background: linear-gradient(to bottom,  #333, #040b11);
+  color: #fff;
+  padding: 20px;
+  text-align: center;
+  font-size: 14px;
+  font-family: Arial, sans-serif;
+}
+
+.team-name {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+footer p span {
+  display: inline-block;
+}
+
+.home-button {
+  background-color: #8b1218;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 5px;
+  border-radius: 5px;
+}
+
+.home-button:hover {
+  background-color: #8b1218;
+  transform: scale(1.05);
+}
+
+.loading-indicator {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 18px;
+}
+
+.dot {
+  opacity: 0;
+  animation: fadeInOut 1.5s infinite;
+}
+
+.dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.dot:nth-child(2) {
+  animation-delay: 0.5s;
+}
+
+.dot:nth-child(3) {
+  animation-delay: 1s;
+}
+
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}

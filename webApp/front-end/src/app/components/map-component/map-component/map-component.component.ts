@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, Input, NgZone, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { Coordinates, Robot, RobotMarkerInfo } from 'src/app/interfaces/models';
 import { SocketService } from 'src/app/services/socket-service/socket.service';
@@ -9,46 +9,87 @@ import * as THREE from 'three';
   templateUrl: './map-component.component.html',
   styleUrls: ['./map-component.component.css']
 })
-export class MapComponentComponent implements AfterViewInit {
+export class MapComponentComponent implements AfterViewInit, OnDestroy {
   @ViewChild('mapCanvas') mapCanvas!: ElementRef<HTMLCanvasElement>;
-  private context!: CanvasRenderingContext2D;
+  @ViewChild('foregroundCanvas') foregroundCanvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('foregroundCanvas2') foregroundCanvas2!: ElementRef<HTMLCanvasElement>;
 
-  constructor(private ngZone: NgZone, private socketService: SocketService) {}
+  @Input() map!: number[];
+  private context!: CanvasRenderingContext2D;
+  private foregroundContext!: CanvasRenderingContext2D;
+  private foregroundContext2!: CanvasRenderingContext2D;
+  private simulation!: boolean;
+  private imageData!: ImageData;
+
+  constructor(private socketService: SocketService, private ngZone: NgZone) {}
 
   ngAfterViewInit() {
-    const context = this.mapCanvas.nativeElement.getContext('2d');
-    if (!context) {
-      throw new Error('CanvasRenderingContext2D is not supported by this browser.');
+    this.initializeCanvasContexts();
+
+    if (this.map === undefined) {
+      this.subscribeToMapUpdates();
+      this.subscribeToRobotPositionUpdates();
+    } else {
+      this.updateMap(this.map, this.simulation);
     }
-    this.context = context;
-    this.socketService.map.subscribe(
-      (newMapData) => {
-        this.updateMap(newMapData);
-      },
-      (error) => {
-        console.error('Error receiving map data:', error);
-      }
-    );
   }
 
-  updateMap(newMapData: number[]) {
+  ngOnDestroy() {
+    this.clearCanvas(this.context, this.mapCanvas.nativeElement);
+    this.clearCanvas(this.foregroundContext, this.foregroundCanvas.nativeElement);
+    this.map = [];
+  }
+
+  private initializeCanvasContexts() {
+    this.context = this.mapCanvas.nativeElement.getContext('2d') as CanvasRenderingContext2D;
+    this.foregroundContext = this.foregroundCanvas.nativeElement.getContext('2d') as CanvasRenderingContext2D;
+    this.foregroundContext2 = this.foregroundCanvas2.nativeElement.getContext('2d') as CanvasRenderingContext2D;
+  }
+
+  private subscribeToMapUpdates() {
+    this.socketService.map.asObservable().subscribe((newMapData: number[]) => {
+      if (newMapData) this.updateMap(newMapData, this.simulation);
+    });
+
+    this.socketService.simulation.asObservable().subscribe((bool: boolean) => {
+      this.simulation = bool;
+    });
+  }
+
+  private subscribeToRobotPositionUpdates() {
+    this.socketService.robotPos.asObservable().subscribe((data: RobotMarkerInfo) => {
+      const position: Coordinates = { "x": data.position.x , "y": data.position.y, "z": 0 };
+      if (data.robotId == "2") {
+        this.updateRobot(position, '2', this.foregroundContext2);
+      } else {
+        this.updateRobot(position, '1', this.foregroundContext);
+      }
+    });
+  }
+
+  private updateMap(newMapData: number[], simulation: boolean) {
     this.ngZone.runOutsideAngular(() => {
       requestAnimationFrame(() => {
-        this.drawMap(newMapData);
+        this.drawMap(newMapData, 320, 320)
       });
     });
   }
 
-  private drawMap(mapData: number[]) {
-    const width = 1984;
-    const height = 1984;
-    const imageData = this.context.createImageData(width, height);
+  private updateRobot(position: Coordinates, robotId: string, context: CanvasRenderingContext2D) {
+    requestAnimationFrame(() => {
+        this.drawRobot(position, robotId, context);
+    });
+  }
+
+  private drawMap(mapData: number[], width: number, height: number) {
+    this.context.canvas.width = this.foregroundContext.canvas.width = this.foregroundContext2.canvas.width = width;
+    this.context.canvas.height = this.foregroundContext.canvas.height = this.foregroundContext2.canvas.height = height;
+    const imageData = this.context.createImageData(this.context.canvas.width, this.context.canvas.height);
     const data = new Uint32Array(imageData.data.buffer);
 
-    // Assuming the endianness is Little Endian, ABGR format is used
-    const greyColor = 0xFF808080;  // Grey, with full alpha
-    const whiteColor = 0xFFFFFFFF; // White, with full alpha
-    const blackColor = 0xFF000000; // Black, with full alpha
+    const greyColor = 0xFF808080;  
+    const whiteColor = 0xFFFFFFFF; 
+    const blackColor = 0xFF000000; 
 
     for (let i = 0; i < mapData.length; i++) {
       switch (mapData[i]) {
@@ -66,65 +107,40 @@ export class MapComponentComponent implements AfterViewInit {
 
     this.context.putImageData(imageData, 0, 0);
   }
-  // @Input() robot!: Robot;
-  // @Input() simulation !: boolean;
-  // private renderer!: THREE.WebGLRenderer;
-  // private scene!: THREE.Scene;
-  // private camera!: THREE.PerspectiveCamera;
-  // private robotMarker: THREE.Mesh;
-  // private secondRobotMarker: THREE.Mesh;
-  // private width = this.elementRef.nativeElement.clientWidth;
-  // private height = this.elementRef.nativeElement.clientHeight;
 
-  // constructor(private elementRef: ElementRef, private ngZone: NgZone, private socketService: SocketService) {
-  //   const coneGeometry = new THREE.ConeGeometry(0.2, 0.5, 10);
-  //   const coneMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-  //   const secondConeMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-  //   this.robotMarker = new THREE.Mesh(coneGeometry, coneMaterial);
-  //   this.secondRobotMarker = new THREE.Mesh(coneGeometry, secondConeMaterial);
 
-  //   this.robotMarker.scale.set(2, 2, 2);
-  //   this.secondRobotMarker.scale.set(2, 2, 2); 
+  private drawRobot(position: Coordinates, robotId: string, context: CanvasRenderingContext2D) {
+      let robotSize = 5;
+      let newPosition: Coordinates = position;
+      const robotColor = robotId === "1" ? 0xFF00FF00 : 0xFFFF0000;
+  
+      let canvasCenterX = context.canvas.width / 2;
+      let canvasCenterY = context.canvas.height / 2;
 
-  //   this.renderer = new THREE.WebGLRenderer();
-  //   this.scene = new THREE.Scene();
-  //   this.camera = new THREE.PerspectiveCamera(75, this.width / this.height, 0.1, 1000);
+      if (this.simulation) {
+        newPosition.x = position.x * 16 + canvasCenterX;
+        newPosition.y = position.y * 16 + canvasCenterY
+      } else {
+        newPosition.x = (position.x + 8) * 20;
+        newPosition.y = (position.y + 8) * 20;
+      }
+  
+      if (!this.imageData) {
+        this.imageData = context.createImageData(2 * robotSize + 1, 2 * robotSize + 1);
+      }
+      const robotData = new Uint32Array(this.imageData.data.buffer);
+  
+      for (let i = 0; i < robotData.length; i++) {
+        robotData[i] = robotColor; 
+      }
 
-  //   this.camera.position.set(0, 0, 30);
-  //   this.camera.lookAt(0, 0, 0);
-  // }
+      this.clearCanvas(context, context.canvas);
+      context.putImageData(this.imageData, newPosition.x, newPosition.y); 
+  }
 
-  // ngOnInit(): void {
-  //   this.ngZone.runOutsideAngular(() => {
-  //     this.elementRef.nativeElement.appendChild(this.renderer.domElement);
-  //     this.onWindowResize();
-  //   });
 
-  //   this.render();
+  private clearCanvas(context: CanvasRenderingContext2D, canvasElement: HTMLCanvasElement) {
+    context.clearRect(0, 0, canvasElement.width, canvasElement.height);
+  }
 
-  //   this.socketService.robotPos.asObservable().subscribe((coordinates: RobotMarkerInfo) => {
-  //     if (coordinates.robotId == '2')  {
-  //       this.secondRobotMarker.position.set(coordinates.position.x, coordinates.position.y, coordinates.position.z);
-  //       this.scene.add(this.secondRobotMarker);
-  //     }
-  //     else {
-  //       this.robotMarker.position.set(coordinates.position.x, coordinates.position.y, coordinates.position.z);
-  //       this.scene.add(this.robotMarker);
-  //     }
-  //     this.render();
-  //   })
-  // }
-
-  // onWindowResize() {
-  //   this.width = this.elementRef.nativeElement.clientWidth;
-  //   this.height = this.elementRef.nativeElement.clientHeight;
-  //   this.renderer.setSize(this.width, this.height);
-  //   this.camera.aspect = this.width / this.height;
-  //   this.camera.updateProjectionMatrix();
-  //   this.render();
-  // }
-
-  // render() {
-  //   this.renderer.render(this.scene, this.camera);
-  // }
 }

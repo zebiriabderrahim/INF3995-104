@@ -2,6 +2,7 @@ export interface MissionRoom {
     hostId: string;
     robot: Robot;
     guestId?: string[];
+    otherRobots?: Robot[];
 }
 
 export interface Robot {
@@ -28,3 +29,9 @@ export interface RobotMarkerInfo {
   robotId: string;
   position: Coordinates;
 }
+
+export interface RobotBatteryInfo {
+  robotId: string;
+  batteryLevel: number;
+}
+

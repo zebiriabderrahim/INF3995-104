@@ -19,3 +19,4 @@ coverage
 matplotlib
 numpy
 scikit-learn
+paramiko

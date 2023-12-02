@@ -1,0 +1,49 @@
+<!-- Text Editor Page -->
+<body>
+  <header class="custom-head">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <h2>Système de contrôle pour AgileX limo</h2>
+  </header>
+  <div class="editor-page">
+
+    <aside class="file-panel">
+      <ul class="file-list">
+        <li *ngFor="let file of files | keyvalue"
+            (click)="onFileSelect(file.key)"
+            [class.selected]="file.key === selectedFileName">
+          {{ file.key }}
+        </li>
+      </ul>
+    </aside>
+
+    <section class="editor-container">
+      <div *ngIf="isLoading" class="loading-indicator">
+        Loading files<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
+      </div>
+      <textarea class="text-editor"
+          [(ngModel)]="selectedFileContent"
+          (ngModelChange)="onContentChange($event)"
+          (keydown)="onKeyDown($event)">
+      </textarea>
+
+      <div class="button-container">
+        <button mat-raised-button class="home-button" (click)="openQuitDialog()">
+          <mat-icon>home</mat-icon> Home
+        </button>
+        <button mat-raised-button class="save-btn" (click)="openSaveDialog()">Save</button>
+        <div *ngIf="isSaving" class="loading-indicator">
+          Saving files<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
+        </div>
+      </div>
+    </section>
+
+  </div>
+  <footer class="footer">
+    <h4 class="team-name">Équipe 104</h4>
+    <p>
+      <span>Thibault Demagny</span>, <span>Aymane Chalh</span>, <span>Abderrahim Zebiri</span>,
+      <span>Anass El Kettani</span>, <span>Lina Khial</span>, <span>Nada Alami-chentoufi</span>
+    </p>
+  </footer>
+</body>
