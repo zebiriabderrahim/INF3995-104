@@ -15,11 +15,14 @@ describe('CommandService', () => {
   const mockCommunicationService = {
     getRobots: () => of([]),
     getMissions: () => of([]),
+    getMissionMap: () => of([]),
     identifyRobot: (robot: Robot) => of({}),
     simulateMission: () => of({}),
     terminateSimulation: () => of({}),
     getRosConnection: (robot: Robot) => of({}),
     launchMission: (robot: Robot) => of({}),
+    getRobotFiles:(password:string)=>of({}),
+    saveRobotFiles:(password:string,files:File[])=>of({}),
   };
 
   const mockSocketService = {
@@ -27,6 +30,8 @@ describe('CommandService', () => {
     simulateMission: () => {},
     viewMissionRoom: (robot: Robot) => {},
     simulateMissionRobot: (robot: Robot) => {},
+    launchAllRobots: (robots: Robot[]) => {},
+    viewMissionRoomAllRobots: () => {},
   };
 
   beforeEach(() => {
@@ -66,17 +71,23 @@ describe('CommandService', () => {
     expect(communicationService.getMissions).toHaveBeenCalled();
   });
 
+  it('should call getMissionMap', () => {
+    spyOn(communicationService, 'getMissionMap').and.returnValue(of([]));
+    commandService.getMissionMap("missionName");
+    expect(communicationService.getMissionMap).toHaveBeenCalledWith("missionName");
+  });
+
   it('should call identifyRobot', () => {
     spyOn(communicationService, 'identifyRobot').and.returnValue(of(""));
     commandService.identifyRobot(robot);
     expect(communicationService.identifyRobot).toHaveBeenCalledWith(robot);
   });
 
-  it('should call communicationService launchMission', () => {
-    spyOn(communicationService, 'launchMission').and.returnValue(of({}));
-    commandService.launchMission(robot);
-    expect(communicationService.launchMission).toHaveBeenCalledWith(robot);
-  });
+  // it('should call communicationService launchMission', () => {
+  //   spyOn(communicationService, 'launchMission').and.returnValue(of({}));
+  //   commandService.launchMission(robot);
+  //   expect(communicationService.launchMission).toHaveBeenCalledWith(robot);
+  // });
 
   it('should call socketService simulateMissionRobot', () => {
     const spy= spyOn(socketService, 'simulateMissionRobot');
@@ -109,11 +120,33 @@ describe('CommandService', () => {
     expect(socketService.simulateMission).toHaveBeenCalled();
   });
 
-  it('should call launchMission + createMissionRoom', () => {
-    const firstSpy=spyOn(commandService, 'launchMission');
-    const secondSpy=spyOn(socketService, 'createMissionRoom');
+  it('should call createMissionRoom', () => {
+    const spy=spyOn(socketService, 'createMissionRoom');
     commandService.createMissionRoom(robot);
-    expect(firstSpy).toHaveBeenCalledWith(robot);
-    expect(secondSpy).toHaveBeenCalledWith(robot);
+    expect(spy).toHaveBeenCalledWith(robot);
+  });
+
+  it('should call launchAllRobots', () => {
+    const spy=spyOn(socketService, 'launchAllRobots');
+    commandService.launchAllRobots([robot]);
+    expect(spy).toHaveBeenCalledWith([robot]);
+  });
+
+  it('should call viewMissionRoomAllRobots', () => {
+    const spy=spyOn(socketService, 'viewMissionRoomAllRobots');
+    commandService.viewMission();
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('should call getRobotFiles in communication service', () => {
+    const spy=spyOn(communicationService, 'getRobotFiles');
+    commandService.getRobotFiles("nvid");
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('should call saveRobotFiles in communication service', () => {
+    const spy=spyOn(communicationService, 'saveRobotFiles');
+    commandService.saveRobotFiles("nvid",[]);
+    expect(spy).toHaveBeenCalled();
   });
 });

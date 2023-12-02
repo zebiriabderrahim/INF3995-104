@@ -1,4 +1,5 @@
 import { AfterViewChecked, Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { Log } from 'src/app/interfaces/models';
 import { SocketService } from 'src/app/services/socket-service/socket.service';
 
@@ -15,10 +16,11 @@ export class LogBoxComponent implements AfterViewChecked {
   systemChecked = true;
   commandChecked = true;
   otherChecked = true;
+  currentLogsSubscription: Subscription | undefined;
 
-  constructor(private socketService: SocketService) { 
+  constructor(private socketService: SocketService) {
 
-    this.socketService.currentLogs.subscribe((logs) => {
+    this.currentLogsSubscription= this.socketService.currentLogs.subscribe((logs) => {
       this.logs = logs;
       this.filterLogs();
     });
@@ -33,6 +35,12 @@ export class LogBoxComponent implements AfterViewChecked {
     });
   }
 
+  delayedFilterLogs() {
+    setTimeout(() => {
+      this.filterLogs();
+    }, 0);
+  }
+
   ngAfterViewChecked() {
     this.scrollToBottom();
   }
@@ -41,6 +49,9 @@ export class LogBoxComponent implements AfterViewChecked {
     try {
       this.logboxElement.nativeElement.scrollTop = this.logboxElement.nativeElement.scrollHeight;
     } catch (err) { }
+  }
+  ngOnDestroy():void{
+    this.currentLogsSubscription?.unsubscribe();
   }
 
 }

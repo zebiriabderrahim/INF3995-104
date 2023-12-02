@@ -1,40 +1,43 @@
-.map-container {
-    display: flex;
-    flex: 1;
-    position: relative;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
-    align-items: center;
-    justify-content: center;
-    z-index: 0;
-    width: 100%; 
-    height: 100%;
+
+.canvas-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;   
+}
+
+.canvas-wrapper {
+  position: relative;
+}
+
+#mapCanvas, #foregroundCanvas, #foregroundCanvas2 {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.foreground-canvas, .foreground-canvas2 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+#mapCanvas {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+@media (max-width: 768px) {
+  .canvas-container {
+    height: auto; 
   }
 
-  @media (max-width: 768px) {
-    .map-container {
-        align-items: center;
-        justify-content: center;
-      }
-  }
-
-  :host {
-    display: block;
-    height: 100%;
-  }
-  
   .canvas-wrapper {
-    width: 300px; /* Set the viewport width */
-    height: 300px; /* Set the viewport height */
-    overflow: hidden; /* Hide the overflowing parts of the canvas */
-    position: relative; /* Make this a positioning context */
-    margin: 0 auto; /* Center the canvas wrapper on the screen horizontally */
+    width: 100%;
+    max-width: none;
+    margin: auto;
+    margin-right: 15px; 
   }
-  
-  canvas {
-    position: absolute; /* This allows us to move the canvas within the wrapper */
-    top: -842px; /* Move the canvas up by half the difference between the canvas height and the viewport height */
-    left: -842px; /* Move the canvas left by half the difference between the canvas width and the viewport width */
-    image-rendering: pixelated; /* This will keep the pixels sharp when scaled */
-    transform: scale(2); /* Adjust the scaling factor as needed to zoom in or out. 1.5 is just an example */
-    transform-origin: center center; /* Ensure the scaling is from the center */
-  }
+}
+

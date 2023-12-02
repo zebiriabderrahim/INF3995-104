@@ -1,0 +1,4 @@
+<launch>
+	<node name="robot_communication" pkg="robot_communication" type="robot_communication.py" output="screen"/>
+</launch>
+

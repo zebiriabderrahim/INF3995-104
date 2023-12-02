@@ -7,8 +7,9 @@ import { SocketService } from './socket.service';
 import { Router, RouterModule } from '@angular/router';
 import { MissionPageComponent } from 'src/app/pages/mission-page/mission-page.component';
 import { RouterTestingModule } from '@angular/router/testing';
-import { MissionRoom, Robot, RobotMarkerInfo } from 'src/app/interfaces/models';
+import { Log, MissionRoom, Robot, RobotMarkerInfo } from 'src/app/interfaces/models';
 import { of, Subject } from 'rxjs';
+import { CommunicationService } from '../communication-service/communication.service';
 
 class SocketClientServiceMock extends ClientSocketService {
   override connect() {
@@ -26,6 +27,10 @@ describe('SocketService', () => {
   let robots: Robot[];
   let mockRoom: MissionRoom;
   let coordinates: RobotMarkerInfo;
+
+  const mockCommunicationService = {
+    saveMission: (type: string) => of({}),
+  };
 
 
   beforeEach(() => {
@@ -66,7 +71,7 @@ describe('SocketService', () => {
               { path: 'mission', component:  MissionPageComponent },
           ]),
       ],
-      providers: [{ provide: ClientSocketService, useValue: socketServiceMock }],
+      providers: [{ provide: ClientSocketService, useValue: socketServiceMock },{provide: CommunicationService, useValue: mockCommunicationService}],
       declarations: [MissionPageComponent],
   });
 
@@ -166,6 +171,18 @@ describe('SocketService', () => {
     expect(spy).toHaveBeenCalledWith(true);
   });
 
+  it('should handle set simulation subject to true response', () => {
+    const spy = spyOn(socketService.isRoomCreated, 'next');
+    const roomInfoSpy = spyOn(socketService.roomInfo, 'next');
+    const simulationSpy = spyOn(socketService.simulation, 'next');
+    mockRoom.robot.ipAddress = '192.168.0.sim';
+    socketHelper.peerSideEmit('createdMissionRoom', mockRoom);
+    expect(socketService.currentRoom).toEqual(mockRoom);
+    expect(roomInfoSpy).toHaveBeenCalledWith(mockRoom);
+    expect(spy).toHaveBeenCalledWith(true);
+    expect(simulationSpy).toHaveBeenCalledWith(true);
+  });
+
   it('should handle availableRooms response', () => {
     const spy = spyOn(socketService.availableRooms, 'next');
     socketHelper.peerSideEmit('availableRooms',{"rooms": [mockRoom],"simulated":[mockRoom]});
@@ -179,8 +196,9 @@ describe('SocketService', () => {
   });
 
   it('should handle roomDeleted response', () => {
+    spyOn(socketService, 'saveMission').and.callFake(() => 'physical');
     const spy = spyOn(socketService.isRoomDeleted, 'next');
-    socketHelper.peerSideEmit('roomDeleted');
+    socketHelper.peerSideEmit('roomDeleted', 'physical');
     expect(spy).toHaveBeenCalledWith(true);
   });
 
@@ -193,10 +211,8 @@ describe('SocketService', () => {
   it('should handle navigate to simulation mission when clicked button', () => {
     const routerSpy = spyOn(router, 'navigate');
     const sendSpy = spyOn(socketServiceMock, 'send');
-    const spy = spyOn(socketService.simulation, 'next');
     socketService.simulateMission();
     expect(sendSpy).toHaveBeenCalledWith('simulateMission');
-    expect(spy).toHaveBeenCalledWith(true);
     expect(routerSpy).toHaveBeenCalledWith(['/mission']);
   });
 
@@ -239,8 +255,8 @@ describe('SocketService', () => {
 
   it('should send getBatteryLevel event', () => {
     const sendSpy = spyOn(socketServiceMock, 'send');
-    socketService.getBatteryLevel(robots[0].ipAddress);
-    expect(sendSpy).toHaveBeenCalledWith('getBatteryLevel', robots[0].ipAddress);
+    socketService.getBatteryLevel(robots[0]);
+    expect(sendSpy).toHaveBeenCalledWith('getBatteryLevel', robots[0]);
   });
 
   it('should simulate Mission Robot', () => {
@@ -273,7 +289,6 @@ describe('SocketService', () => {
 
   it('should update robots when receiving a robot battery', () => {
     const robots = socketService.robots.value; 
-    console.log(robots)
     
     const mockRobot = {
       name: 'Robot 1',
@@ -286,4 +301,138 @@ describe('SocketService', () => {
     socketHelper.peerSideEmit('robotBattery', mockRobot);
     expect(spy).toHaveBeenCalledWith([mockRobot, robots[1]]);
   });
+
+  it('should save mission', () => {
+    const logs: Log[] = [
+      { 
+        type: "system",
+        name: "system",
+        message: "Mission arrêtée",
+        timestamp: "Nov 03 20:59:39"
+      },
+      { 
+        type: "system",
+        name: "system",
+        message: "Mission arrêtée",
+        timestamp: "Nov 03 20:59:59"
+      }
+    ];
+    
+    let mission = {
+      logs: [{ timestamp: "Nov 03 20:56:23" }, { timestamp: "Nov 03 20:59:39" }],
+      map:  [],
+      duration: "",
+      type: "",
+      robots: "physical",
+    };
+    socketService.currentLogs.next(logs);
+    // const spy = spyOn(c, 'send');
+    const spy= spyOn(mockCommunicationService, 'saveMission').and.returnValue(of({}));
+    socketService.saveMission("simulation","1.07");
+    expect(spy).toHaveBeenCalled();
+    socketService.saveMission("pyhyical","1.07");
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('should send returnToBase event', () => {
+    const sendSpy = spyOn(socketServiceMock, 'send');
+    socketService.returnToBase(robots[0]);
+    expect(sendSpy).toHaveBeenCalledWith('returnToBase', robots[0]);
+  });
+
+  it('should send returnToBase simulation event', () => {
+    const sendSpy = spyOn(socketServiceMock, 'send');
+    socketService.returnToBaseSimulation(robots[0]);
+    expect(sendSpy).toHaveBeenCalledWith('returnToBaseSimulation', robots[0]);
+  });
+
+  it('should send getLogs  event', () => {
+    const sendSpy = spyOn(socketServiceMock, 'send');
+    socketService.getLogs(robots[0],true);
+    expect(sendSpy).toHaveBeenCalledWith('getLogs', socketService.robots.getValue());
+    socketService.getLogs(robots[0],false);
+    expect(sendSpy).toHaveBeenCalledWith('getLogs', robots[0]);
+  });
+
+  it('should send getBatteryLevelSim  event', () => {
+    const sendSpy = spyOn(socketServiceMock, 'send');
+    socketService.getBatteryLevelSim(robots[0]);
+    expect(sendSpy).toHaveBeenCalledWith('getBatteryLevelSim', robots[0]);
+  });  
+
+  it('should launch all robots', () => {
+    const sendSpy = spyOn(socketServiceMock, 'send');
+    const routerSpy = spyOn(router, 'navigate');
+    socketService.launchAllRobots(robots);
+    expect(sendSpy).toHaveBeenCalledWith('launchAllRobots', robots);
+    expect(routerSpy).toHaveBeenCalledWith(['/mission']);
+  });
+
+  it('should send terminateAllPhysicalRobots event', () => {
+    const sendSpy = spyOn(socketServiceMock, 'send');
+    socketService.terminateAllPhysicalRobots(robots);
+    expect(sendSpy).toHaveBeenCalledWith('stopAllRobots', robots);
+  });
+
+  it('should viewMissionRoomAllRobots', () => {
+    const sendSpy = spyOn(socketServiceMock, 'send');
+    const routerSpy = spyOn(router, 'navigate');
+    socketService.viewMissionRoomAllRobots();
+    expect(sendSpy).toHaveBeenCalledWith('viewAllRobots');
+    expect(routerSpy).toHaveBeenCalledWith(['/mission']);
+  });
+
+  it('should send setInitialPosition event', () => {
+    const sendSpy = spyOn(socketServiceMock, 'send');
+    socketService.setInitialPosition("position", coordinates);
+    expect(sendSpy).toHaveBeenCalledWith('setInitialPosition', {name: "position", data: coordinates});
+  });
+
+  it('should add logs', () => {
+    const spy = spyOn(socketService.currentLogs, 'next');
+    socketHelper.peerSideEmit('log');
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('should stop battery call', () => {
+    const spy = spyOn(socketService.stopBatteryCallSimulation, 'next');
+    socketHelper.peerSideEmit('stopBatteryCallSimulation', true);
+    expect(spy).toHaveBeenCalledWith(true);
+  });
+
+  it('should update map', () => {
+    const spy = spyOn(socketService.map, 'next');
+    socketHelper.peerSideEmit('map', [1,2,3]);
+    expect(spy).toHaveBeenCalledWith([1,2,3]);
+  });
+
+  it('should update allPhysicalRobots subject', () => {
+    const spy = spyOn(socketService.allPhysicalRobots, 'next');
+    socketHelper.peerSideEmit('allRobotsConnected',true);
+    expect(spy).toHaveBeenCalledWith(true);
+  });
+
+  it('should update allSimConnected subject', () => {
+    const spy = spyOn(socketService.allSimConnected, 'next');
+    socketHelper.peerSideEmit('allSimConnected',true);
+    expect(spy).toHaveBeenCalledWith(true);
+  });
+
+  it('should update batteryLevelSimulation subject', () => {
+    const spy = spyOn(socketService.batteryLevelSimulation, 'next');
+    socketHelper.peerSideEmit('receiveBatterySim', {robotId: '1234', batteryLevel: 100});
+    expect(spy).toHaveBeenCalledWith({robotId: '1234', batteryLevel: 100});
+  });
+
+  it('should receiveDistanceSim emit', () => {
+    socketService.type="simulation";
+    const spy = spyOn(socketService, 'saveMission');
+    socketHelper.peerSideEmit('receiveDistanceSim', "1.8m");
+    expect(spy).toHaveBeenCalledWith("simulation","1.8m");
+  });
+  
+  
+
+
+
 });

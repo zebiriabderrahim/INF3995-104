@@ -3,9 +3,11 @@ class MissionRoom:
         self.host_id = host_id
         if type == 'simulation': # one simulated robot
             self.robot_info = Robot(robot["name"], robot["ipAddress"], "(simulation)")
-        elif robot is None: # both simultaed robots
+        elif type == 'physical': # both physical robots
+            self.robot_info = [Robot(bot["name"], bot["ipAddress"], "", bot["batteryLevel"]) for bot in robot]
+        elif robot is None: # both simulated robots
             self.robot_info = Robot("Robots", "simulation", "(simulation)")
-        else : # physical robots
+        else : # one physical robot
             self.robot_info = Robot(robot["name"], robot["ipAddress"], "", robot["batteryLevel"])
         self.guest_id = []
         
@@ -13,11 +15,19 @@ class MissionRoom:
         self.guest_id.append(guest_id)
 
     def to_dict(self):
-        return {
-            "hostId": self.host_id,
-            "robot": self.robot_info.to_dict(),
-            "guestId": self.guest_id
-        }
+        if isinstance(self.robot_info, list):
+            return {
+                "hostId": self.host_id,
+                "robot": self.robot_info[0].to_dict(),
+                "guestId": self.guest_id,
+                "otherRobots": [robot.to_dict() for robot in self.robot_info[1:]] if len(self.robot_info) > 1 else []
+            }
+        else:
+            return {
+                "hostId": self.host_id,
+                "robot": self.robot_info.to_dict(),
+                "guestId": self.guest_id
+            }
 
 
 class Robot:

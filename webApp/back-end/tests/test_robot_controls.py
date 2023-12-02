@@ -1,7 +1,9 @@
+import json
 import unittest
 from unittest.mock import patch, Mock, call
 import roslibpy
 from flask import Flask
+from flask import jsonify
 from controllers import routes
 from services import robot_controls 
 
@@ -13,39 +15,61 @@ class RobotControls(unittest.TestCase):
         self.client = self.app.test_client()
         self.robot_controls = robot_controls
 
-    @patch('services.robot_controls.draw_on_screen')
-    def test_identify_robot1(self, mock_draw_on_screen):
+    @patch('services.ros_utilities.execute_command')
+    def test_identify_robot1(self, mock_execute_command):
         with self.app.app_context():
-            mock_draw_on_screen.return_value = 'Successfully called the draw_on_screen function'
-            robot1_result = self.robot_controls.identify_robot('192.168.0.122')  
-            mock_draw_on_screen.assert_called_once_with('192.168.0.122') 
-            assert robot1_result == 'Successfully called the draw_on_screen function', 'draw_on_screen was not called via identify(ip)'
+            mock_execute_command.return_value = 'Successfully called the execute command function'
+            robot1_result = self.robot_controls.identify_robot({'ipAddress': '192.168.0.110'})  
+            mock_execute_command.assert_called_once_with({'ipAddress': '192.168.0.110'}, 'play -n -c1 synth fade q 0.1 1 0.1') 
+            assert robot1_result == 'Successfully called the execute command function', 'execute_command was not called via identify(ip robot 1)'
 
+    @patch('services.ros_utilities.execute_command')
+    def test_identify_robot2(self, mock_execute_command):
+        mock_execute_command.return_value = 'Successfully called the execute command function'
+        robot2_result = self.robot_controls.identify_robot({'ipAddress': '192.168.0.122'})
+        mock_execute_command.assert_called_once_with({'ipAddress': '192.168.0.122'}, 'play -n -c1 synth pluck C4 pluck E4 pluck G4 fade q 0.1 1 0.1')
+        assert robot2_result == 'Successfully called the execute command function', 'execute_command was not called via identify(ip robot 2)'
 
-    @patch('services.robot_controls.play_sound')
-    def test_identify_robot2(self, mock_play_sound):
-        mock_play_sound.return_value = 'Successfully called the play_sound function'
-        robot2_result = self.robot_controls.identify_robot('192.168.0.110')
-        mock_play_sound.assert_called_once_with('192.168.0.110')
-        assert robot2_result == 'Successfully called the play_sound function', 'play_sound was not called via identify(ip)'
+    @patch('services.ros_utilities.execute_command')
+    def test_launch_mission(self, mock_execute_command):
+        self.robot_controls.launch_mission({'ipAddress': '192.168.0.110'})
+        mock_execute_command.assert_has_calls([
+            call({'ipAddress': '192.168.0.110'}, 'roslaunch limo_bringup start_mission.launch'),
+            call({'ipAddress': '192.168.0.110'}, 'rosrun recovery_algo recovery_algo.py'),
+            call({'ipAddress': '192.168.0.110'}, 'rosrun environment_setting distance_calculator.py')
+        ])
 
-    @patch('services.ros_utilities.send_command')
-    def test_draw_on_screen(self, mock_send_command):
-        mock_send_command.return_value = "Successfully called the ros.send_command function"
-        self.robot_controls.draw_on_screen('198.162.0.122')
-        mock_send_command.assert_called_once_with('198.162.0.122', 'identification/launch/draw_screen.launch')
+    @patch('services.robot_controls.launch_mission')
+    @patch('services.robot_controls.launch_map_merger')
+    @patch('services.robot_controls.start_robots_communication')
+    def test_launch_robots(self, mock_start_robots, mock_map_merger, mock_launch_mission):
+        self.robot_controls.launch_robots(['robot1', 'robot2'])
+        mock_start_robots.assert_called_once()
+        mock_map_merger.assert_called_once()
+        self.assertTrue(self.robot_controls.are_two_physical_launched, True)
+        mock_launch_mission.assert_has_calls([
+            call('robot1'),
+            call('robot2')
+        ])
 
-    @patch('services.ros_utilities.send_command')
-    def test_play_sound(self, mock_send_command):
-        mock_send_command.return_value = "Successfully called the ros.send_command function"
-        self.robot_controls.play_sound('198.168.0.110')
-        mock_send_command.assert_called_once_with('198.168.0.110', 'identification/launch/play_sound.launch')
+    @patch('services.ros_utilities.execute_command')
+    def test_launch_map_merger(self, mock_execute_command):
+        self.robot_controls.launch_map_merger()
+        mock_execute_command.assert_called_once_with({'ipAddress':'192.168.0.110'}, 'roslaunch merge_map merge.launch')
 
-    @patch('services.ros_utilities.launch_mission')
-    def test_launch_mission(self, mock_launch_mission):
-        mock_launch_mission.return_value = "Successfully called the ros.launch_mission function"
-        self.robot_controls.launch_mission('198.168.0.110')
-        mock_launch_mission.assert_called_once_with('198.168.0.110', 'launch_mission/src/launch_mission.launch')
+    @patch('services.ros_utilities.execute_command')
+    def test_start_robots_communication(self, mock_execute_command):
+        self.robot_controls.start_robots_communication()
+        mock_execute_command.assert_has_calls([
+            call({'ipAddress':'192.168.0.110'}, 'roslaunch robot_communication robot_communication.launch'),
+            call({'ipAddress':'192.168.0.110'}, 'rosrun map_republisher map_republisher.py robot1'),
+            call({'ipAddress':'192.168.0.122'}, 'rosrun map_republisher map_republisher.py robot2')
+        ])
+
+    @patch('services.ros_utilities.terminate_mission')
+    def test_terminate_mission(self, mock_terminate):
+        self.robot_controls.terminate_mission('robot')
+        mock_terminate.assert_called_once_with('robot')
 
 if __name__ == '__main__':
     unittest.main()

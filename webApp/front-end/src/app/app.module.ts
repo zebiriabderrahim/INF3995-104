@@ -1,4 +1,5 @@
 import { NgModule } from '@angular/core';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { BrowserModule } from '@angular/platform-browser';
 import { MatIconModule } from '@angular/material/icon'
 import { MatDialogModule } from '@angular/material/dialog';
@@ -18,6 +19,13 @@ import { FormsModule } from '@angular/forms';
 import { LogBoxComponent } from './components/log-box/log-box.component';
 import { MapComponentComponent } from './components/map-component/map-component/map-component.component';
 import { MissionHistoryDialog } from './components/mission-history-dialog/mission-history-dialog.component';
+import { InitialLocationComponent } from './components/initial-location/initial-location.component';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { ThreeDimensionalMapComponent } from './components/three-dimensional-map/three-dimensional-map.component';
+import { RobotEditorComponent } from './pages/robot-editor/robot-editor.component';
+import { ErrorDialogComponent } from './components/error-dialog/error-dialog.component';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -29,6 +37,10 @@ import { MissionHistoryDialog } from './components/mission-history-dialog/missio
     RobotComponent,
     LogBoxComponent,
     MapComponentComponent,
+    InitialLocationComponent,
+    ThreeDimensionalMapComponent,
+    RobotEditorComponent,
+    ErrorDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -42,7 +54,11 @@ import { MissionHistoryDialog } from './components/mission-history-dialog/missio
     MatDialogModule,
     MatCheckboxModule,
     FormsModule,
-    MatSlideToggleModule
+    MatSlideToggleModule,
+    MatFormFieldModule,
+    MatInputModule,
+    ReactiveFormsModule,
+    MatButtonModule
   ],
   providers: [],
   bootstrap: [AppComponent]

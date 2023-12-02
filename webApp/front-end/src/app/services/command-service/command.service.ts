@@ -7,9 +7,9 @@ import { Robot } from 'src/app/interfaces/models';
   providedIn: 'root'
 })
 export class CommandService {
- 
+
   constructor(private communicationService: CommunicationService, public socketService: SocketService) { }
-  
+
   getRobots(){
     return this.communicationService.getRobots();
   }
@@ -18,24 +18,28 @@ export class CommandService {
     return this.communicationService.getMissions();
   }
 
-  identifyRobot(robot: Robot){ 
+  getMissionMap(missionName: string){
+    return this.communicationService.getMissionMap(missionName);
+  }
+
+  identifyRobot(robot: Robot){
     this.communicationService.identifyRobot(robot).subscribe();
   }
 
-  launchMission(robot: Robot){ 
-    this.communicationService.launchMission(robot).subscribe();
-  }
+  // launchMission(robot: Robot){
+  //   this.communicationService.launchMission(robot).subscribe();
+  // }
 
-
-  createMissionRoom(robot: Robot) { 
-    this.launchMission(robot);
+  createMissionRoom(robot: Robot) {
+    // this.launchMission(robot);
     this.socketService.createMissionRoom(robot);
   }
 
-  viewMissionRoom(robot: Robot) {
-    this.socketService.viewMissionRoom(robot);
+  viewMissionRoom(robot: Robot, isSimulation: boolean) {
+    this.socketService.viewMissionRoom(robot,isSimulation);
   }
 
+ 
   simulateMission() {
     this.socketService.simulateMission();
   }
@@ -51,4 +55,21 @@ export class CommandService {
   getRosConnection(robot: Robot) {
     return this.communicationService.getRosConnection(robot);
   }
+
+  launchAllRobots(robots: Robot[]) {
+    this.socketService.launchAllRobots(robots);
+  }
+
+  viewMission() {
+    this.socketService.viewMissionRoomAllRobots();
+  }
+
+  getRobotFiles(password: string) {
+    return this.communicationService.getRobotFiles(password);
+  }
+
+  saveRobotFiles(password: string, files: any) {
+    return this.communicationService.saveRobotFiles(password, files);
+  }
+
 }

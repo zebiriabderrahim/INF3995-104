@@ -36,7 +36,7 @@ describe('CommunicationServiceService', () => {
   httpMock.verify();
   });
 
-  
+
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
@@ -44,14 +44,14 @@ describe('CommunicationServiceService', () => {
   it('should get the robot when identify button is clicked', () => {
     service.identifyRobot(robots[0]).subscribe({
       next: (response: string) => {
-          expect(response).toEqual(robots[0].ipAddress);
+          expect(response).toEqual(robots[0].name);
       },
       error: fail,
     });
 
-    const request = httpMock.expectOne(`${baseUrl}/identify?ip=${robots[0].ipAddress}`);
+    const request = httpMock.expectOne(`${baseUrl}/identify?robot=${JSON.stringify(robots[0])}`);
     expect(request.request.method).toBe('GET');
-    request.flush(robots[0].ipAddress);
+    request.flush(robots[0].name);
 
   });
 
@@ -80,6 +80,20 @@ describe('CommunicationServiceService', () => {
     const request = httpMock.expectOne(`${baseUrl}/missions`);
     expect(request.request.method).toBe('GET');
     request.flush(missions);
+
+  });
+
+  it('should get a mission map', () => {
+    service.getMissionMap(missions[0]).subscribe({
+      next: (response: string) => {
+          expect(response).toEqual('map');
+      },
+      error: fail,
+    });
+
+    const request = httpMock.expectOne(`${baseUrl}/missionMap?missionName=${missions[0]}`);
+    expect(request.request.method).toBe('GET');
+    request.flush('map');
 
   });
 
@@ -116,22 +130,22 @@ describe('CommunicationServiceService', () => {
     const result = 'success';
     const error = new Error('An error occurred');
     const errorHandler = service.handleError('testRequest', result);
-  
+
     errorHandler(error).subscribe((value) => {
       expect(value).toBe(result);
     });
   });
-  
+
   it('should return an observable with undefined if no result is provided', () => {
     const error = new Error('An error occurred');
     const errorHandler = service.handleError('testRequest');
-  
+
     errorHandler(error).subscribe((value) => {
       expect(value).toBeUndefined();
     });
   });
 
-  it('should get the ros connection', () => { 
+  it('should get the ros connection', () => {
     service.getRosConnection(robots[0]).subscribe({
       next: (response: string) => {
           expect(response).toEqual(robots[0].ipAddress);
@@ -145,19 +159,63 @@ describe('CommunicationServiceService', () => {
 
   });
 
-  it('should launch a mission', () => { 
+  it('should launch a mission', () => {
     service.launchMission(robots[0]).subscribe({
-      next: (response: string) => {
-          expect(response).toEqual('Mission launched');
+      next: (response: any) => {
+          expect(response).toEqual(robots[0]);
       },
       error: fail,
     });
 
-    const request = httpMock.expectOne(`${baseUrl}/launch?ip=${robots[0].ipAddress}`);
+    const request = httpMock.expectOne(`${baseUrl}/launch?robot=${JSON.stringify(robots[0])}`);
     expect(request.request.method).toBe('GET');
-    request.flush('Mission launched');
+    request.flush(robots[0]);
 
   });
-  
+
+  it('should save a mission', () => {
+    service.saveMission(missions[0]).subscribe({
+      next: (response: string) => {
+          expect(response).toEqual('Mission saved');
+      },
+      error: fail,
+    });
+
+    const request = httpMock.expectOne(`${baseUrl}/saveMission`);
+    expect(request.request.method).toBe('POST');
+    request.flush('Mission saved');
+
+  });
+
+  it('should get robot files', () => {
+    const password = "nbiro";
+    service.getRobotFiles(password).subscribe({
+      next: (response: any) => {
+          expect(response).toEqual("got password");
+      },
+      error: fail,
+    });
+
+    const request = httpMock.expectOne(`${baseUrl}/robotFiles?password=${password}`);
+    expect(request.request.method).toBe('GET');
+    request.flush("got password");
+
+  });
+
+  it('should save files', () => {
+    const password = "nbiro";
+    const files = "files";
+    service.saveRobotFiles(password,files).subscribe({
+      next: (response: string) => {
+          expect(response).toEqual('files saved');
+      },
+      error: fail,
+    });
+
+    const request = httpMock.expectOne(`${baseUrl}/saveRobotFiles?password=${password}`);
+    expect(request.request.method).toBe('POST');
+    request.flush('files saved');
+
+  });
 
 });
