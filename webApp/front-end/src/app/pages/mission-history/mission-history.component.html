@@ -7,30 +7,29 @@
 
     <div class="mission-history-container">
         <h2>Mission History</h2>
-            
+        <button mat-raised-button class="show-logs-btn home-button" [routerLink]="['/home']">
+          <mat-icon>home</mat-icon>
+            Home
+        </button>
         <ng-container class="mission-list" *ngIf="missions ; else noMissions">
-            <button mat-raised-button class="show-logs-btn home-button" [routerLink]="['/home']">
-                <mat-icon>home</mat-icon>
-                Home
-            </button>
+
             <li *ngFor="let mission of missions" class="mission-card">
                 <div class="mission-info">
                   <p class="mission-name">Mission Name: {{ mission.name }}</p>
-                  <p class="mission-date">Date: {{ mission.date | date }}</p>
+                  <p class="mission-data"><b>Date:</b> {{ mission.date | date }}<br><b>Durée:</b> {{ mission.duration }}<br><b>Robots utilisés:</b> {{ mission.robots == "physicalRobot" ? "Les deux robots physiques" : mission.robots}}</p>
                 </div>
 
-                <button mat-raised-button class="show-logs-btn" (click)="openMissionOverview()">
+                <button mat-raised-button class="show-logs-btn" (click)="openMissionOverview(mission)">
                     <mat-icon>visibility</mat-icon>
-                    View
+                    Regarder mission
                 </button>
                 <button mat-raised-button class="show-logs-btn" (click)="openLogsOverview(mission)">
                     <mat-icon>list</mat-icon>
                     Logs
                 </button>
-
             </li>
         </ng-container>
-    
+
         <div>
             <ng-template #noMissions>
                 <p class="no-missions-message mission-card">No missions available yet.</p>
@@ -48,4 +47,3 @@
     </footer>
 </body>
 
-  

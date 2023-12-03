@@ -14,24 +14,91 @@ find_package(catkin REQUIRED COMPONENTS
   tf2_ros
   gazebo_dev
   gazebo_msgs
+  actionlib
+  sensor_msgs
+  gazebo_dev
+  message_generation
+  nodelet
+  std_srvs
+  rosconsole
 )
+find_package(Boost REQUIRED COMPONENTS thread)
+
+include_directories(include
+    ${catkin_INCLUDE_DIRS}
+    ${Boost_INCLUDE_DIRS}
+  )
+link_directories(
+  ${catkin_LIBRARY_DIRS}
+)
+
+add_action_files(
+  FILES
+  StopResumeExploration.action
+  LaunchRobot.action
+  DistanceQuery.action
+)
+
+add_service_files(
+    FILES
+    Reset.srv
+    SetCharge.srv
+    SetTemperature.srv
+)
+
+generate_messages(
+  DEPENDENCIES
+  actionlib_msgs
+  std_msgs
+)
+
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES  gazebo_ros_ackerman
-  CATKIN_DEPENDS roscpp sensor_msgs
+  LIBRARIES  gazebo_ros_ackerman 
+  CATKIN_DEPENDS 
+    roscpp 
+    sensor_msgs 
+    actionlib 
+    gazebo_ros 
+    message_runtime 
+    gazebo_msgs 
+    nodelet 
+    std_srvs 
+    rosconsole 
+    std_msgs
 )
+
+
+
 
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
 )
 
-add_library(gazebo_ros_ackerman src/gazebo_ros_ackerman_drive.cpp)
-target_link_libraries(gazebo_ros_ackerman ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+add_executable(distance_calculator src/distance_calculator.cpp)
+add_dependencies(distance_calculator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(distance_calculator ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
-install(TARGETS gazebo_ros_ackerman
-ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
+add_executable(battery_simulator src/battery_simulator.cpp)
+add_dependencies(battery_simulator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(battery_simulator ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
+add_executable(simulation_manager_server src/simulation_manager_server.cpp)
+add_dependencies(simulation_manager_server ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(simulation_manager_server ${catkin_LIBRARIES})
+
+
+
+
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  FILES_MATCHING PATTERN "*.h"
+  PATTERN ".svn" EXCLUDE
+)
+
+
+install(DIRECTORY xacro
+    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 

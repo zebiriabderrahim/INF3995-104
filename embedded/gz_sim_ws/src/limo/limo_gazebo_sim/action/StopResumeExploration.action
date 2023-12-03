@@ -1,0 +1,9 @@
+# Goal definition
+string robot_namespace
+bool stop  # True to stop, False to resume
+---
+# Result definition
+bool success
+string message
+---
+# Feedback definition (if needed, otherwise leave empty)

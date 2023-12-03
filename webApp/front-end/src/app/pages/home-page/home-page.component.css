@@ -5,45 +5,32 @@
 }
 
 .custom-head {
-    background: linear-gradient(to bottom,  #333, #040b11);
-    padding: 1%;
-    text-align: center;
-    color: #fff;
-    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
-    letter-spacing: 1px;
-    border-radius: 5px;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    margin-top: -1%;
-    margin-left: -1%;
-    margin-right: -1%;
-    font-size: 3rem;
-    min-height: 10vh;
-    max-height: 13vh;
+  background: linear-gradient(to bottom,  #333, #040b11);
+  padding: 15px;
+  text-align: center;
+  color: #fff;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+  letter-spacing: 1px;
+  border-radius: 5px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
 }
 
 .custom-head h2 {
-    color: #fff;
-}
-
-h2 {
-    margin: 0;
-    line-height: 0;
+  color: #fff;
 }
 
 .custom-slide-toggle {
-    font-size: 24px; 
-    font-family: 'Roboto', sans-serif; 
-  }
+    margin-top: 30px;
+    font-size: 24px;
+    font-family: 'Roboto', sans-serif;
+}
 
 ::ng-deep .mat-slide-toggle.mat-checked:not(.mat-disabled) .mat-slide-toggle-thumb {
     background-color: green !important;
 }
 
-::ng-deep .mat-slide-toggle:not(.mat-checked):not(.mat-disabled) .mat-slide-toggle-thumb {
-    background-color: #8b1218 !important;
-}
 
 .container {
     display: flex;

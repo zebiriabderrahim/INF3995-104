@@ -17,8 +17,21 @@ class MissionRoomTest(unittest.TestCase):
             "batteryLevel": 100
         }
 
+        self.robot_data_physical = [{
+            "name": "Robot",
+            "ipAddress": "0.0.0.0",
+            "batteryLevel": 100
+        }, {
+            "name": "Robot",
+            "ipAddress": "0.0.0.0",
+            "batteryLevel": 100
+        }]
+
         self.mission_room = mission_room.MissionRoom('host', self.robot_data)
         self.robot = mission_room.Robot("Robot2", '0.0.0.1', '', 70)
+        self.physical_mission_room = mission_room.MissionRoom('host', self.robot_data_physical, None, 'physical')
+        self.simulation_mission_room = mission_room.MissionRoom('host', self.robot_data, None, 'simulation')
+        self.one_simulated_robot_mission = mission_room.MissionRoom('host', None)
 
     def test_add_guest(self):
         self.mission_room.add_guest('guest')
@@ -32,6 +45,30 @@ class MissionRoomTest(unittest.TestCase):
             'hostId': 'host',
             'robot': 'robot_info',
             'guestId': []
+        }, 'Mission room info is incorrect')
+
+    
+    @patch('classes.mission_room.Robot.to_dict')
+    def test_mission_to_dict_v2(self, mock_robot_to_dict):
+        mock_robot_to_dict.return_value = 'robot_info'
+        mission_dict = self.physical_mission_room.to_dict()
+        self.assertEqual(mission_dict, {
+            'hostId': 'host',
+            'robot': 'robot_info',
+            'guestId': [],
+            'otherRobots': ['robot_info']
+        }, 'Mission room info is incorrect')
+
+    @patch('classes.mission_room.Robot.to_dict')
+    def test_mission_to_dict_v3(self, mock_robot_to_dict):
+        mock_robot_to_dict.return_value = 'robot_info'
+        self.mission_room.robot_info = [self.robot]
+        mission_dict = self.mission_room.to_dict()
+        self.assertEqual(mission_dict, {
+            'hostId': 'host',
+            'robot': 'robot_info',
+            'guestId': [],
+            'otherRobots': []
         }, 'Mission room info is incorrect')
 
     def test_change_robot_state(self):

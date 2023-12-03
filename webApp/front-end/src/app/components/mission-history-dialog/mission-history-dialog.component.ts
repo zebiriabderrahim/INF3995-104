@@ -12,14 +12,27 @@ import { BrowserModule } from '@angular/platform-browser'
 })
 export class MissionHistoryDialog {
   logs: Log[];
+  map: number[];
+  duration!: string;
+  type!: string;
+  robots!: string;
+  distance!: string;
   logShown: boolean = false;
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: { missionid: number, logs: Log[] }) {
+  constructor(@Inject(MAT_DIALOG_DATA) public data: { missionid: number, logs: Log[], map: number[], duration: string, type: string, robots: string, distance: string}) {
     if (data.logs){
       this.logShown = true;
       this.logs = data.logs;
+      this.map = [];
     }
-    else this.logs = [];
+    else {
+      this.logs = [];
+      this.logShown = false;
+      this.map = data.map;
+      this.duration = data.duration;
+      this.type = data.type;
+      this.robots = data.robots;
+      this.distance = data.distance;
+    }
   }
-  
 }

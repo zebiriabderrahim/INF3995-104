@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<launch> 
+
+    <arg name="world_name" default="$(find limo_gazebo_sim)/worlds/simulation2.world"/>
+    <arg name="move_forward_only" default="false"/>
+
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(arg world_name)"/>
+        <arg name="paused" value="false"/>
+        <arg name="use_sim_time" value="true"/>
+        <arg name="gui" value="false"/>
+        <arg name="headless" value="false"/>
+        <arg name="debug" value="false"/>
+    </include>
+</launch>

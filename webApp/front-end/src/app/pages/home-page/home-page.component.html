@@ -6,12 +6,16 @@
 
     <div class="container">
       <div class="left-half">
-            <div class="btn-container"> 
+            <div class="btn-container">
               <mat-slide-toggle [(ngModel)]="simulationStatus" class="custom-slide-toggle">Simulation</mat-slide-toggle>
 
               <app-robot *ngFor="let robot of robots" [robot]="robot" [simulation]="simulationStatus" class="text-with-buttons"></app-robot>
-              <button mat-raised-button class="btn" (click)="handleSimulation()" *ngIf="simulationStatus && simulationRooms.length === 0">Lancer les robots</button>
+              <button mat-raised-button class="btn" *ngIf="!simulationStatus && !bothRobotsUsed(availableRooms)" (click)="handleRobots()" [disabled]="!areRobotsOn">Lancer tous les robots</button>
+              <button mat-raised-button class="btn" *ngIf="!simulationStatus  && bothRobotsUsed(availableRooms)" (click)="viewMission()">Voir la mission en cours</button>
+              <button mat-raised-button class="btn" (click)="handleSimulation()" *ngIf="simulationStatus && simulationRooms.length === 0" [disabled]="!enableSimulation" >Lancer les robots</button>
               <button mat-raised-button class="btn" routerLink="/mission-history">Historique des missions</button>
+              <button mat-raised-button class="btn" routerLink="/robot-editor" [disabled]="!areRobotsOn">Mettre a jour les robots</button>
+
             </div>
       </div>
 

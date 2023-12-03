@@ -2,8 +2,8 @@
   <div class="robot-status">
     <div class="robot-info">
       <span>{{ robot.name }}</span> <br>
-      <span class="state" *ngIf="!isAvailableRoom(undefined) && !simulation">{{ robot.state }}</span>
-      <span class="state" *ngIf="isAvailableRoom(undefined) && !simulation">en mission</span>
+      <span class="state" *ngIf="!isAvailableRoom(undefined) && !simulation && !bothRobotsUsed(availableRooms)">{{ robot.state }}</span>
+      <span class="state" *ngIf="(isAvailableRoom(undefined) && !simulation) || bothRobotsUsed(availableRooms)">en mission</span>
     </div>
     <span *ngIf="!simulation">
       <title>Battery Status</title>
@@ -20,25 +20,50 @@
         </div>
       </span>
 
-    <div class="button-section">
-      <span *ngIf="isAvailableRoom('sim') && simulation && isInSimRoom(robot.name)">Robot en mission</span>
+      <span *ngIf="simulation">
+        <title>Battery Status</title>
+          <div>
+              <div class="battery-status">
+                <div class="battery-level" 
+                [class.grey-out]="robotSimulationBatteryLevel===0"
+                [class.low-battery]="robotSimulationBatteryLevel < 40"
+                [class.critical-battery]="robotSimulationBatteryLevel < 20">
+                  <div class="battery-fill"></div>
+                  <span class="battery-percentage">{{ robotSimulationBatteryLevel}}%</span>
+                </div>
+              </div>
+          </div>
+        </span>
 
-      <button class="icon-button" (click)="launchMission(robot)" *ngIf="!isAvailableRoom(undefined) && !simulation" [disabled]="robot.state === 'Off'">
+    <div class="button-section">
+      <!-- <span *ngIf="(isAvailableRoom('sim') && simulation && isInSimRoom(robot.name) && !isAllRobotsLaunched(simulationRooms)) || ((isAllRobotsLaunched(simulationRooms) && simulation))" >Robot en mission</span> -->
+
+      <button class="icon-button" (click)="launchMission(robot)" *ngIf="!isAvailableRoom(undefined) && !simulation && !bothRobotsUsed(availableRooms)" [disabled]="robot.state === 'Off'">
         <mat-icon class="play-button" [class.grey-out]="robot.state === 'Off'">play_arrow</mat-icon>
         <span>Lancer mission</span>
       </button>
-
-      <button class="icon-button" (click)="handleSimulationRobot(robot)" *ngIf="!isAvailableRoom('sim') && simulation">
-        <mat-icon class="play-button">play_arrow</mat-icon>
+      
+      <button class="icon-button"  (click)="handleSimulationRobot(robot)" *ngIf="!isAvailableRoom('sim') && simulation && !isAllRobotsLaunched(simulationRooms)" [disabled]="robotSimulationBatteryLevel === 0"> 
+        <mat-icon class="play-button" [class.grey-out]="robotSimulationBatteryLevel === 0">play_arrow</mat-icon>
         <span>Lancer simulation</span>
       </button>
 
-      <button class="icon-button" (click)="viewMission(robot)" *ngIf="isAvailableRoom(undefined) && !simulation">
+      <button class="icon-button" *ngIf="simulation" (click)="setInitialLocation()" [disabled]="robotSimulationBatteryLevel > 0">
+        <mat-icon class="play-button" [class.grey-out]="robotSimulationBatteryLevel > 0">flag</mat-icon>
+        <span>Definir la position initiale</span>
+      </button>
+
+      <button class="icon-button" (click)="viewMission(robot,false)" *ngIf="isAvailableRoom(undefined) && !simulation">
         <mat-icon class="play-button">play_arrow</mat-icon>
         <span>Voir mission</span>
       </button>
 
-      <button class="icon-button" (click)="indentifyRobot(robot)" *ngIf="!simulation" [disabled]="robot.state === 'Off'">
+      <button class="icon-button" (click)="viewMission(robot,true)" *ngIf="isAvailableRoom('sim') && simulation">
+        <mat-icon class="play-button">play_arrow</mat-icon>
+        <span>Voir la simulation</span>
+      </button>
+
+      <button class="icon-button" (click)="identifyRobot(robot)" *ngIf="!simulation" [disabled]="robot.state === 'Off'">
         <mat-icon class="identify-button" [class.grey-out]="robot.state === 'Off'">search</mat-icon>
         <span>Identifier</span>
       </button>

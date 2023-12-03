@@ -1,0 +1,2 @@
+/home/nvidia/INF3995-104/embedded/agilex_ws/src/save_test_file_pkg/src/save_test_file.py
+/home/nvidia/INF3995-104/start_script.sh

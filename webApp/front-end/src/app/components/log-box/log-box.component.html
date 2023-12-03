@@ -1,9 +1,9 @@
 <div class="container">
     <div class="header clearfix">
         <span class="title">Logs</span>
-        <mat-checkbox class="system-check" [(ngModel)]="systemChecked" (click)="filterLogs()" color="warn">sys</mat-checkbox>
-        <mat-checkbox class="command-check" [(ngModel)]="commandChecked" (click)="filterLogs()" color="warn">comm</mat-checkbox>
-        <mat-checkbox class="other-check" [(ngModel)]="otherChecked" (click)="filterLogs()" color="warn">sens</mat-checkbox>
+        <mat-checkbox class="system-check" [(ngModel)]="systemChecked" (click)="delayedFilterLogs()" color="warn">sys</mat-checkbox>
+        <mat-checkbox class="command-check" [(ngModel)]="commandChecked" (click)="delayedFilterLogs()" color="warn">comm</mat-checkbox>
+        <mat-checkbox class="other-check" [(ngModel)]="otherChecked" (click)="delayedFilterLogs()" color="warn">sens</mat-checkbox>
     </div>
     <div class="logbox clearfix" #logboxElement>
           <li [ngClass]="log.type"

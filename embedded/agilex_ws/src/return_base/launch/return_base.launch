@@ -1,0 +1,5 @@
+<launch>
+    <node name="return_base" pkg="retour_base" type="return_base.py" output="screen">
+    </node>
+</launch>
+

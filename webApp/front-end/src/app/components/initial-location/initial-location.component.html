@@ -1,0 +1,32 @@
+<h1>Position Initiale</h1>
+
+<form *ngIf="form" [formGroup]="form">
+  <div class="form-group">
+    <mat-form-field appearance="fill">
+      <input matInput placeholder="X" formControlName="xValue">
+    </mat-form-field>
+    <div *ngIf="form.get('xValue')?.invalid && (form.get('xValue')?.dirty || form.get('xValue')?.touched)">
+      <mat-error *ngIf="form.get('xValue')?.hasError('required')">
+        La valeur de X est requise.
+      </mat-error>
+      <mat-error *ngIf="form.get('xValue')?.hasError('pattern')">
+        Veuillez entrer un nombre valide pour X ente -4 et 0.
+      </mat-error>
+    </div>
+  </div>
+  <div class="form-group">
+    <mat-form-field appearance="fill">
+      <input matInput placeholder="Y" formControlName="yValue">
+    </mat-form-field>
+    <div *ngIf="form.get('yValue')?.invalid && (form.get('yValue')?.dirty || form.get('yValue')?.touched)">
+      <mat-error *ngIf="form.get('yValue')?.hasError('required')">
+        La valeur de Y est requise.
+      </mat-error>
+      <mat-error *ngIf="form.get('yValue')?.hasError('pattern')">
+        Veuillez entrer un nombre valide pour Y entre -2 et 2.
+      </mat-error>
+    </div>
+  </div>
+  <button mat-raised-button (click)="submit()">Soumettre</button>
+  <button mat-raised-button (click)="defaultPosition()">Position par defaut</button>
+</form>

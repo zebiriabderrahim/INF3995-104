@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
 import { ErrorDialogComponent } from 'src/app/components/error-dialog/error-dialog.component';
-import { MissionRoom, Robot } from 'src/app/interfaces/models';
+import { MissionRoom, Robot, RobotBatteryInfo } from 'src/app/interfaces/models';
 import { CommandService } from 'src/app/services/command-service/command.service';
 import { SocketService } from 'src/app/services/socket-service/socket.service';
 
@@ -13,26 +13,45 @@ import { SocketService } from 'src/app/services/socket-service/socket.service';
 })
 export class HomePageComponent implements OnInit {
   title = 'front-end';
-  simulationStatus: boolean = false;
+  simulationStatus: boolean;
   simulationRooms: MissionRoom[];
+  availableRooms: MissionRoom[];
+  robots: Robot[];
   availableSimRoomsSubscription: Subscription | undefined;
-  robots: Robot[] = [];
   rosConnectionErrorSubscription: Subscription | undefined;
+  availableRoomsSubscription: Subscription | undefined;
+  robotSubscription: Subscription | undefined;
+  allSimConnectedSubscription: Subscription | undefined;
+  enableSimulation!: boolean;
+  areRobotsOn: boolean = false;
 
   constructor(
     private commandService: CommandService,
     private dialog: MatDialog,
-    private socketService: SocketService
+    private socketService: SocketService,
   ) {
     this.simulationRooms = [];
+    this.availableRooms = [];
+    this.robots = [];
+    this.simulationStatus = false;
   }
 
+
   ngOnInit(): void {
-    this.socketService.robots.subscribe((robots: Robot[]) => {
-      this.robots = robots;
+    this.socketService.getAvailableRooms()
+    this.allSimConnectedSubscription= this.socketService.allSimConnected.subscribe((allSimConnected: boolean) => {
+        this.enableSimulation = allSimConnected;
     });
 
-    this.rosConnectionErrorSubscription=this.socketService.rosConnectionError.subscribe(rosConnectionError => {
+    this.robotSubscription= this.socketService.robots.subscribe((robots: Robot[]) => {
+      this.robots = robots;
+      if (robots[0].state === 'On' && robots[1].state === 'On') {
+        this.areRobotsOn = true;
+      }
+    });
+
+
+    this.rosConnectionErrorSubscription = this.socketService.rosConnectionError.subscribe(rosConnectionError => {
       if (rosConnectionError) {
         this.openErrorDialog({
           title: 'Error',
@@ -48,10 +67,30 @@ export class HomePageComponent implements OnInit {
     this.availableSimRoomsSubscription = this.socketService.getAvailableSimulatedRoomsInfo().subscribe((rooms: MissionRoom[]) => {
       this.simulationRooms = rooms;
     });
+
+    this.availableRoomsSubscription = this.socketService.getAvailableMissionRoomsInfo().subscribe((rooms: MissionRoom[]) => {
+      this.availableRooms = rooms;
+    });
+
   }
 
   handleSimulation() {
     this.commandService.simulateMission();
+  }
+
+  handleRobots() {
+    this.commandService.launchAllRobots(this.robots);
+  }
+
+  viewMission() {
+    this.commandService.viewMission();
+  }
+
+  bothRobotsUsed(rooms:MissionRoom[]) {
+    return (
+      rooms.some(room => room.otherRobots && room.otherRobots?.length > 0) ||
+      false
+    );
   }
 
   openErrorDialog(data: any) {
@@ -63,14 +102,10 @@ export class HomePageComponent implements OnInit {
 
   ngOnDestroy(): void {
     this.rosConnectionErrorSubscription?.unsubscribe();
-    // if (this.availableSimRoomsSubscription) {
-    //   this.availableSimRoomsSubscription.unsubscribe();
-    // }
-    // if (this.socketService.rosConnectionError) {
-    //   this.socketService.rosConnectionError.unsubscribe();
-    // }
-    // if (this.socketService.robots) {
-    //   this.socketService.robots.unsubscribe();
-    // }
+    this.availableSimRoomsSubscription?.unsubscribe();
+    this.availableRoomsSubscription?.unsubscribe();
+    this.robotSubscription?.unsubscribe();
+    this.allSimConnectedSubscription?.unsubscribe();
+    
   }
 }

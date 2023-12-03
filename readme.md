@@ -21,6 +21,17 @@ L'interface utilisateur affiche quatre options principales :
 - Lancer une simulation
 À chaque fois qu'un opérateur sélectionne une option, la demande est redirigée vers le serveur, soit sous la forme d'une requête HTTP, soit par le biais d'une communication par socket. Le serveur prend ensuite en charge la demande de manière appropriée. Selon que la simulation a été choisie dans l'interface utilisateur, le serveur redirige les demandes vers les robots physiques ou vers la simulation dans Gazebo.
 
+# Docker : Tout lancer en une commande
+
+Exécutez `docker compose up` à l'intérieur de ce répertoire. Cela créera le serveur frontend sur le port 80 disponible sur le réseaux, le serveur backend sur le port 8000 en localhost, et la simulation gazebo.
+
+Pour avoir accès a l'application depuis d'autres appareils sur le réseaux, veuillez a modifier le fichier `/front-end/src/environments/environment.prod.ts` et mettre l'adresse IP local de la station au sol.
+
+
+## BACKEND : ajout de nouveaux packages
+Si vous ajoutez de nouveaux packages au serveur Flask, n'oubliez pas d'ajouter le package dans le fichier `/back-end/requirements.txt`.
+
+
 # Guide d'utilisation de la Simulation Limo Gazebo pour le PDR
 Le code de la simulation se trouve dans le dossier "embedded".
 Ce guide vous explique comment utiliser la simulation Limo Gazebo dans votre espace de travail Catkin (`gz_sim_ws`). Suivez ces étapes pour lancer la simulation.

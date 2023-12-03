@@ -1,10 +1,26 @@
 <?xml version="1.0"?>
 <launch>
-    <!-- Include your existing launch file -->
-    <include file="$(find limo_gazebo_sim)/launch/sim.launch" />
+    <arg name="open_rviz" default="false"/>
+    <arg name="rtabmap_viz" default="false" />
+    
+    <include file="$(find limo_gazebo_sim)/launch/simulation_env.launch" />
 
-    <!-- Include rosbridge_server -->
-    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
-        <!-- Add any arguments or parameters if needed -->
-    </include>
+    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
+
+    <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find limo_description)/rviz/rosbot.rviz" required="true" output="screen"/> -->
+
+    <node pkg="multirobot_map_merge" type="map_merge" respawn="false" name="map_merge" output="screen">
+       <rosparam file="$(find limo_gazebo_sim)/param/map_merge_params.yaml" command="load"/>
+    </node>
+
+    <node name="simulation_manager_server" pkg="limo_gazebo_sim" type="simulation_manager_server" respawn="false" output="screen"/>
+
+  <!-- Construct and voxelize the point cloud (for fast visualization in rviz) -->
+     <node pkg="nodelet" type="nodelet" name="points_xyzrgb" args="standalone rtabmap_util/point_cloud_xyzrgb">
+      <remap from="rgbd_image"      to="/robot1/rgbd_image/compressed"/>
+      <remap from="cloud"           to="voxel_cloud" />
+
+      <param name="queue_size" type="int" value="10"/>
+      <param name="voxel_size" type="double" value="0.01"/>
+  </node>
 </launch>

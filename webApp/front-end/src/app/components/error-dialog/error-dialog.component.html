@@ -1,6 +1,8 @@
 <div class="custom-error-dialog">
     <h2>{{ data.title }}</h2>
     <p>{{ data.message }}</p>
-    <button mat-raised-button color="primary" (click)="onCloseClick()">{{ data.close }}</button>
+    <input #passwordInput *ngIf="data.auth" matInput placeholder="password" [(ngModel)]="password"
+       (keyup.enter)="onCloseClick()">
+    <button mat-raised-button color="primary" (click)="onCloseClick()" [disabled]="data.auth && !isValidPassword()">{{ data.close }}</button>
+    <button mat-raised-button color="primary" (click)="onSaveClick()" *ngIf="data.save">{{ data.save }}</button>
 </div>
-  

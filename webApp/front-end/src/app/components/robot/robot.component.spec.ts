@@ -1,14 +1,12 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { RobotComponent } from './robot.component';
-import { MissionRoom, Robot } from 'src/app/interfaces/models';
+import { MissionRoom, Robot, RobotBatteryInfo } from 'src/app/interfaces/models';
 import { CommandService } from 'src/app/services/command-service/command.service';
 import { SocketService } from 'src/app/services/socket-service/socket.service';
-import { BehaviorSubject, Subject, of } from 'rxjs';
-import { NgModule } from '@angular/core';
-import { MatDialogModule } from '@angular/material/dialog';
-import { Socket } from 'socket.io-client';
-import { By } from '@angular/platform-browser';
+import { BehaviorSubject, Observable, Subject, of } from 'rxjs';
+import { NgModule, SimpleChange } from '@angular/core';
+import { MatDialog,MatDialogModule } from '@angular/material/dialog';
+
 
 @NgModule({
   imports: [MatDialogModule],
@@ -19,6 +17,8 @@ describe('RobotComponent', () => {
   let fixture: ComponentFixture<RobotComponent>;
   let socketService: SocketService;
   let commandService: CommandService;
+  let dialog: MatDialog;
+
 
   const mockCommandService = {
     getRobots: () => of([]),
@@ -32,86 +32,69 @@ describe('RobotComponent', () => {
   };
 
   const mockSocketService = {
-    createMissionRoom: (robot: Robot) => {},
-    viewMissionRoom: (robot: Robot) => {},
-    getAvailableRooms: jasmine.createSpy('getAvailableRooms').and.returnValue(new BehaviorSubject([])),
-    getAvailableMissionRoomsInfo: () => of([getTestMission()]),
-    getAvailableSimulatedRoomsInfo: () => of([getTestMission()]),
-    getBatteryLevel: (ipAddress: string) => {},
-    isRoomCreated: new Subject<boolean>(),
+    stopMission: () => {},
+    asObservable: () => {},
+    returnToBaseSimulation:(robot:Robot) => {},
+    returnToBase:(robot:Robot)=> {},
+    terminateSimulationRobot: () => {},
+    terminateAllPhysicalRobots: (robot:Robot) => {},
+    isConnected: (bool:boolean) => {return bool;}, 
+    getAvailableRooms:()=> {},
+    getLogs:(room:MissionRoom,bool:boolean )=>{},
+    setInitialPosition: (robotName: string, location: string) => of({}),
+    
+    getBatteryLevel:(robot:Robot)=>{},
+    getBatteryLevelSim:(robot:Robot)=>{},
+    getAvailableMissionRoomsInfo : () => {
+      return mockSocketService.availableRooms.asObservable();
+    },
+    
+    allPhysicalRobots: new BehaviorSubject<boolean>(false),
+    availableRooms: new BehaviorSubject<MissionRoom[]>([]),
+    roomInfo: new Subject<MissionRoom[]>(),
+    simulation: new BehaviorSubject<boolean>(false),
+    batteryLevelSimulation: new Subject<RobotBatteryInfo>(),
+    robots: new Subject<Robot[]>(),
     isRoomDeleted: new Subject<boolean>(),
     isHostLeavingRoom: new Subject<boolean>(),
-    roomInfo: new Subject<MissionRoom>(),
-    availableRooms: new Subject<MissionRoom[]>(),
-    stopBatteryCall: new BehaviorSubject<Boolean>(false),
-  };
-
+    stopBatteryCallSimulation: new Subject<boolean>(),
+    isRoomCreated: new Subject<boolean>(),
+    stopBatteryCall: new Subject<boolean>(),
+    simulationRooms: new Subject<MissionRoom[]>(),
+    getAvailableSimulatedRoomsInfo: () => {
+      return mockSocketService.simulationRooms.asObservable();
+    },
+    getMissionRoomInfo: ()=> {
+      return mockSocketService.roomInfo.asObservable();
+    }
+   
+   };
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [ RobotComponent ],
       providers: [
         { provide: CommandService, useValue: mockCommandService },
         { provide: SocketService, useValue: mockSocketService },
+        MatDialog,
     ],
+    imports: [
+      MatDialogModule,
+    ]
     })
     .compileComponents();
 
     fixture = TestBed.createComponent(RobotComponent);
+    component = fixture.componentInstance;
     socketService = TestBed.inject(SocketService);
     commandService = TestBed.inject(CommandService);
-    component = fixture.componentInstance;
+    dialog = TestBed.inject(MatDialog);
     component.robot = getTestRobot();
-    component.simulation = false;
-    fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('ngOnInit should have subscribed to the necessary variables of socketService', () => {
-    spyOn(socketService, 'getBatteryLevel').and.returnValue();
-    component.ngOnInit();
-    socketService.availableRooms.next([getTestMission()]);
-    expect(component.availableRooms).toEqual([getTestMission()]);
-    socketService.isRoomDeleted.next(true);
-    expect(socketService.getAvailableRooms).toHaveBeenCalled();
-    socketService.isRoomCreated.next(true);
-    expect(socketService.getAvailableRooms).toHaveBeenCalled();
-    socketService.stopBatteryCall.next(false);
-    expect(socketService.getBatteryLevel).toHaveBeenCalled();
-    component.ngOnChanges({}); // to cover the ngOnChanges function
-  });
-
-  // it('should have the button Lancer Mission if no room is available and isAvailableRoom should return false', () => {
-  //   component.availableRooms = [];
-  //   fixture.detectChanges();
-  //   const buttons = fixture.debugElement.queryAll(By.css('button'));
-  //   const launchMissionButton = buttons.find((button) =>
-  //     button.nativeElement.textContent.includes('Lancer mission')
-  //   );
-  //   const viewMissionButton = buttons.find((button) =>
-  //     button.nativeElement.textContent.includes('Voir mission')
-  //   );
-  //   expect(component.isAvailableRoom()).toBeFalsy();
-  //   expect(launchMissionButton!.nativeElement.disabled).toBe(false);
-  //   expect(viewMissionButton).toBeUndefined();
-  // });
-
-  // it('should have the button Voir Mission if a room is available and isAvailableRoom should return true', () => {
-  //   component.availableRooms = [getTestMission()];
-  //   fixture.detectChanges();
-  //   const buttons = fixture.debugElement.queryAll(By.css('button'));
-  //   const launchMissionButton = buttons.find((button) =>
-  //     button.nativeElement.textContent.includes('Lancer mission')
-  //   );
-  //   const viewMissionButton = buttons.find((button) =>
-  //     button.nativeElement.textContent.includes('Voir mission')
-  //   );
-  //   expect(component.isAvailableRoom()).toBeTruthy();
-  //   expect(viewMissionButton!.nativeElement.disabled).toBe(false);
-  //   expect(launchMissionButton).toBeUndefined();
-  // });
 
   it('launchMission should call createMissionClick', () => {
     const createMissionSpy = spyOn(commandService, 'createMissionRoom').and.returnValue();
@@ -121,7 +104,7 @@ describe('RobotComponent', () => {
 
   it('indentifyRobot should call identifyRobot', () => {
     const identifyRobotSpy = spyOn(commandService, 'identifyRobot').and.returnValue();
-    component.indentifyRobot(getTestRobot());
+    component.identifyRobot(getTestRobot());
     expect(identifyRobotSpy).toHaveBeenCalled();
   });
 
@@ -167,6 +150,143 @@ describe('RobotComponent', () => {
   it('isInSimRoom should return true if the robot is in a simulation room', () => {
     component.simulationRooms = [getTestMission()];
     expect(component.isInSimRoom('test')).toBeTruthy();
+  });
+  
+  it('ngOnInit should initialize subscriptions', () => {
+    spyOn(socketService, 'getBatteryLevel');
+    spyOn(socketService, 'getBatteryLevelSim');
+    socketService.batteryLevelSimulation.next({ robotId: component.robot.ipAddress, batteryLevel: 80 });
+    socketService.isRoomDeleted.next(false);
+    socketService.isRoomCreated.next(true);
+    socketService.stopBatteryCall.next(true);
+    socketService.stopBatteryCallSimulation.next(true);
+    component.ngOnInit();
+    expect(component.batterySubscription).toBeDefined();
+    expect(component.stopBatterySimulationSubscription).toBeDefined();
+    expect(component.availableRoomsSubscription).toBeDefined();
+    expect(component.availableSimRoomsSubscription).toBeDefined();
+    expect(component.roomDeletedSubscription).toBeDefined();
+    expect(component.roomCreatedSubscription).toBeDefined();
+  });
+
+  it('should call getBatteryLevel when stopBatteryCall emits false', () => {
+    spyOn(socketService, 'getBatteryLevel').and.stub();
+
+    component.ngOnInit();
+    socketService.stopBatteryCall.next(false);
+
+    expect(socketService.getBatteryLevel).toHaveBeenCalledWith(component.robot);
+  });
+
+  it('should call getBatteryLevelSim when stopBatteryCallSimulation emits false', () => {
+    spyOn(socketService, 'getBatteryLevelSim').and.stub();
+
+    component.ngOnInit();
+    socketService.stopBatteryCallSimulation.next(false);
+
+    expect(socketService.getBatteryLevelSim).toHaveBeenCalledWith(component.robot);
+  });
+
+  it('should update simulationRooms when getAvailableSimulatedRoomsInfo emits', () => {
+    const mockRooms: MissionRoom[] = [getTestMission()];
+    spyOn(socketService, 'getAvailableSimulatedRoomsInfo').and.returnValue(of(mockRooms));
+    
+    component.ngOnInit();
+    
+    expect(component.simulationRooms).toEqual(mockRooms);
+  });
+  
+  it('should call getAvailableRooms and set isRoomDeleted to false when isRoomDeleted emits true', fakeAsync(() => {
+    spyOn(socketService, 'getAvailableRooms').and.stub();
+    const isRoomDeletedSpy = spyOn(socketService.isRoomDeleted, 'next').and.callThrough();
+  
+    component.ngOnInit();
+    socketService.isRoomDeleted.next(true);
+    tick();
+  
+    expect(socketService.getAvailableRooms).toHaveBeenCalled();
+    expect(isRoomDeletedSpy).toHaveBeenCalledTimes(2);
+    expect(isRoomDeletedSpy).toHaveBeenCalledWith(false);
+  }));
+
+  it('should call getAvailableRooms and set isRoomCreated to false when isRoomCreated emits true', fakeAsync(() => {
+    spyOn(socketService, 'getAvailableRooms').and.stub();
+    const isRoomCreatedSpy = spyOn(socketService.isRoomCreated, 'next').and.callThrough();
+  
+    component.ngOnInit();
+    socketService.isRoomCreated.next(true);
+    tick();
+  
+    expect(socketService.getAvailableRooms).toHaveBeenCalled();
+    expect(isRoomCreatedSpy).toHaveBeenCalledTimes(2);
+    expect(isRoomCreatedSpy).toHaveBeenCalledWith(false);
+  }));
+  
+  
+  
+  
+  
+
+
+  it('should return true if any room has other robots', () => {
+    const roomsWithOtherRobots: MissionRoom[] = [
+      {  hostId: "0.0.0.0",
+        robot: getTestRobot(),
+        guestId: [],
+        otherRobots: [getTestRobot()] },
+    ];
+    expect(component.bothRobotsUsed(roomsWithOtherRobots)).toBeTruthy();
+  });
+
+  it('should return false if no room has other robots', () => {
+    const roomsWithoutOtherRobots: MissionRoom[] = [
+     getTestMission(),
+    ];
+    expect(component.bothRobotsUsed(roomsWithoutOtherRobots)).toBeFalsy();
+  });
+
+  it('should call setInitialPosition with the result from the dialog', () => {
+    const testResult = 'some-location'; 
+    const mockDialogRef = { afterClosed: () => of(testResult) };
+    spyOn(dialog, 'open').and.returnValue(mockDialogRef as any);
+    const spy= spyOn(socketService, 'setInitialPosition');
+    component.setInitialLocation();
+
+    expect(dialog.open).toHaveBeenCalled();
+    expect(spy).toHaveBeenCalledWith(component.robot.name, testResult);
+  });
+
+  it('should return true if any room has a robot with ipAddress "simulation"', () => {
+    const missionRoom: MissionRoom[] = [{
+      hostId: "host123",
+      robot: { name: 'robot1', ipAddress: 'simulation', state: 'active', batteryLevel: 100 },
+      guestId: ["guest456", "guest789"]
+    }];
+    expect(component.isAllRobotsLaunched(missionRoom)).toBeTruthy();
+  });
+
+  it('should return false if no room has a robot with ipAddress "simulation"', () => {
+    const missionRoom: MissionRoom[] = [{
+      hostId: "host123",
+      robot: { name: 'robot1', ipAddress: '192', state: 'active', batteryLevel: 100 },
+      guestId: ["guest456", "guest789"]
+    }];
+    expect(component.isAllRobotsLaunched(missionRoom)).toBeFalsy();
+  });
+
+  it('should subscribe to batteryLevelSimulation and update robotSimulationBatteryLevel on simulation', () => {
+    const testRobotBatteryInfo: RobotBatteryInfo = {
+      robotId: component.robot.ipAddress,
+      batteryLevel: 80
+    };
+
+    spyOn(socketService.batteryLevelSimulation, 'asObservable').and.returnValue(of(testRobotBatteryInfo));
+    component.simulation = true;
+    component.ngOnChanges({
+      simulation: new SimpleChange(null, component.simulation, true)
+    });
+
+    expect(component.robotSimulationBatteryLevel).toBe(testRobotBatteryInfo.batteryLevel);
   });
 
 });

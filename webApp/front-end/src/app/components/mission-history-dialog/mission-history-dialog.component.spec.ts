@@ -1,33 +1,54 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { MissionHistoryDialog } from './mission-history-dialog.component';
-import { MAT_DIALOG_DATA, MatDialog } from '@angular/material/dialog';
-import { CommandService } from 'src/app/services/command-service/command.service';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Log } from 'src/app/interfaces/models';
 
 describe('MissionHistoryDialog', () => {
   let component: MissionHistoryDialog;
   let fixture: ComponentFixture<MissionHistoryDialog>;
-  let dialog: MatDialog;
-  let commandService: jasmine.SpyObj<CommandService>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [ MissionHistoryDialog ],
-      providers: [
-        { provide: MatDialog, useValue: dialog },
-        { provide: CommandService, useValue: commandService },
-        { provide: MAT_DIALOG_DATA, useValue: {} }
-    ],
+  describe('when logs are provided', () => {
+    beforeEach(async () => {
+      await TestBed.configureTestingModule({
+        declarations: [ MissionHistoryDialog ],
+        providers: [
+          { provide: MAT_DIALOG_DATA, useValue: { logs: [{/*...mock log data...*/}], map: [] } }
+          // other providers...
+        ],
+      })
+      .compileComponents();
 
-    })
-    .compileComponents();
+      fixture = TestBed.createComponent(MissionHistoryDialog);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+    });
 
-    fixture = TestBed.createComponent(MissionHistoryDialog);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+    it('should initialize logs and set logShown to true', () => {
+      expect(component.map).toEqual([]);
+    });
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  describe('when only map is provided', () => {
+    beforeEach(async () => {
+      await TestBed.configureTestingModule({
+        declarations: [ MissionHistoryDialog ],
+        providers: [
+          { provide: MAT_DIALOG_DATA, useValue: { map: [/*...mock map data...*/] } }
+          // other providers...
+        ],
+      })
+      .compileComponents();
+
+      fixture = TestBed.createComponent(MissionHistoryDialog);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+    });
+
+    it('should initialize map and set logShown to false', () => {
+      const mockMap:number[] = [];
+      expect(component.map).toEqual(mockMap);
+      expect(component.logShown).toBeFalse();
+      expect(component.logs).toEqual([]);
+    });
   });
 });

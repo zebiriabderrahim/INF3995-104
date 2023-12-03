@@ -19,10 +19,13 @@ describe('MissionHistoryComponent', () => {
   let fixture: ComponentFixture<MissionHistoryComponent>;
   let commandService: CommandService;
   let socketService: SocketService;
+  let dialogSpy: jasmine.SpyObj<MatDialog>;
+
 
   const mockCommandService = {
     getRobots: () => of([]),
     getMissions: () => of([]),
+    getMissionMap: () => of([]),
     identifyRobot: (robot: Robot) => of({}),
     simulateMission: () => of({}),
     terminateSimulation: () => of({}),
@@ -47,14 +50,17 @@ describe('MissionHistoryComponent', () => {
   };
 
   beforeEach(async () => {
+    dialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
     await TestBed.configureTestingModule({
       declarations: [ MissionHistoryComponent, MissionHistoryDialog ],
       imports: [DynamicTestModule, MatDialogModule],
       providers: [
         { provide: CommandService, useValue: mockCommandService },
         { provide: SocketService, useValue: mockSocketService },
+        { provide: MatDialog, useValue: dialogSpy },
         { provide: MAT_DIALOG_DATA, useValue: {} }
     ],
+
     })
     .compileComponents();
 
@@ -69,17 +75,43 @@ describe('MissionHistoryComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should open mission overview dialog', () => {
-    const mockMissionData = { name: 'testMission' };
-    const dialogSpy = spyOn((component as any).missionHistoryDialog, 'open').and.stub();
-    component.missions = [mockMissionData];
-    component.openMissionOverview();
-    expect(dialogSpy).toHaveBeenCalledWith(MissionHistoryDialog, {
-      data: { missionid: mockMissionData.name },
+  it('should open mission overview dialog with correct parameters', () => {
+    const mockMission = { name: 'testMission', map: 'testMap' };
+    spyOn(commandService, 'getMissionMap').and.returnValue(of([0,0,0,0]));
+    component.openMissionOverview(mockMission);
+    expect(commandService.getMissionMap).toHaveBeenCalled();
+    expect(dialogSpy.open).toHaveBeenCalledWith(MissionHistoryDialog, {
+      data: { missionid: mockMission.name, map: [0,0,0,0], duration:undefined,type:undefined,robots:undefined },
       width: '80%',
       height: '90%'
     });
   });
+
+  it('should open logs overview dialog with correct parameters', () => {
+    const mockMission = { name: 'testMission', logs: 'testLogs' };
+    component.openLogsOverview(mockMission);
+    expect(dialogSpy.open).toHaveBeenCalledWith(MissionHistoryDialog, {
+      data: { missionid: mockMission.name, logs: mockMission.logs },
+      width: '80%',
+      height: '90%'
+    });
+  });
+
+
+
+  // it('should open mission overview dialog', () => {
+  //   const mockMissionData = { name: 'testMission' };
+  //   const dialogSpy = spyOn((component as any).missionHistoryDialog, 'open').and.stub();
+  //   component.missions = [mockMissionData];
+  //   // component.openMissionOverview();
+  //   expect(dialogSpy).toHaveBeenCalledWith(MissionHistoryDialog, {
+  //     data: { missionid: mockMissionData.name },
+  //     width: '80%',
+  //     height: '90%'
+  //   });
+  // });
+
+
 
   it('ngOnInit should subscribe to missions and isHostLeavingRoom', () => {
     spyOn(socketService.isHostLeavingRoom, 'asObservable').and.returnValue(of(true));
