@@ -19,7 +19,7 @@ export class MissionHistoryComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.missionsSubscription = this.commandService.getMissions().subscribe((data) => {
-      this.missions = data;
+            this.missions = data;
     });
 
     this.isHostLeavingRoomSubscription = this.socketService.isHostLeavingRoom.asObservable().subscribe((isHostLeavingRoom: boolean) => {
@@ -37,7 +37,7 @@ export class MissionHistoryComponent implements OnInit, OnDestroy {
   openMissionOverview(mission: any) {
     this.commandService.getMissionMap(mission.name).subscribe((data) => {
       this.missionHistoryDialog.open(MissionHistoryDialog, {
-        data: { missionid: mission.name, map: data },
+        data: { missionid: mission.name, map: data, duration: mission.duration, type: mission.type, robots: mission.robots, distance: mission.distance },
         width: '80%',
         height: '90%',
       });

@@ -64,15 +64,31 @@ def map_callback(data, robot_ip):
         centroid = np.mean(cluster_cells, axis=0)
         position = [(centroid[1] * map_resolution) + origin[0], (centroid[0] * map_resolution) + origin[1]]  
 
-        distance1 = np.linalg.norm(np.array(position) - np.array(robot1_position))
-        distance2 = np.linalg.norm(np.array(position) - np.array(robot2_position))
-
-        if(distance1 < distance2):
-            distance = distance1
-            robot_used = "robot 1"
-        else:
-            distance = distance2
-            robot_used = "robot 2"
+        robot_used = ""
+        if(robot_ip == 'physical'):
+            distance1 = np.linalg.norm(np.array(position) - np.array(robot1_position))
+            distance2 = np.linalg.norm(np.array(position) - np.array(robot2_position))
+            if(distance1 < distance2):
+                distance, robot_used = distance1, "de robot 1"
+            else:
+                distance, robot_used = distance2, "de robot 2"
+        elif(robot_ip == "simulation"):
+            distance1 = np.linalg.norm(np.array(position) - np.array(robot_simulation.current_positions[0]))
+            distance2 = np.linalg.norm(np.array(position) - np.array(robot_simulation.current_positions[1]))
+            if(distance1 < distance2):
+                distance = distance1
+                robot_used = "de robot 1"
+            else:
+                distance = distance2
+                robot_used = "de robot 2"
+        elif(robot_ip == "192.168.0.110"):
+            distance = np.linalg.norm(np.array(position) - np.array(robot1_position))
+        elif(robot_ip == "192.168.0.122"):
+            distance = np.linalg.norm(np.array(position) - np.array(robot2_position))
+        elif(robot_ip == "192.168.0.110sim"):
+            distance = np.linalg.norm(np.array(position) - np.array(robot_simulation.current_positions[0]))
+        elif(robot_ip == "192.168.0.122sim"):
+            distance = np.linalg.norm(np.array(position) - np.array(robot_simulation.current_positions[1]))
 
         if distance <= 4:
             merged = False
@@ -128,9 +144,11 @@ def handle_stop_mission(robot=None):
             
         socket_service.socketio.emit("log", {"type": "system", "name": "system", "message": "Mission arrêtée", "timestamp": time.strftime("%b %d %H:%M:%S")}, room=room_name)
         socket_service.socketio.emit("hostLeftRoom", room=room_name)
-        socket_service.socketio.emit("roomDeleted", message)            
+        socket_service.socketio.emit("roomDeleted", message)
+        print("in handle_stop_mission stop mission", robot_simulation.physical_robot_distance)      
+  
+        # robot_simulation.physical_robot_distance=""                             
         del mission_rooms[room_name]
-        close_room(room_name) 
     except Exception as e:
         print(f"An error occurred in handle stop mission function:{str(e)}")
 
@@ -147,7 +165,8 @@ def stop_simulation(robot, type=None):
         
         socket_service.socketio.emit("log", {"type": "system", "name": "system", "message": "Simulation arrêtée", "timestamp": time.strftime("%b %d %H:%M:%S")}, room=room_name)
         socket_service.socketio.emit("hostLeftRoom", room=room_name)
-        socket_service.socketio.emit("roomDeleted", message) 
+        socket_service.socketio.emit("roomDeleted", message,room=room_name) 
+        socket_service.socketio.emit("receiveDistanceSim", robot_simulation.simulated_robot_distance, room=room_name)
         socket_service.socketio.emit('stoppedSimulation', room=room_name)
 
         if type == 'simulation':   
@@ -198,6 +217,7 @@ def send_log(robots, all_robots = False):
 
     except Exception as e:
         print(f"An error occurred in send_log function: log couldn't be sent, {str(e)}")
+
 
 
 def send_robot_battery(robot_ip, data):

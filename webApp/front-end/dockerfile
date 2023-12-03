@@ -1,5 +1,4 @@
-
-FROM node:14
+FROM node:18
 
 WORKDIR /usr/local/app
 
@@ -9,6 +8,8 @@ COPY . .
 
 RUN npm install
 
-# RUN ng build --prod
+RUN ng build --configuration production
+
+EXPOSE 4100
 
 CMD ["ng", "serve", "--host", "0.0.0.0", "--port", "4100", "--disable-host-check"]

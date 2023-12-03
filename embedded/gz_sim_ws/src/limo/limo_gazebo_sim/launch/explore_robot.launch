@@ -1,0 +1,8 @@
+<launch>
+    <arg name="ns" />
+    <group ns="$(arg ns)">
+      <node pkg="explore_lite" type="explore" respawn="false" name="explore" output="screen">
+          <rosparam file="$(find limo_gazebo_sim)/param/exploration_params.yaml" command="load" />
+      </node>
+    </group>
+</launch>

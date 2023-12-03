@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import * as THREE from 'three';
+//import * as THREE from 'three';
 
 @Component({
   selector: 'app-three-dimensional-map',
@@ -7,9 +7,9 @@ import * as THREE from 'three';
   styleUrls: ['./three-dimensional-map.component.css']
 })
 export class ThreeDimensionalMapComponent implements OnInit {
-  private scene!: THREE.Scene;
-  private camera!: THREE.PerspectiveCamera;
-  private renderer!: THREE.WebGLRenderer;
+  // private scene!: THREE.Scene;
+  // private camera!: THREE.PerspectiveCamera;
+  // private renderer!: THREE.WebGLRenderer;
 
   constructor() {}
 

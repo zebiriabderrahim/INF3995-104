@@ -8,4 +8,6 @@ app.register_blueprint(routes.main)
 app.config["DEBUG"] = True
 CORS(app)
 socket_service.socketio.init_app(app, cors_allowed_origins="*")
-socket_service.socketio.run(app, port=8000)
+
+if __name__ == "__main__":
+    socket_service.socketio.run(app, host='0.0.0.0', port=8000)

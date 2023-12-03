@@ -22,7 +22,7 @@ import { MissionHistoryDialog } from './components/mission-history-dialog/missio
 import { InitialLocationComponent } from './components/initial-location/initial-location.component';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { ThreeDimensionalMapComponent } from './components/three-dimensional-map/three-dimensional-map.component';
+// import { ThreeDimensionalMapComponent } from './components/three-dimensional-map/three-dimensional-map.component';
 import { RobotEditorComponent } from './pages/robot-editor/robot-editor.component';
 import { ErrorDialogComponent } from './components/error-dialog/error-dialog.component';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -38,7 +38,7 @@ import { ReactiveFormsModule } from '@angular/forms';
     LogBoxComponent,
     MapComponentComponent,
     InitialLocationComponent,
-    ThreeDimensionalMapComponent,
+    // ThreeDimensionalMapComponent,
     RobotEditorComponent,
     ErrorDialogComponent
   ],

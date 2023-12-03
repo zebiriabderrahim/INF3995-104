@@ -1,28 +1,29 @@
 <?xml version="1.0"?>
 <launch>
     <!-- Define arguments -->
-    <arg name="robot_namespace"/>
+    <arg name="ns"/>
     <arg name="robot_name"/>
-    <arg name="init_pose"/>
+    <arg name="init_pose_x"/>
+    <arg name="init_pose_y"/>
+    <arg name="init_pose_z"/>
+    <arg name="init_pose_yaw"/>
 
     <!-- Set the robot_description parameter based on the provided robot_namespace argument -->
     <param name="robot_description" command="$(find xacro)/xacro '$(find limo_description)/urdf/limo_four_diff.xacro'
-        robot_namespace:=$(arg robot_namespace)" />
+        robot_namespace:=$(arg ns)" />
 
     <!-- Spawn the robot model with the provided name, initial pose, and robot_namespace -->
-    <node name="limo_model" pkg="gazebo_ros" type="spawn_model"
-        args="$(arg init_pose) -urdf -unpause -param robot_description -model $(arg robot_name)"
+     <node name="limo_model" pkg="gazebo_ros" type="spawn_model"
+        args="-x $(arg init_pose_x) -y $(arg init_pose_y) -z $(arg init_pose_z) -Y $(arg init_pose_yaw) -urdf -unpause -param robot_description -model $(arg robot_name)"
         respawn="false" output="screen" />
-
     <!-- Load the controller configuration with the specified robot_namespace -->
-    <rosparam file="$(find limo_gazebo_sim)/config/limo_four_diff_control.yaml" command="load" ns="$(arg robot_namespace)"/>
+    <rosparam file="$(find limo_gazebo_sim)/config/limo_four_diff_control.yaml" command="load"/>
 
     <!-- Load and start the controllers with the specified robot_namespace -->
-    <node name="controller_spawner" pkg="controller_manager" type="spawner"
-        respawn="false" output="screen" args="limo_state_controller" ns="$(arg robot_namespace)"/>
-
+    <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="limo_state_controller" />
     <!-- Publish the robot's joint states -->
-    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" ns="$(arg robot_namespace)" />
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+    <node pkg="limo_gazebo_sim" type="battery_simulator" name="battery_simulator" output="screen" respawn="false"/>
 </launch>
 
         

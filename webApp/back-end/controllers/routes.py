@@ -23,7 +23,6 @@ def get_mission_map():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
 @main.route('/identify', methods=['GET'])
 def identify_robot():
     ''' identifies the robot currently in use '''
@@ -69,7 +68,8 @@ def save_robot_files():
     ''' saves files on a certain robot's local workspace '''
     try:
         password = request.args.get('password')
-        files = request.get_json()
+        data = request.get_json()
+        files = data.get('files', {})
         if files and password: return jsonify(robot_update.save_robot_files(password, files))
     except Exception as e:
         return jsonify({"error on save robot files": str(e)}), 500

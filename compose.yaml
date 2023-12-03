@@ -1,0 +1,33 @@
+services:
+  backend:
+    build: ./webApp/back-end
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./webApp/back-end:/usr/src/app
+    networks:
+      - app-network
+
+  frontend:
+    build: ./webApp/front-end
+    ports:
+      - "4100:4100"
+    volumes:
+      - ./webApp/front-end:/usr/local/app
+    networks:
+      - app-network
+  
+  ros-gazebo-simulation:
+    container_name: ros_gazebo_simulation_container
+    build: ./embedded 
+    ports:
+      - "9090:9090"
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    networks:
+      - app-network
+    stdin_open: true
+    tty: true
+
+networks:
+  app-network:

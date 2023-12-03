@@ -110,13 +110,14 @@ export class SocketService {
       distance: distance,
     }
     console.log(mission.distance)
+    console.log(type);
     const start = new Date(mission.logs[0].timestamp);
     const end = new Date(mission.logs[mission.logs.length - 1].timestamp);
     const diff = this.calculateDuration(start, end);
     mission.duration = "La mission a duré " + diff.minutes + " minutes et " + diff.secondes + " secondes.";
-    console.log(type);
     if(type.includes("sim")) mission.type = "Mode simulation";
     else  mission.type = "Mode robots physiques";
+    console.log(mission);
     this.communicationService.saveMission(mission).subscribe();
   }
 
@@ -136,7 +137,7 @@ export class SocketService {
   }
 
   returnToBase(robot: Robot | Robot[]) {
-    this.clientSocket.send('returnToBase', robot);
+    // this.clientSocket.send('returnToBase', robot);
   }
 
   returnToBaseSimulation(robot: Robot | {}) {
@@ -230,10 +231,11 @@ export class SocketService {
     this.clientSocket.on('roomDeleted', (type:string) => {
       this.isRoomDeleted.next(true);
       this.type = type;
-
+      console.log(type);
     })
 
     this.clientSocket.on('receiveDistanceSim', (distance: string) => {
+      console.log(distance);
       if (this.clientSocket.socket.id === this.currentRoom.hostId)  this.saveMission(this.type, distance);
       this.currentLogs.next([]);
       this.map.next([]);
@@ -250,6 +252,7 @@ export class SocketService {
     });
 
     this.clientSocket.on('recieveSimRobotPos', (data: RobotMarkerInfo) => {
+      console.log(data)
       this.robotPos.next(data);
     });
 

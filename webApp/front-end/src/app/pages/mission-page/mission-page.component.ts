@@ -99,19 +99,19 @@ export class MissionPageComponent implements OnInit, OnDestroy {
   handleBatteryLevel(robot: string | Robot, batteryLevel: number): void {
     if (typeof robot === 'string' && robot == 'Robot 1') {
       this.robotSimulationBatteryLevel = batteryLevel;
-      if (0 < this.robotSimulationBatteryLevel && this.robotSimulationBatteryLevel < 30) {
+      if (0 < this.robotSimulationBatteryLevel && this.robotSimulationBatteryLevel <= 100) {
         this.socketService.returnToBaseSimulation({ "ipAddress":"192.168.0.110",'name': robot });
       }
     } 
     else if (typeof robot === 'string' && robot == 'Robot 2') {
       this.robotSimulationBatteryLevelRobot2 = batteryLevel;
-      if (0 < this.robotSimulationBatteryLevelRobot2 && this.robotSimulationBatteryLevelRobot2 <30) {
+      if (0 < this.robotSimulationBatteryLevelRobot2 && this.robotSimulationBatteryLevelRobot2 <=32) {
         this.socketService.returnToBaseSimulation({"ipAddress":"192.168.0.122",'name': robot });
       }
     } 
     else {
       this.robotSimulationBatteryLevel = batteryLevel;
-      if (this.robotSimulationBatteryLevel <= 52) {
+      if (0 < this.robotSimulationBatteryLevel && this.robotSimulationBatteryLevel <= 30) {
         this.socketService.returnToBaseSimulation(robot);
       }
     }
