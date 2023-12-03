@@ -1,3 +1,4 @@
+from bson import ObjectId
 from database import database_configuration as database
 from datetime import datetime
   
@@ -19,7 +20,16 @@ def fetch_missions():
     except Exception as e:
         raise e
 
-
+def fetch_and_update_last_mission(distance):
+    try:
+            id = database.db["mission_history"].find_one(sort=[("_id", -1)])["_id"]
+            criteria = {"_id": ObjectId(id)}
+            print(criteria)
+            update_operation = {"$set": {"distance": distance}}
+            return database.db["mission_history"].update_one(criteria, update_operation)
+    except Exception as e:
+        raise e
+    
 def fetch_mission_map(mission_name):
     """
     Fetches the map associated with a specific mission from the 'mission_history' collection.

@@ -56,7 +56,7 @@ export class CommunicationService {
   }
 
   saveRobotFiles(password: string, files: any): Observable<any>  {
-    return this.http.post<any>(`${this.baseUrl}/saveRobotFiles?password=${password}`, files).pipe(catchError(this.handleError<any>('saveRobotFiles')));
+    return this.http.post<any>(`${this.baseUrl}/saveRobotFiles?password=${password}`, {files}).pipe(catchError(this.handleError<any>('saveRobotFiles')));
   }
 
   handleError<T>(request: string, result?: T): (error: Error) => Observable<T> {

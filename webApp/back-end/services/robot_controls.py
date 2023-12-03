@@ -19,9 +19,9 @@ def identify_robot(robot):
     - If the robot's IP address matches '192.168.0.110', it executes another sound command.
     """
     if robot["ipAddress"] == '192.168.0.122':
-        return ros.execute_command(robot, 'play -n -c1 synth pluck C4 pluck E4 pluck G4 fade q 0.1 1 0.1')
+        return ros.execute_command(robot, 'pacmd set-default-sink alsa_output.usb-0c76_USB_PnP_Audio_Device-00.analog-stereo; pacmd set-sink-volume 1 0x10000; play -n -c1 synth pluck C4 pluck E4 pluck G4 fade q 0.1 1 0.1')
     if robot["ipAddress"] == '192.168.0.110':
-        return ros.execute_command(robot, 'play -n -c1 synth fade q 0.1 1 0.1')
+        return ros.execute_command(robot, 'pacmd set-default-sink alsa_output.usb-0c76_USB_PnP_Audio_Device-00.analog-stereo; pacmd set-sink-volume 1 0x10000; play -n -c1 synth fade q 0.1 1 0.1')
 
 
 def launch_mission(robot):

@@ -39,13 +39,14 @@ export class RobotEditorComponent implements OnInit {
 
   ngOnInit(): void {
     this.openEditorPasswordDialog();
+    this.socketService.getAvailableRooms();
 
     this.availableSimRoomsSubscription = this.socketService.getAvailableSimulatedRoomsInfo().subscribe((rooms: MissionRoom[]) => {
       this.simulationRooms = rooms;
     });
 
     this.availableRoomsSubscription = this.socketService.getAvailableMissionRoomsInfo().subscribe((rooms: MissionRoom[]) => {
-      this.availableRooms = rooms;
+            this.availableRooms = rooms;
     });
   }
 
@@ -135,6 +136,7 @@ export class RobotEditorComponent implements OnInit {
   }
 
   openQuitDialog() {
+    this.socketService.getAvailableRooms();
     if(this.modified){
       const dialogRef = this.dialog.open(ErrorDialogComponent, {
         width: '300px',
@@ -160,6 +162,7 @@ export class RobotEditorComponent implements OnInit {
   }
 
   openSaveDialog() {
+    this.socketService.getAvailableRooms();
     if (this.availableRooms.length > 0) {
       this.openErrorDialog();
     } else {
@@ -175,7 +178,9 @@ export class RobotEditorComponent implements OnInit {
 
       dialogRef.afterClosed().subscribe((save: any) => {
         if (save === 'sauvegarder') {
-          this.saveFiles();
+          if (this.availableRooms.length > 0) {
+            this.openErrorDialog();
+          } else this.saveFiles();
         }
       });
     }

@@ -143,12 +143,10 @@ class SocketServiceTest(unittest.TestCase):
         ])
         mock_stop_simulate.assert_called_once_with(self.robot_data, 'simulation')
 
-
     @patch('services.ros_utilities.return_robot_to_base')
     def test_handle_return_to_base_all(self, mock_return_to_base):
         self.socketio_client.emit('returnToBase', [self.robot_data])
         mock_return_to_base.assert_called_once_with(self.robot_data['ipAddress'])
-
 
     @patch('services.ros_utilities.return_robot_to_base')
     def test_handle_return_to_base_one(self, mock_return_to_base):

@@ -1,6 +1,6 @@
 # Catkin build and workspace specific ignores
 /build/
-# /devel/
+/devel/
 # /install/
 # /logs/
 # /.catkin_tools/
