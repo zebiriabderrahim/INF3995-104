@@ -50,12 +50,14 @@ def battery_callback(robot, message):
     :param robot: Dictionary containing robot details (e.g., 'name', 'ipAddress').
     :param message: Dictionary representing battery status ('percentage' key).
     """
-    global last_processed_battery_time
-    
-    current_time = time.time()
-    if current_time - last_processed_battery_time >= 1: 
-        if message['percentage'] is not None: socket_service.socketio.emit("receiveBatterySim", {"robotId": str(robot["ipAddress"]), "batteryLevel": round(message['percentage'])})
-        last_processed_battery_time = current_time  
+    global is_battery_low
+    battery_level = round(message['data'])
+    socket_service.socketio.emit("receiveBatterySim", {"robotId": str(robot["ipAddress"]), "batteryLevel": battery_level})
+    if battery_level < 30 and not is_battery_low[robot["ipAddress"]]:
+        is_battery_low[robot["ipAddress"]] = True
+        room= robot['ipAddress'] + 'sim' if not are_two_robot_connected else "simulation" 
+        socket_service.socketio.emit("log", {"type": "system", "name": "system", "message": f"Niveau de batterie faible: {battery_level}%", "timestamp": time.strftime("%b %d %H:%M:%S")}, room=room)
+
         
     
 def position_callback(robot_id, message, room_id):

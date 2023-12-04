@@ -24,7 +24,6 @@ robot1_position = [0.0, 0.0]
 robot2_position = [0.0, 0.0]
 is_battery_low = {"192.168.0.110": False, "192.168.0.122": False}
 
-
 def odom_callback_robot1(msg, robot, room_name):
     """
     Updates Robot1's position and emits its odometry data to a specific socket room.
@@ -132,7 +131,6 @@ def map_callback(data, robot_ip):
                 position = [round(position[0], 2), round(position[1], 2)]
 
                 socket_service.socketio.emit("log", {"type": "other", "name": "lidar", "message": f"Obstacle en {position} à {distance} m {robot_used}", "timestamp": time.strftime("%b %d %H:%M:%S")}, room=robot_ip)
-
 
 def create_mission_room(robot=None, type=None):
     """

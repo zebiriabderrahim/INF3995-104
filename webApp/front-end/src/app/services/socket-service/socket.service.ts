@@ -137,7 +137,7 @@ export class SocketService {
   }
 
   returnToBase(robot: Robot | Robot[]) {
-    // this.clientSocket.send('returnToBase', robot);
+    this.clientSocket.send('returnToBase', robot);
   }
 
   returnToBaseSimulation(robot: Robot | {}) {
