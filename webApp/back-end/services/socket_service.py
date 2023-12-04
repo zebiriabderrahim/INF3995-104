@@ -180,8 +180,11 @@ def handle_return_to_base(robot):
     """
     if isinstance(robot, list):
         for bot in robot:
+            socketio.emit("log", {"type": "command", "name": "command", "message": f"{bot['name']} retourne a la base", "timestamp": time.strftime("%b %d %H:%M:%S")}, room='physical')      
+            print('return to base for robot', bot['ipAddress'])
             ros_utilities.return_robot_to_base(bot['ipAddress'])
     else:
+        socketio.emit("log", {"type": "command", "name": "command", "message": f"{robot['name']} retourne a la base", "timestamp": time.strftime("%b %d %H:%M:%S")}, room=robot['ipAddress'])      
         ros_utilities.return_robot_to_base(robot['ipAddress'])
     
 
@@ -200,7 +203,8 @@ def handle_return_to_base_simulation(robot):
 
     """
     if robot["ipAddress"] == 'simulation' :
-        if all(val not in robot_simulation.return_base_robots for val in ("robot1", "robot2")):     
+        if all(val not in robot_simulation.return_base_robots for val in ("robot1", "robot2")):  
+            socketio.emit("log", {"type": "command", "name": "command", "message": f"robot 1 et robot 2 retournent a la base", "timestamp": time.strftime("%b %d %H:%M:%S")}, room=robot['ipAddress'])      
             robot_simulation.terminate_mission_robot(None, False)
             robot_simulation.return_to_base()
             robot_simulation.return_base_robots.update(["robot1", "robot2"])
@@ -215,6 +219,7 @@ def handle_return_to_base_simulation(robot):
                 robot_simulation.terminate_mission_robot({"name": missing_robot}, False)
                 robot_simulation.return_to_base({"name": missing_robot})           
     else: 
+        socketio.emit("log", {"type": "command", "name": "command", "message": f"{robot['name']}: retourne a la base", "timestamp": time.strftime("%b %d %H:%M:%S")}, room=robot['ipAddress'])
         if not robot_simulation.return_base_robots.__contains__(robot['name'].lower().replace(' ', '')):
             robot_simulation.return_base_robots.add(robot['name'].lower().replace(' ', ''))
             robot_simulation.terminate_mission_robot(robot, False)
