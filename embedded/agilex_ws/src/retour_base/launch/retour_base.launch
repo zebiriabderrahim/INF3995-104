@@ -1,7 +1,0 @@
-<launch>
-    <!-- Node for RobotController -->
-    <node name="retour_base" pkg="retour_base" type="retour_base.py" output="screen">
-        <!-- Add any ROS parameters if needed -->
-    </node>
-</launch>
-
