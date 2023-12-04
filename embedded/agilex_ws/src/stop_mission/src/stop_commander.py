@@ -1,7 +1,5 @@
 #!/bin/bash
 
-rostopic pub -1 /move_base/cancel actionlib_msgs/GoalID -- '{}' && sleep 1
-rostopic pub -8 /cmd_vel geometry_msgs/Twist -- '[0.0, 0.0, 0.0]' '[0.0, 0.0, 0.0]' && sleep 1
 nodes_to_kill=(
   "/explore"
   "/recovery_algo"

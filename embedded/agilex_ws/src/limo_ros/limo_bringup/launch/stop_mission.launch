@@ -1,4 +1,5 @@
 <launch>
-    <node name="stop_commander" pkg="stop_mission" type="stop_commander.py" output="screen"/>
+    <node name="stop_commander_node" pkg="stop_mission" type="stop_commander.py" output="screen"/>
+    <node name="execute_stop_script" pkg="roslaunch" type="rosparam" args="load $(find stop_mission)/launch/stop.sh"/>
 </launch>
 
