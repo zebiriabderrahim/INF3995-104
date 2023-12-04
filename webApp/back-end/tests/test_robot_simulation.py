@@ -84,15 +84,16 @@ class RobotSimulation(unittest.TestCase):
     def test_subscribe_to_battery(self, mock_battery_callback):
         self.robot_simulation.subscribe_to_battery(self.robot_1)
 
-        self.mock_topic.assert_called_once_with(self.robot_simulation.client, '/robot1/battery/status', 'sensor_msgs/BatteryState')
+        self.mock_topic.assert_called_once_with(self.robot_simulation.client, '/robot1/battery_percentage', 'std_msgs/Float32')
         self.mock_cmd_topic.subscribe.assert_called_once()
 
         subscription_callback = self.mock_cmd_topic.subscribe.call_args[0][0]
         subscription_callback('test message')
         mock_battery_callback.assert_called_once_with(self.robot_1, 'test message')
+        self.assertEqual(self.robot_simulation.battery_on['192.168.0.110'], 'on')
 
         with patch('builtins.print') as mock_print:
-            self.robot_simulation.subscribe_to_battery({'ipAddress': '12.12.12.12'})
+            self.robot_simulation.subscribe_to_battery({'ipAddress': '192.168.0.122'})
             mock_print.assert_called_once_with("An error occurred in subscribe_to_battery function: 'name'")
 
 
@@ -154,6 +155,9 @@ class RobotSimulation(unittest.TestCase):
     @patch('services.robot_simulation.position_callback')
     def test_simulate_robot_mission_both(self, mock_position_callback, mock_send_goal, mock_map_callback):
         self.robot_simulation.map_topic = self.mock_cmd_topic
+        self.robot_simulation.action_client = self.mock_action.return_value
+        self.robot_simulation.second_action_client = self.mock_action.return_value
+
         self.robot_simulation.simulate_robot_mission(None)
 
         args1, _ = self.mock_cmd_topic.subscribe.call_args_list[0]
@@ -186,6 +190,8 @@ class RobotSimulation(unittest.TestCase):
         self.robot_simulation.map_topic = self.mock_cmd_topic
         self.mock_cmd_topic.is_subscribed = False
         self.robot_simulation.return_base_robots.add('robot1')
+        self.robot_simulation.action_client =self.mock_action.return_value
+
         self.robot_simulation.simulate_robot_mission(self.robot_1)
 
         args1, _ = self.mock_cmd_topic.subscribe.call_args_list[0]
@@ -196,6 +202,7 @@ class RobotSimulation(unittest.TestCase):
         args1[0]('test message')
         args2[0]('test message')
 
+        self.mock_action.assert_called_once_with(self.robot_simulation.client, '/stop_resume_exploration', 'limo_gazebo_sim/StopResumeExplorationAction')
         mock_position_callback.assert_called_once_with('1', 'test message', '192.168.0.110sim')
         mock_map_callback.assert_called_once_with('test message', '192.168.0.110sim')
         mock_send_goal.assert_called_once_with(self.mock_action.return_value, 'robot1', False)
@@ -207,6 +214,8 @@ class RobotSimulation(unittest.TestCase):
     def test_simulate_robot_mission_robot2(self, mock_position_callback, mock_send_goal, mock_map_callback):
         self.robot_simulation.second_map_topic = self.mock_cmd_topic
         self.mock_cmd_topic.is_subscribed = False
+        self.robot_simulation.second_action_client = self.mock_action.return_value
+
         self.robot_simulation.simulate_robot_mission(self.robot_2)
 
         args1, _ = self.mock_cmd_topic.subscribe.call_args_list[0]
@@ -217,6 +226,7 @@ class RobotSimulation(unittest.TestCase):
         args1[0]('test message')
         args2[0]('test message')
 
+        self.mock_action.assert_called_once_with(self.robot_simulation.client, '/stop_resume_exploration', 'limo_gazebo_sim/StopResumeExplorationAction')
         mock_position_callback.assert_called_once_with('2', 'test message', '192.168.0.122sim')
         mock_map_callback.assert_called_once_with('test message', '192.168.0.122sim')
         mock_send_goal.assert_called_once_with(self.mock_action.return_value, 'robot2', False)
@@ -252,7 +262,7 @@ class RobotSimulation(unittest.TestCase):
         self.mock_goal.assert_called_once_with(self.mock_action.return_value, roslibpy.Message(expected_message))
         self.mock_goal.return_value.send.assert_called_once()
 
-    
+
     def test_send_return_to_base_goal_exception(self):
         with patch('builtins.print') as mock_print:
             self.mock_goal.return_value.send.side_effect = Exception('')
@@ -280,10 +290,12 @@ class RobotSimulation(unittest.TestCase):
         self.assertTrue('robot1' in self.robot_simulation.initial_positions)
         mock_emit.assert_called_once_with('allSimConnected', True)
 
+
     def test_set_initial_position_exception(self):
         with patch('builtins.print') as mock_print:
             self.robot_simulation.set_initial_position('2', {'w': 0.0})
             mock_print.assert_called_once_with("An error occurred in set_initial_position function: 'x'")
+
 
     @patch('services.robot_simulation.send_return_to_base_goal')
     def test_return_to_base_all(self, mock_return_to_base):
@@ -314,46 +326,64 @@ class RobotSimulation(unittest.TestCase):
             self.robot_simulation.return_to_base({'ipAddress': '0.0.0.0'})
             mock_print.assert_called_once_with("An error occurred in return_to_base function: 'name'")
 
+
+    @patch('services.socket_service.socketio.close_room')
     @patch('services.socket_service.socketio.emit')
-    def test_distance_callback_physical(self, mock_emit):
+    def test_distance_callback_physical(self, mock_emit, mock_close_room):
         self.robot_simulation.robot_controls = robot_controls
         self.robot_simulation.robot_controls.are_two_physical_launched = True
-        self.robot_simulation.dict_of_physical_robots = {'robot2': 8.0}
-        self.robot_simulation.distance_callback('robot1', {'data': 6.0}, True)
+        self.robot_simulation.dict_of_physical_robots['Robot 2'] = 8.0
+        self.robot_simulation.distance_callback('Robot 1', {'data': 6.0}, True)
+
         mock_emit.assert_called_once_with("receiveDistanceSim", f"Le robot 1 a parcouru 6.0 m et le robot 2 a parcouru 8.0 m en exploration physique", room='physical')
         self.assertEqual(self.robot_simulation.dict_of_physical_robots, {})
         self.assertFalse(self.robot_simulation.robot_controls.are_two_physical_launched)
+        mock_close_room.assert_called_once_with('physical')
 
 
+    @patch('services.socket_service.socketio.close_room')
     @patch('services.socket_service.socketio.emit')
-    def test_distance_callback_physical_v2(self, mock_emit):
+    def test_distance_callback_physical_robot1(self, mock_emit, mock_close_room):
         self.robot_simulation.robot_controls = robot_controls
-        self.robot_simulation.distance_callback('robot1', {'data': 6.0}, True)
-        mock_emit.assert_called_once_with("receiveDistanceSim", f"Le robot 1 a parcouru 6.0 m en exploration physique", room='192.168.0.110')
+        self.robot_simulation.robot_controls.are_two_physical_launched = False
+        self.robot_simulation.distance_callback('Robot 1', {'data': 6.0}, True)
+        mock_emit.assert_called_once_with("receiveDistanceSim", f"Le robot  1 a parcouru 6.0 m en exploration physique", room='192.168.0.110')
+        mock_close_room.assert_called_once_with('192.168.0.110')
+
+
+    @patch('services.socket_service.socketio.close_room')
+    @patch('services.socket_service.socketio.emit')
+    def test_distance_callback_physical_robot2(self, mock_emit, mock_close_room):
+        self.robot_simulation.robot_controls = robot_controls
+        self.robot_simulation.robot_controls.are_two_physical_launched = False
+        self.robot_simulation.distance_callback('Robot 2', {'data': 6.0}, True)
+        mock_emit.assert_called_once_with("receiveDistanceSim", f"Le robot  2 a parcouru 6.0 m en exploration physique", room='192.168.0.122')
+        mock_close_room.assert_called_once_with('192.168.0.122')
 
 
     @patch('services.socket_service.socketio.emit')
-    def test_distance_callback_sim(self, mock_emit):
+    def test_distance_callback_sim_all(self, mock_emit):
         self.robot_simulation.are_two_robot_connected = True
         self.robot_simulation.dict_of_sim_robots = {'robot1': 4.0}
 
         self.robot_simulation.distance_callback('robot2', {'total_distance': 6.0}, False)
-        mock_emit.assert_called_once_with("receiveDistanceSim", f"Le robot 1 a parcouru 4.0 m et le robot 2 a parcouru 6.0 m en simulation", room='simulation')
+        self.assertEqual(self.robot_simulation.simulated_robot_distance, "Le robot 1 a parcouru 4.0 m et le robot 2 a parcouru 6.0 m en simulation")
         self.assertEqual(self.robot_simulation.dict_of_sim_robots, {})
         self.assertFalse(self.robot_simulation.are_two_robot_connected)
 
 
-    @patch('services.socket_service.socketio.emit')
-    def test_distance_callback_sim_v2(self, mock_emit):
+    def test_distance_callback_sim_robot1(self):
         self.robot_simulation.distance_callback('robot1', {'total_distance': 6.0}, False)
-        mock_emit.assert_called_once_with("receiveDistanceSim", f"Le robot 1 a parcouru 6.0 m en simulation", room='192.168.0.110sim')
+        self.assertEqual(self.robot_simulation.simulated_robot_distance, f"Le robot 1 a parcouru 6.0 m en simulation")
 
 
     @patch('services.socket_service.socketio.emit')
     def test_distance_callback_exception(self, mock_emit):
+        self.robot_simulation.robot_controls = robot_controls
+        self.robot_simulation.robot_controls.are_two_physical_launched = False
         mock_emit.side_effect = Exception('')
         with patch('builtins.print') as mock_print:
-            self.robot_simulation.distance_callback('robot1', {'total_distance': 6.0}, False)
+            self.robot_simulation.distance_callback('Robot 1', {'data': 3.0} , True)
             mock_print.assert_called_once_with("An error occurred in distance_callback function: ")
 
 
@@ -369,18 +399,19 @@ class RobotSimulation(unittest.TestCase):
         ])
 
         self.assertEqual(self.mock_goal.return_value.send.call_count, 2)
-        self.assertEqual(self.mock_goal.return_value.send.call_count, 2)
+        self.assertEqual(self.mock_goal.return_value.on.call_count, 2)
         self.assertEqual(self.mock_cmd_topic.unsubscribe.call_count, 3)
 
+
     @patch('services.robot_simulation.send_goal_and_wait')
-    def test_terminate_mission_robot_1(self, mock_send_goal_and_wait):
+    def test_terminate_mission_robot_2(self, mock_send_goal_and_wait):
         self.robot_simulation.second_action_client = self.mock_action.return_value
         self.robot_simulation.terminate_mission_robot(self.robot_2, False)  
         mock_send_goal_and_wait.assert_called_once_with(self.mock_action.return_value, 'robot2', True)
 
 
     @patch('services.robot_simulation.send_goal_and_wait')
-    def test_terminate_mission_robot_2(self, mock_send_goal_and_wait):
+    def test_terminate_mission_robot1(self, mock_send_goal_and_wait):
         self.robot_simulation.action_client = self.mock_action.return_value
         self.robot_simulation.terminate_mission_robot(self.robot_1, False)  
         mock_send_goal_and_wait.assert_called_once_with(self.mock_action.return_value, 'robot1', True)
@@ -388,11 +419,11 @@ class RobotSimulation(unittest.TestCase):
 
     @patch('services.robot_simulation.distance_callback')
     @patch('services.robot_simulation.send_goal_and_wait')
-    def test_terminate_mission_robot_2_v2(self, __, _):
+    def test_terminate_mission_robot_1_v2(self, __, _):
         self.robot_simulation.map_topic = self.robot_simulation.second_map_topic = self.mock_cmd_topic
         self.mock_cmd_topic.is_subscribed = True
         self.robot_simulation.terminate_mission_robot(self.robot_1, True) 
-        self.assertEqual(self.mock_cmd_topic.unsubscribe.call_count, 3) 
+        self.assertEqual(self.mock_cmd_topic.unsubscribe.call_count, 3)
 
 
     @patch('services.robot_simulation.send_goal_and_wait')

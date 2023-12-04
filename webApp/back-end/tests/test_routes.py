@@ -115,10 +115,9 @@ class RoutesTest(unittest.TestCase):
     @patch('services.robot_update.save_robot_files')
     def test_save_robot_files(self, mock_save_robot_files):
         mock_save_robot_files.return_value = {'message': 'save_robot_files successful'}
+        payload = {'files': ['File1', 'File2']}
         with self.app.app_context():
-            response = self.client.post('/saveRobotFiles?password=1234', 
-                            data=json.dumps(['File1', 'File2']), 
-                            content_type='application/json')
+            response = self.client.post('/saveRobotFiles?password=1234', data=json.dumps(payload), content_type='application/json')
             data = response.get_json()
             mock_save_robot_files.assert_called_once_with('1234', ["File1", "File2"])
             self.assertEqual(data['message'], 'save_robot_files successful')
@@ -126,7 +125,7 @@ class RoutesTest(unittest.TestCase):
         with self.app.app_context():
             mock_save_robot_files.side_effect = Exception('Some error message')
             response = self.client.post('/saveRobotFiles?password=1234', 
-                            data=json.dumps(['File1', 'File2']), 
+                            data=json.dumps(payload), 
                             content_type='application/json')
             data = response.get_json()
             self.assertEqual(response.status_code, 500)

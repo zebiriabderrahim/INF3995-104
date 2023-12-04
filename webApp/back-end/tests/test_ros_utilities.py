@@ -27,15 +27,22 @@ class RosUtilities(unittest.TestCase):
         self.mock_topic_class.stop()
 
 
+    @patch('services.robot_simulation.distance_callback')
     @patch('services.ros_utilities.execute_command')
     @patch('services.ros_utilities.create_ros')
-    def test_terminate_mission(self, mock_create_ros, mock_execute_command):
+    def test_terminate_mission(self, mock_create_ros, mock_execute_command, mock_distance_callback):
         mock_ros_client = self.mock_ros.return_value
         mock_create_ros.return_value = mock_ros_client
-        self.ros_utilities.terminate_mission({'ipAddress': '192.168.0.110'})
-        self.assertEqual(self.mock_topic.call_count, 2)
-        self.assertEqual(self.mock_topic.return_value.unsubscribe.call_count, 2)
-        mock_execute_command.assert_called_once_with({'ipAddress': '192.168.0.110'}, "rosrun stop_mission stop_commander.py")
+
+        self.ros_utilities.terminate_mission({'ipAddress': '192.168.0.110', 'name': 'Robot1'})
+        distance_callback = self.mock_topic.return_value.subscribe.call_args[0][0]
+        distance_callback('test message')
+        self.assertEqual(self.mock_topic.call_count, 3)
+        self.assertEqual(self.mock_topic.return_value.unsubscribe.call_count, 3)
+        self.assertEqual(self.mock_topic.return_value.subscribe.call_count, 1)
+        mock_create_ros.assert_called_once_with('192.168.0.110')
+        mock_distance_callback.assert_called_once_with('Robot1', 'test message', True)
+        mock_execute_command.assert_called_once_with({'ipAddress': '192.168.0.110', 'name': 'Robot1'}, "rosrun stop_mission stop_commander.py")
 
 
     @patch('services.ros_utilities.execute_command')

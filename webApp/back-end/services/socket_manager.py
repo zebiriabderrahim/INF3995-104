@@ -22,18 +22,33 @@ origin = [-5, -5]
 last_processed_time = 0
 robot1_position = [0.0, 0.0]
 robot2_position = [0.0, 0.0]
+is_battery_low = {"192.168.0.110": False, "192.168.0.122": False}
+
 
 def odom_callback_robot1(msg, robot, room_name):
+    """
+    Updates Robot1's position and emits its odometry data to a specific socket room.
+
+    :param msg: Odometry message with pose and position data for Robot1.
+    :param robot: Dictionary with Robot1's information (e.g., name, details).
+    :param room_name: Name of the socket room to emit the position data.
+    """
     global robot1_position
-    global last_processed_time
 
     robot1_position[0] = msg["pose"]["pose"]["position"]["x"]
     robot1_position[1] = msg["pose"]["pose"]["position"]["y"]
 
     socket_service.socketio.emit("recieveSimRobotPos",{"robotId": f'{robot["name"].lower().replace(" ", "")[-1]}', "position": msg["pose"]["pose"]["position"]}, room=room_name) 
 
-def odom_callback_robot2(msg, robot, room_name):
 
+def odom_callback_robot2(msg, robot, room_name):
+    """
+    Updates Robot2's position and emits its odometry data to a specific socket room.
+
+    :param msg: Odometry message with pose and position data for Robot2.
+    :param robot: Dictionary with Robot2's information (e.g., name, details).
+    :param room_name: Name of the socket room to emit the position data.
+    """
     global robot2_position
 
     robot2_position[0] = msg["pose"]["pose"]["position"]["x"]
@@ -42,6 +57,12 @@ def odom_callback_robot2(msg, robot, room_name):
 
 
 def map_callback(data, robot_ip):
+    """
+    Processes map data and emits information about detected obstacles to the specified socket room.
+
+    :param data: Map data containing information about the environment.
+    :param robot_ip: IP address or identifier of the robot for which the map data is processed.
+    """
     global global_obstacle_dict
 
     width = data["info"]["width"]
@@ -65,28 +86,34 @@ def map_callback(data, robot_ip):
         position = [(centroid[1] * map_resolution) + origin[0], (centroid[0] * map_resolution) + origin[1]]  
 
         robot_used = ""
+
         if(robot_ip == 'physical'):
             distance1 = np.linalg.norm(np.array(position) - np.array(robot1_position))
             distance2 = np.linalg.norm(np.array(position) - np.array(robot2_position))
             if(distance1 < distance2):
-                distance, robot_used = distance1, "de robot 1"
+                distance, robot_used = distance1, "robot 1"
             else:
-                distance, robot_used = distance2, "de robot 2"
+                distance, robot_used = distance2, "robot 2"
+
         elif(robot_ip == "simulation"):
             distance1 = np.linalg.norm(np.array(position) - np.array(robot_simulation.current_positions[0]))
             distance2 = np.linalg.norm(np.array(position) - np.array(robot_simulation.current_positions[1]))
             if(distance1 < distance2):
                 distance = distance1
-                robot_used = "de robot 1"
+                robot_used = "robot 1"
             else:
                 distance = distance2
-                robot_used = "de robot 2"
+                robot_used = "robot 2"
+
         elif(robot_ip == "192.168.0.110"):
             distance = np.linalg.norm(np.array(position) - np.array(robot1_position))
+
         elif(robot_ip == "192.168.0.122"):
             distance = np.linalg.norm(np.array(position) - np.array(robot2_position))
+
         elif(robot_ip == "192.168.0.110sim"):
             distance = np.linalg.norm(np.array(position) - np.array(robot_simulation.current_positions[0]))
+
         elif(robot_ip == "192.168.0.122sim"):
             distance = np.linalg.norm(np.array(position) - np.array(robot_simulation.current_positions[1]))
 
@@ -104,9 +131,16 @@ def map_callback(data, robot_ip):
                 distance = round(distance, 2)
                 position = [round(position[0], 2), round(position[1], 2)]
 
-                socket_service.socketio.emit("log", {"type": "other", "name": "lidar", "message": f"Obstacle en {position} à {distance} m de {robot_used}", "timestamp": time.strftime("%b %d %H:%M:%S")}, room=robot_ip)
+                socket_service.socketio.emit("log", {"type": "other", "name": "lidar", "message": f"Obstacle en {position} à {distance} m {robot_used}", "timestamp": time.strftime("%b %d %H:%M:%S")}, room=robot_ip)
+
 
 def create_mission_room(robot=None, type=None):
+    """
+    Creates a mission room for robots in a simulated of physical context and emits room creation messages.
+    
+    :param robot: Dictionary containing information about the robot, including IP address and details.
+    :param type: Type of mission room ('robot simulation', 'physical', or None).
+    """
     try:
         if robot is None:
             room_name = 'simulation'
@@ -134,6 +168,11 @@ def create_mission_room(robot=None, type=None):
 
 
 def handle_stop_mission(robot=None):
+    """
+    Handles stopping a mission for robots during physical exploration.
+
+    :param robot: Dictionary containing information about the robot, including IP address and details.
+    """
     try:
         if robot is None:
             room_name = 'physical'
@@ -145,16 +184,19 @@ def handle_stop_mission(robot=None):
         socket_service.socketio.emit("log", {"type": "system", "name": "system", "message": "Mission arrêtée", "timestamp": time.strftime("%b %d %H:%M:%S")}, room=room_name)
         socket_service.socketio.emit("hostLeftRoom", room=room_name)
         socket_service.socketio.emit("roomDeleted", message)
-        print("in handle_stop_mission stop mission", robot_simulation.physical_robot_distance)      
-  
-        # robot_simulation.physical_robot_distance=""                             
+                            
         del mission_rooms[room_name]
     except Exception as e:
         print(f"An error occurred in handle stop mission function:{str(e)}")
 
 
 def stop_simulation(robot, type=None):
-    
+    """
+    Stops a simulation for a robot or both robots in simulation mode.
+
+    :param robot: Dictionary containing information about the robot, including IP address and details.
+    :param type: Type of simulation ('simulation' or None).
+    """  
     try:
         if type == 'simulation':
             room_name = 'simulation'
@@ -180,6 +222,12 @@ def stop_simulation(robot, type=None):
 
 
 def get_available_rooms():
+    """
+    Retrieves available mission and simulation rooms.
+
+    - Gathers information about available mission rooms and simulation rooms.
+    - Emits a message containing details about available rooms to the appropriate socket.
+    """
     try:
         sim_rooms = [room.to_dict() for room in simulated_rooms.values()]
         rooms = [room.to_dict() for room in mission_rooms.values()]
@@ -188,7 +236,13 @@ def get_available_rooms():
         print(f"An error occurred in get_available_rooms function: {str(e)}")
 
 
-def view_mission_room(robot,is_simulation=False):
+def view_mission_room(robot, is_simulation=False):
+    """
+    Allows viewing a mission either in simulation or occurring on the physical robots.
+
+    :param robot: Dictionary containing information about the robot, including IP address and details.
+    :param is_simulation: Flag indicating whether it's a simulation room (default: False).
+    """
     try:
         if is_simulation:
             join_room(str(robot["ipAddress"]) + 'sim')
@@ -201,7 +255,14 @@ def view_mission_room(robot,is_simulation=False):
     except Exception as e:
         print(f"An error occurred in view_mission_room function: {str(e)}")
 
+
 def send_log(robots, all_robots = False):
+    """
+    Sends logs and subscribes to ROS topics for robot data processing.
+
+    :param robots: List containing dictionaries with information about the robot(s).
+    :param all_robots: Flag to indicate processing logs and topics for all robots (default: False).
+    """
     try:
         if all_robots:
             ros = ros_utilities.create_ros('192.168.0.110')
@@ -219,8 +280,13 @@ def send_log(robots, all_robots = False):
         print(f"An error occurred in send_log function: log couldn't be sent, {str(e)}")
 
 
-
 def send_robot_battery(robot_ip, data):
+    """
+    Sends battery level data for a robot and emits low battery alerts if applicable.
+
+    :param robot_ip: IP address of the robot.
+    :param data: Dictionary containing battery level data.
+    """
     try:
         battery_level = round(data['data'])
         robot = {
@@ -230,7 +296,8 @@ def send_robot_battery(robot_ip, data):
     
         socket_service.socketio.emit("robotBattery", robot)
 
-        if battery_level < 30:
+        if battery_level < 30 and not is_battery_low[robot_ip]:
+            is_battery_low[robot_ip] = True
             socket_service.socketio.emit("log", {"type": "system", "name": "system", "message": f"Niveau de batterie faible: {battery_level}%", "timestamp": time.strftime("%b %d %H:%M:%S")}, room=robot_ip)
 
     except Exception as e:
@@ -238,6 +305,11 @@ def send_robot_battery(robot_ip, data):
 
 
 def handle_disconnect(id):
+    """
+    Handles disconnection events for users in mission or simulation rooms.
+    
+    :param id: Identifier for the disconnected user.
+    """
     try:
         for room in mission_rooms.values():
             if room.host_id == id:
@@ -262,6 +334,10 @@ def handle_disconnect(id):
 
 
 def view_all_robots():
+    """
+    Allows viewing the ongoing mission for all physical robots.
+
+    """
     try:
         join_room('physical')
         mission_rooms['physical'].add_guest(request.sid)
