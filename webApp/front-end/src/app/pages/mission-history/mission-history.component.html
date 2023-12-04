@@ -7,13 +7,32 @@
 
     <div class="mission-history-container">
         <h2>Mission History</h2>
-        <button mat-raised-button class="show-logs-btn home-button" [routerLink]="['/home']">
-          <mat-icon>home</mat-icon>
-            Home
-        </button>
+
+        <div class="button-group">
+            <button mat-raised-button class=" show-logs-btn home-button" [routerLink]="['/home']">
+                <mat-icon>home</mat-icon>
+                Home
+            </button>
+            <button mat-raised-button class="show-logs-btn sort-missions-btn" (click)="sortMissionsByDistance()">
+                Trier selon la distance
+            </button>
+            <button mat-raised-button class="show-logs-btn sort-missions-btn" (click)="sortMissionsByDuration()">
+                Trier selon la durée
+            </button>
+            <button mat-raised-button class="show-logs-btn sort-missions-btn" (click)="showMissionsByMode('Mode simulation')">
+                Missions simulées
+            </button>
+            <button mat-raised-button class="show-logs-btn sort-missions-btn" (click)="showMissionsByMode('Mode robots physiques')">
+                Missions sur robots physiques
+            </button>
+            <button mat-raised-button class="show-logs-btn sort-missions-btn" (click)="showMissionsByMode('')">
+                Toutes les missions
+            </button>
+        </div>
+
         <ng-container class="mission-list" *ngIf="missions ; else noMissions">
 
-            <li *ngFor="let mission of missions" class="mission-card">
+            <li *ngFor="let mission of filteredMissions" class="mission-card">
                 <div class="mission-info">
                   <p class="mission-name">Mission Name: {{ mission.name }}</p>
                   <p class="mission-data"><b>Date:</b> {{ mission.date | date }}<br><b>Durée:</b> {{ mission.duration }}<br><b>Robots utilisés:</b> {{ mission.robots == "physicalRobot" ? "Les deux robots physiques" : mission.robots}}</p>

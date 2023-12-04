@@ -96,15 +96,17 @@ class RobotSimulation(unittest.TestCase):
             self.robot_simulation.subscribe_to_battery({'ipAddress': '192.168.0.122'})
             mock_print.assert_called_once_with("An error occurred in subscribe_to_battery function: 'name'")
 
-
+    @patch('time.strftime')
     @patch('services.socket_service.socketio.emit')
-    @patch('time.time')
-    def test_battery_callback(self, mock_time, mock_emit):
+    def test_battery_callback(self, mock_emit, mock_time):
         mock_time.return_value = 3
-        self.robot_simulation.battery_callback(self.robot_1, {'percentage': 30})
+        self.robot_simulation.battery_callback(self.robot_1, {'data': 20})
 
-        mock_emit.assert_called_once_with("receiveBatterySim", {"robotId": '192.168.0.110', 'batteryLevel': 30})
-        self.assertEqual(self.robot_simulation.last_processed_battery_time, 3)
+        self.assertTrue(self.robot_simulation.is_battery_low['192.168.0.110'])
+        mock_emit.assert_has_calls([
+            call('receiveBatterySim', {'robotId': '192.168.0.110', 'batteryLevel': 20}),
+            call('log', {'type': 'system', 'name': 'system', 'message': 'Niveau de batterie faible: 20%', 'timestamp': 3}, room='192.168.0.110sim')
+        ])
 
     @patch('services.socket_service.socketio.emit')
     @patch('time.time')

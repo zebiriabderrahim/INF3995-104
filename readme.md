@@ -9,27 +9,48 @@ Le front-end est codé en TypeScript en utilisant le framework Angular. Les prat
 - Utilisation de directives et de composants Angular pour une structure modulaire et réutilisable.
 
 ## Back-end
+L'ajout de tout nouveau package nécessaire au fonctionnement du serveur Flask dans le fichier existe dans le fichier `/back-end/requirements.txt`. Ce fichier répertorie toutes les dépendances essentielles pour exécuter le serveur. Maintenir cette liste à jour garantit l'installation correcte de toutes les dépendances requises lors du déploiement du serveur Flask, assurant ainsi la cohérence de l'environnement d'exécution.
+
 Le back-end est codé en Python en utilisant le framework Flask. Il est organisé en dossiers de routes, de services et de contrôleurs. Les pratiques de codage suivantes sont appliquées :
 - Utilisation de la convention snake_case pour les noms de variables et de fonctions.
 - Gestion appropriée des exceptions et des erreurs pour des réponses HTTP claires.
 
 ## Fonctionnement
 L'interface utilisateur affiche quatre options principales :
-- Lancer un robot
+- Lancer un robot physique
+- Lancer une simulation
 - Identifier un robot
 - Consulter l'historique des missions
-- Lancer une simulation
+- Mettre à jour le code des robots physiques
+
 À chaque fois qu'un opérateur sélectionne une option, la demande est redirigée vers le serveur, soit sous la forme d'une requête HTTP, soit par le biais d'une communication par socket. Le serveur prend ensuite en charge la demande de manière appropriée. Selon que la simulation a été choisie dans l'interface utilisateur, le serveur redirige les demandes vers les robots physiques ou vers la simulation dans Gazebo.
+
+## Tests unitaires
+Des tests unitaires ont été rédigés pour chaque fonctionnalité du back-end et du front-end. Pour les exécuter, des commandes spécifiques doivent être utilisées :
+
+- Côté serveur : Des tests ont été élaborés pour les fichiers principaux .py, en excluant les fichiers de configuration.
+
+```bash
+cd webApp/back-end
+```
+```bash
+python -m pytest 
+```
+
+- fromt-end side: 
+
+```bash
+cd webApp/front-end
+```
+```bash
+npm run test
+```
 
 # Docker : Tout lancer en une commande
 
 Exécutez `docker compose up` à l'intérieur de ce répertoire. Cela créera le serveur frontend sur le port 80 disponible sur le réseaux, le serveur backend sur le port 8000 en localhost, et la simulation gazebo.
 
 Pour avoir accès a l'application depuis d'autres appareils sur le réseaux, veuillez a modifier le fichier `/front-end/src/environments/environment.prod.ts` et mettre l'adresse IP local de la station au sol.
-
-
-## BACKEND : ajout de nouveaux packages
-Si vous ajoutez de nouveaux packages au serveur Flask, n'oubliez pas d'ajouter le package dans le fichier `/back-end/requirements.txt`.
 
 
 # Guide d'utilisation de la Simulation Limo Gazebo pour le PDR
