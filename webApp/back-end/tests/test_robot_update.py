@@ -57,11 +57,8 @@ class RobotUpdate(unittest.TestCase):
     def test_read_robot_filenames(self):
         result = self.robot_update.read_robot_filenames()
         self.assertEqual(result, {
-            'kill_script.sh': '/home/nvidia/kill_script.sh',
             'save_test_file.py': '/home/nvidia/INF3995-104/embedded/agilex_ws/src/save_test_file_pkg/src/save_test_file.py',
-            'start_mission.launch': '/home/nvidia/INF3995-104/embedded/agilex_ws/src/limo_ros/limo_bringup/launch/start_mission.launch',
-            'start_script.sh': '/home/nvidia/INF3995-104/start_script.sh',
-            'stop_mission.launch': '/home/nvidia/INF3995-104/embedded/agilex_ws/src/limo_ros/limo_bringup/launch/stop_mission.launch'
+            'start_script.sh': '/home/nvidia/INF3995-104/start_script.sh'
         })
 
 

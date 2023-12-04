@@ -7,7 +7,10 @@ main = Blueprint("main", __name__)
 
 @main.route('/missions', methods=['GET'])
 def get_missions():
-    ''' retrieves the missins saved within our MongoDB database '''
+    ''' 
+    retrieves the missions saved within our MongoDB database 
+
+    '''
     try:
         return jsonify(db.fetch_missions()), 200
     except Exception as e:
@@ -16,16 +19,23 @@ def get_missions():
 
 @main.route('/missionMap', methods=['GET'])
 def get_mission_map():
-    ''' retrieves the map data from a specific mission saved within our MongoDb database '''
+    ''' 
+    retrieves the map data from a specific mission saved within our MongoDb database
+
+    '''
     try:
         mission_name = request.args.get('missionName')
         if mission_name: return jsonify(db.fetch_mission_map(mission_name)), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
 @main.route('/identify', methods=['GET'])
 def identify_robot():
-    ''' identifies the robot currently in use '''
+    ''' 
+    identifies the robot currently in use 
+
+    '''
     try:
         robot = request.args.get('robot')
         if robot: return robot_controls.identify_robot(json.loads(robot))
@@ -35,7 +45,10 @@ def identify_robot():
 
 @main.route('/saveMission', methods=['POST'])
 def save_mission():
-    ''' saves a mission to the MongoDB database '''
+    ''' 
+    saves a mission to the MongoDB database 
+
+    '''
     try:
         mission = request.get_json()
         if mission: return jsonify(db.save_mission(mission))
@@ -45,7 +58,10 @@ def save_mission():
 
 @main.route('/launch', methods=['GET'])
 def launch_mission():
-    ''' launches a mission on a the current robot when called through an http request '''
+    ''' 
+    launches a mission on a the current robot when called through an http request 
+
+    '''
     try:
         robot = request.args.get('robot')
         if robot: return robot_controls.launch_mission(json.loads(robot))
@@ -55,7 +71,10 @@ def launch_mission():
 
 @main.route('/robotFiles', methods=['GET'])
 def get_robot_files():
-    ''' extracts a specific robot's local files '''
+    ''' 
+    extracts a specific robot's local files 
+    
+    '''
     try:
         password = request.args.get('password')
         if password: return jsonify(robot_update.get_robot_files(password))
@@ -65,7 +84,10 @@ def get_robot_files():
 
 @main.route('/saveRobotFiles', methods=['POST'])
 def save_robot_files():
-    ''' saves files on a certain robot's local workspace '''
+    ''' 
+    saves files on a certain robot's local workspace 
+    
+    '''
     try:
         password = request.args.get('password')
         data = request.get_json()

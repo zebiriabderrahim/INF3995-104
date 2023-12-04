@@ -4,7 +4,7 @@ import unittest
 from unittest.mock import patch, Mock, call
 from extensions import socketio
 from flask import Flask, request
-from services import socket_manager, ros_utilities
+from services import socket_manager, ros_utilities, robot_simulation
 from classes import mission_room
 import numpy as np
 
@@ -16,11 +16,12 @@ class SocketManagerTest(unittest.TestCase):
         self.socketio = socketio.init_app(self.app)
         self.socket_manager = socket_manager
         self.socket_manager.ros_utilities = ros_utilities
+        self.socket_manager.robot_simulation = robot_simulation
 
         self.socket_manager.mission_rooms = {}
         self.socket_manager.simulated_rooms = {}
         self.robot_data = {
-            "name": "Robot",
+            "name": "Robot 1",
             "ipAddress": "0.0.0.0",
             "batteryLevel": 100
         }
@@ -36,6 +37,17 @@ class SocketManagerTest(unittest.TestCase):
             ]  
         }
 
+        self.sample_odom_message = {
+             "pose": {
+                "pose": {
+                    "position": {
+                        "x": 10,
+                        "y": 10 
+                    }
+                }
+            }
+        }
+
         self.mock_ros_class = patch('services.socket_manager.roslibpy.Ros', autospec=True)
         self.mock_ros = self.mock_ros_class.start()
         
@@ -47,63 +59,75 @@ class SocketManagerTest(unittest.TestCase):
         self.socket_manager.simulated_rooms = {}
         self.mock_ros_class.stop()
         self.mock_topic_class.stop()
+        self.socket_manager.robot1_position = [0.0, 0.0]
+        self.socket_manager.robot2_position = [0.0, 0.0]
 
-    # @patch('time.strftime')
-    # @patch('numpy.linalg.norm')
-    # @patch('services.socket_service.socketio.emit')
-    # def test_map_callback(self, mock_emit, mock_np, mock_time):
-    #     #  testing normal functionality
-    #     mock_np.return_value = 3.0
-    #     mock_time.return_value = 2
-    #     self.socket_manager.map_callback(self.sample_data, '192.168.0.110')
+    @patch('services.socket_service.socketio.emit')
+    def test_odom_callback_robot1(self, mock_emit):
+        self.socket_manager.odom_callback_robot1(self.sample_odom_message, self.robot_data, 'physical')
+        mock_emit.assert_called_once_with("recieveSimRobotPos",{"robotId": '1', "position": {'x': 10, 'y': 10}}, room='physical')
+        self.assertEqual(self.socket_manager.robot1_position, [10, 10])
 
-    #     mock_emit.assert_has_calls([
-    #         call('map', self.sample_data['data'], room='192.168.0.110'),
-    #         call('log', {'type': 'other', 'name': 'lidar', 'message': 'Obstacle en [-5.0, -4.8] à 3.0 m de robot 2', 'timestamp': 2}, room='192.168.0.110')
-    #     ])
-
-
-    # @patch('time.strftime')
-    # @patch('numpy.linalg.norm')
-    # @patch('services.socket_service.socketio.emit')
-    # def test_map_callback_v2(self, mock_emit, mock_np, mock_time):
-    #     # testing  np.linalg.norm(np.array(existing_position) - np.array(position_tuple)) < cluster_distance
-    #     mock_np.return_value = 0.1
-    #     mock_time.return_value = 2
-    #     self.socket_manager.global_obstacle_dict = {(-5.0, -4.8): 3.0}
-    #     self.socket_manager.map_callback(self.sample_data, '192.168.0.110')
-
-    #     mock_emit.assert_has_calls([
-    #         call('map', self.sample_data['data'], room='192.168.0.110'),
-    #     ])
-
-    # @patch('time.strftime')
-    # @patch('services.socket_service.socketio.emit')
-    # def test_map_callback_v3(self, mock_emit, mock_time):
-    #     #  testing distance1 < distance2
-    #     self.socket_manager.robot1_position = [-1, -2]
-    #     mock_time.return_value = 2
-    #     self.socket_manager.global_obstacle_dict = {(-5.0, -4.8): 3.0}
-    #     self.socket_manager.map_callback(self.sample_data, '192.168.0.110')
-
-    #     mock_emit.assert_has_calls([
-    #         call('map', self.sample_data['data'], room='192.168.0.110'),
-    #     ])
+    @patch('services.socket_service.socketio.emit')
+    def test_odom_callback_robot2(self, mock_emit):
+        self.socket_manager.odom_callback_robot2(self.sample_odom_message, self.robot_data, 'physical')
+        mock_emit.assert_called_once_with("recieveSimRobot2Pos",{"robotId": '1', "position": {'x': 10, 'y': 10}}, room='physical')
+        self.assertEqual(self.socket_manager.robot2_position, [10, 10])
 
     
-    @patch('services.socket_manager.sklearn.cluster.DBSCAN')
+    @patch('time.strftime')
+    @patch('numpy.linalg.norm')
     @patch('services.socket_service.socketio.emit')
-    def test_map_callback_v4(self, mock_emit, mock_dbscan):
-        #  cluster_id = -1
-        mock_dbscan_instance = Mock()
-        mock_dbscan_instance.labels_ = np.array([0, 0, 0, -1, -1])  # Example with some points as noise
-        mock_dbscan.return_value.fit = mock_dbscan_instance
-        self.socket_manager.robot1_position = [-1, -2]
+    def test_map_callback(self, mock_emit, mock_np, mock_time):
+        #  testing normal functionality 
+        mock_np.return_value = 3.0
+        mock_time.return_value = 2
+
+        self.socket_manager.map_callback(self.sample_data, 'physical')
+        mock_emit.assert_has_calls([
+            call('map', self.sample_data['data'], room='physical'),
+            call('log', {'type': 'other', 'name': 'lidar', 'message': 'Obstacle en [-5.0, -4.8] à 3.0 m robot 2', 'timestamp': 2}, room='physical')
+        ])
+
+        self.socket_manager.map_callback(self.sample_data, 'simulation')
+        mock_emit.assert_has_calls([
+            call('map', self.sample_data['data'], room='physical'),
+            call('log', {'type': 'other', 'name': 'lidar', 'message': 'Obstacle en [-5.0, -4.8] à 3.0 m robot 2', 'timestamp': 2}, room='physical')
+        ])
 
         self.socket_manager.map_callback(self.sample_data, '192.168.0.110')
+        mock_emit.assert_called_with('log', {'type': 'other', 'name': 'lidar', 'message': 'Obstacle en [-5.0, -4.8] à 3.0 m ', 'timestamp': 2}, room='192.168.0.110')
+
+        self.socket_manager.map_callback(self.sample_data, '192.168.0.122')
+        mock_emit.assert_called_with('log', {'type': 'other', 'name': 'lidar', 'message': 'Obstacle en [-5.0, -4.8] à 3.0 m ', 'timestamp': 2}, room='192.168.0.122')
+
+        self.socket_manager.map_callback(self.sample_data, '192.168.0.110sim')
+        mock_emit.assert_called_with('log', {'type': 'other', 'name': 'lidar', 'message': 'Obstacle en [-5.0, -4.8] à 3.0 m ', 'timestamp': 2}, room='192.168.0.110sim')
+
+        self.socket_manager.map_callback(self.sample_data, '192.168.0.122sim')
+        mock_emit.assert_called_with('log', {'type': 'other', 'name': 'lidar', 'message': 'Obstacle en [-5.0, -4.8] à 3.0 m ', 'timestamp': 2}, room='192.168.0.122sim')
+
+
+    @patch('time.strftime')
+    @patch('services.socket_service.socketio.emit')
+    def test_map_callback_v2(self, mock_emit, mock_time):
+        #  testing distance1 < distance2
+        self.socket_manager.robot1_position = [-3, -2]
+        mock_time.return_value = 2
+        self.socket_manager.global_obstacle_dict = {(0.0, 0.0): 3.0}
+        self.socket_manager.map_callback(self.sample_data, 'physical')
 
         mock_emit.assert_has_calls([
-            call('map', self.sample_data['data'], room='192.168.0.110'),
+            call('map', self.sample_data['data'], room='physical'),
+            call('log', {'type': 'other', 'name': 'lidar', 'message': 'Obstacle en [-5.0, -4.8] à 3.44 m robot 1', 'timestamp': 2}, room='physical')
+        ])
+
+        self.socket_manager.robot_simulation.current_positions[0] = [-3, -2]
+        self.socket_manager.map_callback(self.sample_data, 'simulation')
+
+        mock_emit.assert_has_calls([
+            call('map', self.sample_data['data'], room='physical'),
+            call('log', {'type': 'other', 'name': 'lidar', 'message': 'Obstacle en [-5.0, -4.8] à 3.44 m robot 1', 'timestamp': 2}, room='physical')
         ])
 
 
@@ -207,28 +231,30 @@ class SocketManagerTest(unittest.TestCase):
 
   
     @patch('services.socket_service.socketio.emit')
-    @patch('services.socket_manager.close_room')
-    def test_handle_stop_mission(self, mock_close_room, mock_emit):
+    def test_handle_stop_mission(self, mock_emit):
         self.socket_manager.mission_rooms = {"0.0.0.0": mission_room.MissionRoom("host", self.robot_data)}
 
         with self.app.test_request_context():
             self.socket_manager.handle_stop_mission(self.robot_data)
 
-        mock_close_room.assert_called_once_with('0.0.0.0')
         assert mock_emit.call_count == 3
         self.assertNotIn(self.robot_data["ipAddress"], self.socket_manager.mission_rooms)
 
     
+    @patch('time.strftime')
     @patch('services.socket_service.socketio.emit')
-    @patch('services.socket_manager.close_room')
-    def test_handle_stop_mission_all_robots(self, mock_close_room, mock_emit):
+    def test_handle_stop_mission_all_robots(self, mock_emit, mock_time):
         self.socket_manager.mission_rooms = {"physical": mission_room.MissionRoom("host", self.robot_data)}
+        mock_time.return_value = 4
 
         with self.app.test_request_context():
             self.socket_manager.handle_stop_mission(None)
 
-        mock_close_room.assert_called_once_with('physical')
-        assert mock_emit.call_count == 3
+        mock_emit.assert_has_calls([
+            call("log", {"type": "system", "name": "system", "message": "Mission arrêtée", "timestamp": 4}, room='physical'),
+            call('hostLeftRoom', room='physical'),
+            call('roomDeleted', 'Les deux robots physiques')
+        ])
         self.assertNotIn('physical', self.socket_manager.mission_rooms)
 
 
@@ -254,7 +280,8 @@ class SocketManagerTest(unittest.TestCase):
         mock_emit.assert_has_calls([
             call("log", {"type": "system", "name": "system", "message": "Simulation arrêtée", "timestamp": 0}, room='simulation'),
             call("hostLeftRoom", room='simulation'),
-            call("roomDeleted"),
+            call("roomDeleted", "Les deux robots en simulation", room='simulation'),
+            call("receiveDistanceSim", self.socket_manager.robot_simulation.simulated_robot_distance, room='simulation'),
             call('stoppedSimulation', room='simulation')
         ])
         
@@ -273,7 +300,8 @@ class SocketManagerTest(unittest.TestCase):
         mock_emit.assert_has_calls([
             call("log", {"type": "system", "name": "system", "message": "Simulation arrêtée", "timestamp": 0}, room='0.0.0.0sim'),
             call("hostLeftRoom", room='0.0.0.0sim'),
-            call("roomDeleted"),
+            call("roomDeleted", 'Le robot 1 en simulation', room='0.0.0.0sim'),
+            call("receiveDistanceSim", self.socket_manager.robot_simulation.simulated_robot_distance, room='0.0.0.0sim'),
             call('stoppedSimulation', room='0.0.0.0sim')
         ])
         
@@ -319,6 +347,20 @@ class SocketManagerTest(unittest.TestCase):
         mock_emit.assert_called_once_with("addedAsViewer", self.socket_manager.mission_rooms['0.0.0.0'].to_dict(), room='0.0.0.0')
         assert self.socket_manager.mission_rooms['0.0.0.0'].guest_id == ["random_sid"], "Guest was not added to the mission room"
 
+    @patch('services.socket_manager.join_room')
+    @patch('services.socket_service.socketio.emit')
+    def test_view_mission_room_v2(self, mock_emit, mock_join_room):
+        self.socket_manager.simulated_rooms = {'0.0.0.0': mission_room.MissionRoom("host", self.robot_data)}
+
+        with self.app.test_request_context(environ_base={'REMOTE_ADDR': '127.0.0.1'}):
+            request.environ['socketio'] = socketio.server
+            request.sid = 'random_sid'
+            self.socket_manager.view_mission_room(self.robot_data, True)
+        
+        mock_join_room.assert_called_once_with('0.0.0.0sim')
+        mock_emit.assert_called_once_with("addedAsViewer", self.socket_manager.simulated_rooms['0.0.0.0'].to_dict(), room='0.0.0.0sim')
+        assert self.socket_manager.simulated_rooms['0.0.0.0'].guest_id == ["random_sid"], "Guest was not added to the mission room"
+
 
     @patch('services.socket_manager.join_room')
     def test_view_mission_room_exception(self, mock_join_room):
@@ -330,12 +372,15 @@ class SocketManagerTest(unittest.TestCase):
                 self.socket_manager.view_mission_room(self.robot_data)
                 mock_print.assert_called_once_with("An error occurred in view_mission_room function: ")
         
-    @patch('services.socket_manager.odom_callback_robot')
-    @patch('services.socket_manager.map_callback')
-    def test_send_log(self, mock_map_callback, mock_odom_callback):
-        self.socket_manager.ros_utilities.ros_connections = {'0.0.0.0': self.mock_ros.return_value}
-        self.socket_manager.send_log(self.robot_data)
 
+    @patch('services.socket_manager.map_callback')
+    @patch('services.socket_manager.odom_callback_robot2')
+    @patch('services.ros_utilities.create_ros')
+    def test_send_log(self, mock_create_ros, mock_odom, mock_map_callback):
+        mock_create_ros.return_value = self.mock_ros.return_value
+        self.socket_manager.send_log([self.robot_data])
+
+        mock_create_ros.assert_called_once_with('0.0.0.0')
         args, _ = self.mock_topic.return_value.subscribe.call_args_list[0]
         args2, _ = self.mock_topic.return_value.subscribe.call_args_list[1]
         self.assertTrue(callable(args[0]))
@@ -345,29 +390,50 @@ class SocketManagerTest(unittest.TestCase):
         args2[0]('test message')
 
         mock_map_callback.assert_called_once_with('test message', '0.0.0.0')
-        mock_odom_callback.assert_called_once_with('test message', self.robot_data)
-            
-    @patch('services.socket_manager.odom_callback_robot')
+        mock_odom.assert_called_once_with('test message', self.robot_data, '192.168.0.122')
+
+    
+    @patch('services.ros_utilities.create_ros')
+    @patch('services.socket_manager.odom_callback_robot2')
+    @patch('services.socket_manager.odom_callback_robot1')
     @patch('services.socket_manager.map_callback')
-    def test_send_log_v2(self, mock_map_callback, mock_odom_callback):
-        self.socket_manager.ros_utilities.ros_connections = {}
-        self.socket_manager.send_log(self.robot_data)
+    def test_send_log_v2(self, mock_map_callback, mock_odom1, mock_odom2, mock_create_ros):
+        mock_create_ros.return_value = self.mock_ros.return_value
+        self.socket_manager.send_log([self.robot_data, self.robot_data], True)
+
+        mock_create_ros.assert_has_calls([
+            call('192.168.0.110'),
+            call('192.168.0.122')
+        ])
 
         args, _ = self.mock_topic.return_value.subscribe.call_args_list[0]
         args2, _ = self.mock_topic.return_value.subscribe.call_args_list[1]
+        args3, _ = self.mock_topic.return_value.subscribe.call_args_list[2]
         self.assertTrue(callable(args[0]))
         self.assertTrue(callable(args2[0]))
+        self.assertTrue(callable(args3[0]))
 
         args[0]('test message')
         args2[0]('test message')
+        args3[0]('map callback test message')
 
-        self.mock_ros.return_value.run.assert_called_once()
-        mock_map_callback.assert_called_once_with('test message', '0.0.0.0')
-        mock_odom_callback.assert_called_once_with('test message', self.robot_data)
+        mock_map_callback.assert_called_once_with('map callback test message', 'physical')
+        mock_odom1.assert_called_once_with('test message', self.robot_data, 'physical')
+        mock_odom2.assert_called_once_with('test message', self.robot_data, 'physical')
 
-    def test_send_log_exception(self):
+
+    @patch('services.ros_utilities.create_ros')
+    @patch('services.socket_manager.odom_callback_robot1')
+    def test_send_log_exception(self, mock_odom1, mock_create_ros):
+        mock_create_ros.return_value = self.mock_ros.return_value
+        self.socket_manager.send_log([{'ipAddress': '192.168.0.110'}])
+
+        args3, _ = self.mock_topic.return_value.subscribe.call_args_list[1]
+        args3[0]('test message')
+        mock_odom1.assert_called_once_with('test message', {'ipAddress': '192.168.0.110'}, '192.168.0.110')
+
         with patch('builtins.print') as mock_print:  
-            self.socket_manager.send_log({'name': 'Robot 2'})
+            self.socket_manager.send_log([{'name': 'Robot 2'}])
             mock_print.assert_called_once_with("An error occurred in send_log function: log couldn't be sent, 'ipAddress'")
         
 
@@ -381,10 +447,11 @@ class SocketManagerTest(unittest.TestCase):
     @patch('services.socket_service.socketio.emit')
     def test_send_robot_battery_v2(self, mock_emit, mock_time):
         mock_time.return_value = 0
+        self.socket_manager.is_battery_low['0.0.0.0'] = False
         self.socket_manager.send_robot_battery('0.0.0.0', {'data': 19})
         mock_emit.assert_has_calls([
-            call("log", {"type": "system", "name": "system", "message": f"Niveau de batterie faible: 19%", "timestamp": 0}, room='0.0.0.0'),
-            call("robotBattery", {'ipAddress': '0.0.0.0', 'batteryLevel': 19})
+            call("robotBattery", {'ipAddress': '0.0.0.0', 'batteryLevel': 19}),
+            call("log", {"type": "system", "name": "system", "message": f"Niveau de batterie faible: 19%", "timestamp": 0}, room='0.0.0.0')
         ])
 
 

@@ -150,13 +150,11 @@ def handle_terminate_simulation_robot(robot):
         socket_manager.get_available_rooms()
 
         if not robot_simulation.return_base_robots.__contains__("robot1"):
-            print("return to base robot1")
-            robot_simulation.terminate_mission_robot({"name":"Robot 1"},False)
+            robot_simulation.terminate_mission_robot({"name":"Robot 1"}, False)
         if not robot_simulation.return_base_robots.__contains__("robot2"):
-            print("return to base robot2")
-            robot_simulation.terminate_mission_robot({"name":"Robot 2"},False)           
-        robot_simulation.terminate_mission_robot(None,True)
-        print("in stop simulation robot after stop mission click")
+            robot_simulation.terminate_mission_robot({"name":"Robot 2"}, False)    
+
+        robot_simulation.terminate_mission_robot(None, True)
         socket_manager.stop_simulation(robot, 'simulation')
 
     else: 
@@ -182,7 +180,6 @@ def handle_return_to_base(robot):
     """
     if isinstance(robot, list):
         for bot in robot:
-            print('return to base for robot', bot['ipAddress'])
             ros_utilities.return_robot_to_base(bot['ipAddress'])
     else:
         ros_utilities.return_robot_to_base(robot['ipAddress'])
@@ -203,29 +200,26 @@ def handle_return_to_base_simulation(robot):
 
     """
     if robot["ipAddress"] == 'simulation' :
-        print("in return to base simulation for both robots")
         if all(val not in robot_simulation.return_base_robots for val in ("robot1", "robot2")):     
             robot_simulation.terminate_mission_robot(None, False)
             robot_simulation.return_to_base()
             robot_simulation.return_base_robots.update(["robot1", "robot2"])
-            print("in return to base simulation for both robots for the first time", robot_simulation.return_base_robots) 
-            print(robot_simulation.return_base_robots)
+
         else:
             missing_robot = {'robot1', 'robot2'}.difference(robot_simulation.return_base_robots)
             if missing_robot: missing_robot = missing_robot.pop()
-            print("missing robot:",missing_robot)
             if missing_robot:
+                robot_to_print = "robot 1" if missing_robot == "robot2" else "robot 2"
+                socketio.emit("log", {"type": "command", "name": "command", "message": f"{robot_to_print} retourne a la base", "timestamp": time.strftime("%b %d %H:%M:%S")}, room=robot['ipAddress'])
                 robot_simulation.return_base_robots.add(missing_robot)
-                robot_simulation.terminate_mission_robot({"name":missing_robot},False)
-                robot_simulation.return_to_base({"name":missing_robot})           
+                robot_simulation.terminate_mission_robot({"name": missing_robot}, False)
+                robot_simulation.return_to_base({"name": missing_robot})           
     else: 
-        print(robot_simulation.return_base_robots)
         if not robot_simulation.return_base_robots.__contains__(robot['name'].lower().replace(' ', '')):
-            print(robot_simulation.return_base_robots)  
             robot_simulation.return_base_robots.add(robot['name'].lower().replace(' ', ''))
             robot_simulation.terminate_mission_robot(robot, False)
             robot_simulation.return_to_base(robot)
-            print("in return to base simulation", robot_simulation.return_base_robots)
+
 
 @socketio.on("getLogs")
 def get_logs(robots):
@@ -268,7 +262,6 @@ def stop_all_robots(robots):
     socketio.emit('allRobotsConnected', False)
     socket_manager.handle_stop_mission()
     for robot in robots:
-        print('entered stop robot')
         ros_utilities.terminate_mission(robot) 
 
 
@@ -292,10 +285,3 @@ def handle_set_initial_pos(data):
 
     """
     robot_simulation.set_initial_position(data['name'][-1], data['data'])
-    
-
-
-    
-
-
-

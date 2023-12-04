@@ -19,14 +19,13 @@ def terminate_mission(robot):
     :param robot: A dictionary containing information about the robot including its IP address.
     """
     def distance_callback(message):
-        print(message)
         robot_simulation.distance_callback(robot["name"], message,True)
         distance_topic.unsubscribe()
+    
     ros = create_ros(robot["ipAddress"])
     distance_topic = Topic(ros, "/distance", "std_msgs/Float64")
     distance_topic.subscribe(distance_callback)
 
-    
     Topic(ros, "/odom", "nav_msgs/Odometry").unsubscribe()
     Topic(ros, "/map", "nav_msgs/OccupancyGrid").unsubscribe()
     

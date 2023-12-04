@@ -20,14 +20,14 @@ class RobotControls(unittest.TestCase):
         with self.app.app_context():
             mock_execute_command.return_value = 'Successfully called the execute command function'
             robot1_result = self.robot_controls.identify_robot({'ipAddress': '192.168.0.110'})  
-            mock_execute_command.assert_called_once_with({'ipAddress': '192.168.0.110'}, 'play -n -c1 synth fade q 0.1 1 0.1') 
+            mock_execute_command.assert_called_once_with({'ipAddress': '192.168.0.110'}, 'pacmd set-default-sink alsa_output.usb-0c76_USB_PnP_Audio_Device-00.analog-stereo; pacmd set-sink-volume 1 0x10000; play -n -c1 synth fade q 0.1 1 0.1') 
             assert robot1_result == 'Successfully called the execute command function', 'execute_command was not called via identify(ip robot 1)'
 
     @patch('services.ros_utilities.execute_command')
     def test_identify_robot2(self, mock_execute_command):
         mock_execute_command.return_value = 'Successfully called the execute command function'
         robot2_result = self.robot_controls.identify_robot({'ipAddress': '192.168.0.122'})
-        mock_execute_command.assert_called_once_with({'ipAddress': '192.168.0.122'}, 'play -n -c1 synth pluck C4 pluck E4 pluck G4 fade q 0.1 1 0.1')
+        mock_execute_command.assert_called_once_with({'ipAddress': '192.168.0.122'}, 'pacmd set-default-sink alsa_output.usb-0c76_USB_PnP_Audio_Device-00.analog-stereo; pacmd set-sink-volume 1 0x10000; play -n -c1 synth pluck C4 pluck E4 pluck G4 fade q 0.1 1 0.1')
         assert robot2_result == 'Successfully called the execute command function', 'execute_command was not called via identify(ip robot 2)'
 
     @patch('services.ros_utilities.execute_command')
