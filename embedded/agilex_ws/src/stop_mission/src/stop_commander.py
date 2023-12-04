@@ -9,7 +9,6 @@ nodes_to_kill=(
   "/limo_base_node"
   "/move_base"
   "/robot_pose_ekf"
-  "/rviz"
   "/slam_gmapping"
   "/ydlidar_node"
   "/map_merge"
