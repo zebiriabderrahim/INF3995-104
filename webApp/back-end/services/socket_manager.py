@@ -129,8 +129,8 @@ def map_callback(data, robot_ip):
                 global_obstacle_dict[position_tuple] = distance
                 distance = round(distance, 2)
                 position = [round(position[0], 2), round(position[1], 2)]
-
                 socket_service.socketio.emit("log", {"type": "other", "name": "lidar", "message": f"Obstacle en {position} à {distance} m {robot_used}", "timestamp": time.strftime("%b %d %H:%M:%S")}, room=robot_ip)
+
 
 def create_mission_room(robot=None, type=None):
     """
@@ -159,7 +159,8 @@ def create_mission_room(robot=None, type=None):
                 mission_rooms[robot["ipAddress"]] = mission_room
         
         join_room(room_name)
-        socket_service.socketio.emit("createdMissionRoom", mission_room.to_dict())
+        socket_service.socketio.emit("createdMissionRoom", mission_room.to_dict(),room=room_name)
+        socket_service.socketio.emit("roomCreated", mission_room.to_dict())
         socket_service.socketio.emit("log", {"type": "system", "name": "system", "message": "Mission démarrée", "timestamp": time.strftime("%b %d %H:%M:%S")}, room=room_name)
     except Exception as e:
         print(f"An error occurred in create_mission_room function: {str(e)}")

@@ -21,11 +21,9 @@ describe('RobotComponent', () => {
 
 
   const mockCommandService = {
-    getRobots: () => of([]),
     getMissions: () => of([]),
     identifyRobot: (robot: Robot) => of({}),
     simulateMission: () => of({}),
-    terminateSimulation: () => of({}),
     createMissionRoom: (robot: Robot) => of({}),
     viewMissionRoom: (robot: Robot) => of({}),
     simulateMissionRobot: (robot: Robot) => of({}),
@@ -38,17 +36,17 @@ describe('RobotComponent', () => {
     returnToBase:(robot:Robot)=> {},
     terminateSimulationRobot: () => {},
     terminateAllPhysicalRobots: (robot:Robot) => {},
-    isConnected: (bool:boolean) => {return bool;}, 
+    isConnected: (bool:boolean) => {return bool;},
     getAvailableRooms:()=> {},
     getLogs:(room:MissionRoom,bool:boolean )=>{},
     setInitialPosition: (robotName: string, location: string) => of({}),
-    
+
     getBatteryLevel:(robot:Robot)=>{},
     getBatteryLevelSim:(robot:Robot)=>{},
     getAvailableMissionRoomsInfo : () => {
       return mockSocketService.availableRooms.asObservable();
     },
-    
+
     allPhysicalRobots: new BehaviorSubject<boolean>(false),
     availableRooms: new BehaviorSubject<MissionRoom[]>([]),
     roomInfo: new Subject<MissionRoom[]>(),
@@ -67,7 +65,7 @@ describe('RobotComponent', () => {
     getMissionRoomInfo: ()=> {
       return mockSocketService.roomInfo.asObservable();
     }
-   
+
    };
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -110,7 +108,7 @@ describe('RobotComponent', () => {
 
   it('viewMission should call viewMissionRoom', () => {
     const viewMissionSpy = spyOn(commandService, 'viewMissionRoom').and.returnValue();
-    component.viewMission(getTestRobot());
+    component.viewMission(getTestRobot(), true);
     expect(viewMissionSpy).toHaveBeenCalled();
   });
 
@@ -151,7 +149,7 @@ describe('RobotComponent', () => {
     component.simulationRooms = [getTestMission()];
     expect(component.isInSimRoom('test')).toBeTruthy();
   });
-  
+
   it('ngOnInit should initialize subscriptions', () => {
     spyOn(socketService, 'getBatteryLevel');
     spyOn(socketService, 'getBatteryLevelSim');
@@ -190,20 +188,20 @@ describe('RobotComponent', () => {
   it('should update simulationRooms when getAvailableSimulatedRoomsInfo emits', () => {
     const mockRooms: MissionRoom[] = [getTestMission()];
     spyOn(socketService, 'getAvailableSimulatedRoomsInfo').and.returnValue(of(mockRooms));
-    
+
     component.ngOnInit();
-    
+
     expect(component.simulationRooms).toEqual(mockRooms);
   });
-  
+
   it('should call getAvailableRooms and set isRoomDeleted to false when isRoomDeleted emits true', fakeAsync(() => {
     spyOn(socketService, 'getAvailableRooms').and.stub();
     const isRoomDeletedSpy = spyOn(socketService.isRoomDeleted, 'next').and.callThrough();
-  
+
     component.ngOnInit();
     socketService.isRoomDeleted.next(true);
     tick();
-  
+
     expect(socketService.getAvailableRooms).toHaveBeenCalled();
     expect(isRoomDeletedSpy).toHaveBeenCalledTimes(2);
     expect(isRoomDeletedSpy).toHaveBeenCalledWith(false);
@@ -212,20 +210,20 @@ describe('RobotComponent', () => {
   it('should call getAvailableRooms and set isRoomCreated to false when isRoomCreated emits true', fakeAsync(() => {
     spyOn(socketService, 'getAvailableRooms').and.stub();
     const isRoomCreatedSpy = spyOn(socketService.isRoomCreated, 'next').and.callThrough();
-  
+
     component.ngOnInit();
     socketService.isRoomCreated.next(true);
     tick();
-  
+
     expect(socketService.getAvailableRooms).toHaveBeenCalled();
     expect(isRoomCreatedSpy).toHaveBeenCalledTimes(2);
     expect(isRoomCreatedSpy).toHaveBeenCalledWith(false);
   }));
-  
-  
-  
-  
-  
+
+
+
+
+
 
 
   it('should return true if any room has other robots', () => {
@@ -246,7 +244,7 @@ describe('RobotComponent', () => {
   });
 
   it('should call setInitialPosition with the result from the dialog', () => {
-    const testResult = 'some-location'; 
+    const testResult = 'some-location';
     const mockDialogRef = { afterClosed: () => of(testResult) };
     spyOn(dialog, 'open').and.returnValue(mockDialogRef as any);
     const spy= spyOn(socketService, 'setInitialPosition');
@@ -262,7 +260,7 @@ describe('RobotComponent', () => {
       robot: { name: 'robot1', ipAddress: 'simulation', state: 'active', batteryLevel: 100 },
       guestId: ["guest456", "guest789"]
     }];
-    expect(component.isAllRobotsLaunched(missionRoom)).toBeTruthy();
+    expect(component.areAllRobotsLaunched(missionRoom)).toBeTruthy();
   });
 
   it('should return false if no room has a robot with ipAddress "simulation"', () => {
@@ -271,7 +269,7 @@ describe('RobotComponent', () => {
       robot: { name: 'robot1', ipAddress: '192', state: 'active', batteryLevel: 100 },
       guestId: ["guest456", "guest789"]
     }];
-    expect(component.isAllRobotsLaunched(missionRoom)).toBeFalsy();
+    expect(component.areAllRobotsLaunched(missionRoom)).toBeFalsy();
   });
 
   it('should subscribe to batteryLevelSimulation and update robotSimulationBatteryLevel on simulation', () => {

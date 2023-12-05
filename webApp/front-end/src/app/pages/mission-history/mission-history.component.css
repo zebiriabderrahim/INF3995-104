@@ -30,7 +30,7 @@
 
     flex-direction: column;
     height: 80vh;
-    max-height: calc(100vh - 120px); /* Adjust the value based on your header/footer size */
+    max-height: calc(100vh - 120px); 
     overflow-y: auto;
 }
 

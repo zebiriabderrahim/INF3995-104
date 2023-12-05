@@ -1,6 +1,5 @@
 FROM ros:noetic-ros-base-focal
 
-# Install necessary packages in one layer
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gazebo11 \
     ros-noetic-gazebo-ros-pkgs \
@@ -19,7 +18,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-noetic-ros-controllers \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Linux tools in another layer
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libx11-xcb1 \
     libgl1-mesa-glx \
@@ -39,7 +37,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     x11-apps \
     && rm -rf /var/lib/apt/lists/*
 
-#copy the workspace
 COPY ./gz_sim_ws/src /root/gz_sim_ws/src
 
 ENV ROS_WS=/root/gz_sim_ws
@@ -59,12 +56,10 @@ RUN echo "export DISPLAY=$HOST_IP:0" \
     echo "source $ROS_WS/devel/setup.bash" \
     >> ~/.bashrc
 
-# Source setup.bash and build the workspace
 RUN /bin/bash -c '. /opt/ros/noetic/setup.bash; \
     rosdep install --from-paths src --ignore-src -r -y; \
     catkin_make'
 
 EXPOSE 9090
 
-# CMD for X11 forwarding and launching ROS nodes
 CMD ["/bin/bash", "-c", "source /opt/ros/noetic/setup.bash && source $ROS_WS/devel/setup.bash && roslaunch limo_gazebo_sim sim_rosbrige_ser.launch open_rviz:=false"]

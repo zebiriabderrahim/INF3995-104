@@ -1,3 +1,7 @@
+# Démonstration vidéos
+
+Toutes démonstration vidéos des différentes fonctionnalités (simulation/robot-physiques) sont disponible au [lien suivant sur Google Drive](https://drive.google.com/drive/folders/1FRc0I4VLxESOACXQvV_2FOeH5X6hW15U?usp=sharing).
+
 # Application Web
 
 Le code de l'application web se trouve dans le dossier "webApp" et est organisé en deux parties principales :
@@ -37,7 +41,7 @@ cd webApp/back-end
 python -m pytest 
 ```
 
-- fromt-end side: 
+- front-end side: 
 
 ```bash
 cd webApp/front-end
@@ -45,10 +49,14 @@ cd webApp/front-end
 ```bash
 npm run test
 ```
+ou pour avoir le coverage:
+```bash
+npm run coverage
+```
 
 # Docker : Tout lancer en une commande
 
-Exécutez `docker compose up` à l'intérieur de ce répertoire. Cela créera le serveur frontend sur le port 80 disponible sur le réseaux, le serveur backend sur le port 8000 en localhost, et la simulation gazebo.
+Exécutez `docker compose up` à l'intérieur de ce répertoire. Cela créera le serveur frontend sur le port 4100 disponible sur le réseaux, le serveur backend sur le port 8000 en localhost, et la simulation gazebo localhost, port 9090.
 
 Pour avoir accès a l'application depuis d'autres appareils sur le réseaux, veuillez a modifier le fichier `/front-end/src/environments/environment.prod.ts` et mettre l'adresse IP local de la station au sol.
 

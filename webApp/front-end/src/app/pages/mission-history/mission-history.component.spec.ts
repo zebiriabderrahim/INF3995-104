@@ -23,12 +23,10 @@ describe('MissionHistoryComponent', () => {
 
 
   const mockCommandService = {
-    getRobots: () => of([]),
     getMissions: () => of([]),
     getMissionMap: () => of([]),
     identifyRobot: (robot: Robot) => of({}),
     simulateMission: () => of({}),
-    terminateSimulation: () => of({}),
   };
 
   const mockSocketService = {
@@ -81,7 +79,7 @@ describe('MissionHistoryComponent', () => {
     component.openMissionOverview(mockMission);
     expect(commandService.getMissionMap).toHaveBeenCalled();
     expect(dialogSpy.open).toHaveBeenCalledWith(MissionHistoryDialog, {
-      data: { missionid: mockMission.name, map: [0,0,0,0], duration:undefined,type:undefined,robots:undefined },
+      data: { missionId: mockMission.name, map: [0,0,0,0], duration:undefined,type:undefined,robots:undefined, distance:undefined },
       width: '80%',
       height: '90%'
     });
@@ -91,26 +89,11 @@ describe('MissionHistoryComponent', () => {
     const mockMission = { name: 'testMission', logs: 'testLogs' };
     component.openLogsOverview(mockMission);
     expect(dialogSpy.open).toHaveBeenCalledWith(MissionHistoryDialog, {
-      data: { missionid: mockMission.name, logs: mockMission.logs },
+      data: { missionId: mockMission.name, logs: mockMission.logs },
       width: '80%',
       height: '90%'
     });
   });
-
-
-
-  // it('should open mission overview dialog', () => {
-  //   const mockMissionData = { name: 'testMission' };
-  //   const dialogSpy = spyOn((component as any).missionHistoryDialog, 'open').and.stub();
-  //   component.missions = [mockMissionData];
-  //   // component.openMissionOverview();
-  //   expect(dialogSpy).toHaveBeenCalledWith(MissionHistoryDialog, {
-  //     data: { missionid: mockMissionData.name },
-  //     width: '80%',
-  //     height: '90%'
-  //   });
-  // });
-
 
 
   it('ngOnInit should subscribe to missions and isHostLeavingRoom', () => {
@@ -125,16 +108,122 @@ describe('MissionHistoryComponent', () => {
     expect(socketService.router.navigate).toHaveBeenCalledWith(["/home"]);
   });
 
-  // it('ngOnDestroy should unsubscribe from subscriptions', () => {
-  //   const missionsSubscriptionSpy = spyOn(component.missionsSubscription as Subscription, 'unsubscribe');
-  //   const isHostLeavingRoomSubscriptionSpy = spyOn(
-  //     component.isHostLeavingRoomSubscription as Subscription,
-  //     'unsubscribe'
-  //   );
-  //   component.ngOnDestroy();
-  //   expect(missionsSubscriptionSpy).toHaveBeenCalled();
-  //   expect(isHostLeavingRoomSubscriptionSpy).toHaveBeenCalled();
-  // });
+  it('should filter missions for "Mode simulation"', () => {
+    component.missions = [
+        { type: 'Mode simulation' },
+        { type: 'Mode robots physiques' },
+    ];
+
+    component.showMissionsByMode('Mode simulation');
+
+    expect(component.filteredMissions.length).toBeGreaterThan(0);
+    expect(component.filteredMissions.every((mission: Record<string, any>) => mission["type"] === 'Mode simulation')).toBeTrue();
+});
+
+it('should filter missions for "Mode robots physiques"', () => {
+  component.missions = [
+    { type: 'Mode simulation' },
+    { type: 'Mode robots physiques' },
+  ];
+
+  component.showMissionsByMode('Mode robots physiques');
+
+  expect(component.filteredMissions.length).toBeGreaterThan(0);
+  expect(component.filteredMissions.every((mission: Record<string, any>) => mission["type"] === 'Mode robots physiques')).toBeTrue();
+});
+
+it('should show all missions for an unknown mode', () => {
+  component.missions = [
+    { type: 'Mode simulation' },
+    { type: 'Mode robots physiques' },
+  ];
+
+  component.showMissionsByMode('Unknown Mode');
+
+  expect(component.filteredMissions).toEqual(component.missions);
+});
+
+it('should sort missions by distance', () => {
+  const mockMissions = [
+    { distance: '10.5 meters' },
+    { distance: '5.2 meters' },
+  ];
+  component.missions = mockMissions;
+
+  component.sortMissionsByDistance();
+
+  const sortedDistances = component.filteredMissions.map((mission: Record<string, any>) => mission["distance"]);
+  expect(sortedDistances).toEqual(['5.2 meters', '10.5 meters']);
+});
+
+it('should sort missions by duration', () => {
+  const mockMissions = [
+    { duration: '3 minutes 30 seconds' },
+    { duration: '2 minutes 45 seconds' },
+  ];
+  component.missions = mockMissions;
+
+  component.sortMissionsByDuration();
+
+  const sortedDurations = component.filteredMissions.map((mission: Record<string, any>)=> mission["duration"]);
+  expect(sortedDurations).toEqual(['2 minutes 45 seconds', '3 minutes 30 seconds']);
+});
+
+it('should sort missions by distance', () => {
+  const mockMissions = [
+    { distance: '10.5 meters' },
+    { distance: '5.2 meters' },
+  ];
+  component.missions = mockMissions;
+
+  component.sortMissionsByDistance();
+
+  const sortedDistances = component.filteredMissions.map((mission: Record<string, any>) => mission["distance"]);
+  expect(sortedDistances).toEqual(['5.2 meters', '10.5 meters']);
+});
+
+it('should handle missions with missing or invalid distance values', () => {
+  const mockMissions = [
+    { distance: '10.5 meters' },
+    { distance: '' },
+    { distance: '7.3 meters' },
+  ];
+  component.missions = mockMissions;
+
+  component.sortMissionsByDistance();
+
+  const sortedDistances = component.filteredMissions.map((mission: Record<string, any>) => mission["distance"]);
+  expect(sortedDistances).toEqual(['','7.3 meters', '10.5 meters']);
+});
+
+it('should sort missions by duration', () => {
+  const mockMissions = [
+    { duration: '3 minutes 30 seconds' },
+    { duration: '2 minutes 45 seconds' },
+  ];
+  component.missions = mockMissions;
+
+  component.sortMissionsByDuration();
+
+  const sortedDurations = component.filteredMissions.map((mission: Record<string, any>) => mission["duration"]);
+  expect(sortedDurations).toEqual(['2 minutes 45 seconds', '3 minutes 30 seconds']);
+});
+
+it('should handle missions with missing or invalid duration values', () => {
+  const mockMissions = [
+    { duration: '2 minutes 45 seconds' },
+    { duration: '3 minutes 30 seconds' },
+    { duration: "" },
+    { duration: "" },
+  ];
+  component.missions = mockMissions;
+
+  component.sortMissionsByDuration();
+  const sortedDurations = component.filteredMissions.map((mission: Record<string, any>) => mission["duration"]);
+  expect(sortedDurations).toEqual(['2 minutes 45 seconds', '3 minutes 30 seconds', "", ""]);
+});
+
+
 });
 
 const getTestRobot =(): Robot => ({

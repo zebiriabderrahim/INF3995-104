@@ -12,8 +12,7 @@ describe('MissionHistoryDialog', () => {
       await TestBed.configureTestingModule({
         declarations: [ MissionHistoryDialog ],
         providers: [
-          { provide: MAT_DIALOG_DATA, useValue: { logs: [{/*...mock log data...*/}], map: [] } }
-          // other providers...
+          { provide: MAT_DIALOG_DATA, useValue: { logs: [{}], map: [] } }
         ],
       })
       .compileComponents();
@@ -33,8 +32,7 @@ describe('MissionHistoryDialog', () => {
       await TestBed.configureTestingModule({
         declarations: [ MissionHistoryDialog ],
         providers: [
-          { provide: MAT_DIALOG_DATA, useValue: { map: [/*...mock map data...*/] } }
-          // other providers...
+          { provide: MAT_DIALOG_DATA, useValue: { map: [] } }
         ],
       })
       .compileComponents();
