@@ -3,8 +3,8 @@ import roslibpy
 import roslibpy.actionlib
 from services import socket_service, socket_manager, robot_controls
 
-# client = roslibpy.Ros(host='ros_gazebo_simulation_container', port=9090)
-client = roslibpy.Ros(host='192.168.125.245', port=9090)
+client = roslibpy.Ros(host='ros_gazebo_simulation_container', port=9090) # for docker
+# client = roslibpy.Ros(host='192.168.85.3', port=9090) # for local development
 map_topic = roslibpy.Topic(client, '/map', 'nav_msgs/OccupancyGrid')
 first_map_topic = roslibpy.Topic(client, '/robot1/map', 'nav_msgs/OccupancyGrid')
 second_map_topic= roslibpy.Topic(client, '/robot2/map', 'nav_msgs/OccupancyGrid')
