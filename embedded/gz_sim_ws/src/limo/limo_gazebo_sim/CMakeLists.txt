@@ -19,7 +19,6 @@ find_package(catkin REQUIRED COMPONENTS
   gazebo_dev
   message_generation
   nodelet
-  std_srvs
   rosconsole
 )
 find_package(Boost REQUIRED COMPONENTS thread)
@@ -39,13 +38,6 @@ add_action_files(
   DistanceQuery.action
 )
 
-add_service_files(
-    FILES
-    Reset.srv
-    SetCharge.srv
-    SetTemperature.srv
-)
-
 generate_messages(
   DEPENDENCIES
   actionlib_msgs
@@ -53,7 +45,6 @@ generate_messages(
 )
 
 catkin_package(
-  INCLUDE_DIRS include
   LIBRARIES  gazebo_ros_ackerman 
   CATKIN_DEPENDS 
     roscpp 
@@ -62,19 +53,11 @@ catkin_package(
     gazebo_ros 
     message_runtime 
     gazebo_msgs 
-    nodelet 
-    std_srvs 
+    nodelet  
     rosconsole 
     std_msgs
 )
 
-
-
-
-include_directories(
-  include
-  ${catkin_INCLUDE_DIRS}
-)
 
 add_executable(distance_calculator src/distance_calculator.cpp)
 add_dependencies(distance_calculator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

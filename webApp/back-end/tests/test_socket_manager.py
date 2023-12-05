@@ -146,7 +146,8 @@ class SocketManagerTest(unittest.TestCase):
         
         mock_join_room.assert_called_once_with('simulation')
         mock_emit.assert_has_calls([
-            call("createdMissionRoom", expected_room.to_dict()),
+            call("createdMissionRoom", expected_room.to_dict(), room='simulation'),
+            call('roomCreated', expected_room.to_dict()),
             call("log", {"type": "system", "name": "system", "message": "Mission démarrée", "timestamp": 0}, room='simulation')
         ])
         assert isinstance(self.socket_manager.simulated_rooms['simulation'].host_id, str), "Argument is not a string"
@@ -169,7 +170,8 @@ class SocketManagerTest(unittest.TestCase):
         
         mock_join_room.assert_called_once_with('0.0.0.0sim')
         mock_emit.assert_has_calls([
-            call("createdMissionRoom", expected_room.to_dict()),
+            call("createdMissionRoom", expected_room.to_dict(), room='0.0.0.0sim'),
+            call('roomCreated', expected_room.to_dict()),
             call("log", {"type": "system", "name": "system", "message": "Mission démarrée", "timestamp": 0}, room='0.0.0.0sim')
         ])
         assert isinstance(self.socket_manager.simulated_rooms['0.0.0.0'].host_id, str), "Argument is not a string"
@@ -191,7 +193,8 @@ class SocketManagerTest(unittest.TestCase):
         
         mock_join_room.assert_called_once_with('physical')
         mock_emit.assert_has_calls([
-            call("createdMissionRoom", expected_room.to_dict()),
+            call("createdMissionRoom", expected_room.to_dict(), room='physical'),
+            call('roomCreated', expected_room.to_dict()),
             call("log", {"type": "system", "name": "system", "message": "Mission démarrée", "timestamp": 0}, room='physical')
         ])
         assert self.socket_manager.mission_rooms['physical'].to_dict() == expected_room.to_dict(), "Incorrect mission room"
@@ -211,7 +214,8 @@ class SocketManagerTest(unittest.TestCase):
         
         mock_join_room.assert_called_once_with('0.0.0.0')
         mock_emit.assert_has_calls([
-            call("createdMissionRoom", expected_room.to_dict()),
+            call("createdMissionRoom", expected_room.to_dict(), room='0.0.0.0'),
+            call('roomCreated', expected_room.to_dict()),
             call("log", {"type": "system", "name": "system", "message": "Mission démarrée", "timestamp": 0}, room='0.0.0.0')
         ])
         assert self.socket_manager.mission_rooms['0.0.0.0'].to_dict() == expected_room.to_dict(), "Incorrect mission room"

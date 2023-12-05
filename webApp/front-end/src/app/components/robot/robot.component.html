@@ -36,14 +36,13 @@
         </span>
 
     <div class="button-section">
-      <!-- <span *ngIf="(isAvailableRoom('sim') && simulation && isInSimRoom(robot.name) && !isAllRobotsLaunched(simulationRooms)) || ((isAllRobotsLaunched(simulationRooms) && simulation))" >Robot en mission</span> -->
 
       <button class="icon-button" (click)="launchMission(robot)" *ngIf="!isAvailableRoom(undefined) && !simulation && !bothRobotsUsed(availableRooms)" [disabled]="robot.state === 'Off'">
         <mat-icon class="play-button" [class.grey-out]="robot.state === 'Off'">play_arrow</mat-icon>
         <span>Lancer mission</span>
       </button>
       
-      <button class="icon-button"  (click)="handleSimulationRobot(robot)" *ngIf="!isAvailableRoom('sim') && simulation && !isAllRobotsLaunched(simulationRooms)" [disabled]="robotSimulationBatteryLevel === 0"> 
+      <button class="icon-button"  (click)="handleSimulationRobot(robot)" *ngIf="!isAvailableRoom('sim') && simulation && !areAllRobotsLaunched(simulationRooms)" [disabled]="robotSimulationBatteryLevel === 0"> 
         <mat-icon class="play-button" [class.grey-out]="robotSimulationBatteryLevel === 0">play_arrow</mat-icon>
         <span>Lancer simulation</span>
       </button>

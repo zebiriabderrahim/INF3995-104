@@ -4,9 +4,10 @@ import roslibpy.actionlib
 from services import socket_service, socket_manager, robot_controls
 
 # client = roslibpy.Ros(host='ros_gazebo_simulation_container', port=9090)
-client = roslibpy.Ros(host='192.168.83.2', port=9090)
+client = roslibpy.Ros(host='192.168.125.245', port=9090)
 map_topic = roslibpy.Topic(client, '/map', 'nav_msgs/OccupancyGrid')
-second_map_topic= roslibpy.Topic(client, '/map', 'nav_msgs/OccupancyGrid')
+first_map_topic = roslibpy.Topic(client, '/robot1/map', 'nav_msgs/OccupancyGrid')
+second_map_topic= roslibpy.Topic(client, '/robot2/map', 'nav_msgs/OccupancyGrid')
 last_processed_time = 0
 last_processed_battery_time = 0
 initial_positions = {}
@@ -92,7 +93,7 @@ def send_goal_and_wait(action_client, namespace, stop):
     goal = roslibpy.actionlib.Goal(action_client, {'robot_namespace': namespace, 'stop': stop})
     goal.send()
     try:
-        goal.wait(5)
+        goal.wait(20)
     except Exception as e:
         print(f"Goal sent to {e} timed out.")
    
@@ -130,11 +131,11 @@ def simulate_robot_mission(robot=None):
     global action_client
     global second_action_client
     
-    action_client=None
-    second_action_client=None
+
     try:                 
         if robot is None :
             action_client = roslibpy.actionlib.ActionClient(client, '/stop_resume_exploration', 'limo_gazebo_sim/StopResumeExplorationAction')
+            time.sleep(2)
             second_action_client = roslibpy.actionlib.ActionClient(client, '/stop_resume_exploration', 'limo_gazebo_sim/StopResumeExplorationAction')
             are_two_robot_connected = True
             return_base_robots.clear()
@@ -147,10 +148,11 @@ def simulate_robot_mission(robot=None):
         else:
             roslibpy.Topic(client, f"{robot['name'].lower().replace(' ', '')}/odom", 'nav_msgs/Odometry').subscribe(lambda message: position_callback(robot["name"][-1], message, str(robot["ipAddress"] + 'sim')))
 
-            if robot['name'] == "Robot 1" and not map_topic.is_subscribed:
+            if robot['name'] == "Robot 1" and not first_map_topic.is_subscribed:
                 action_client = roslibpy.actionlib.ActionClient(client, '/stop_resume_exploration', 'limo_gazebo_sim/StopResumeExplorationAction') 
-                map_topic.subscribe(lambda message: socket_manager.map_callback(message, str(robot["ipAddress"] + 'sim')))
-                send_goal_and_wait(action_client, f"{robot['name'].lower().replace(' ', '')}", False)   
+                first_map_topic.subscribe(lambda message: socket_manager.map_callback(message, str(robot["ipAddress"] + 'sim')))
+                send_goal_and_wait(action_client, f"{robot['name'].lower().replace(' ', '')}", False)
+                   
 
             elif robot['name'] == "Robot 2" and not second_map_topic.is_subscribed:
                 second_action_client = roslibpy.actionlib.ActionClient(client, '/stop_resume_exploration', 'limo_gazebo_sim/StopResumeExplorationAction')
@@ -189,7 +191,7 @@ def send_return_to_base_goal(robot_name, initial_pos):
             }
         }))
         goal.send()
-        goal.wait(5)
+        goal.wait(20)
     except Exception as e:
         print(f"An error occurred in send_return_to_base_goal function: {str(e)}")
 
@@ -248,12 +250,12 @@ def return_to_base(robot=None):
         if robot is None:
             for i in [1, 2]:
                 send_return_to_base_goal(f"robot{i}", initial_positions[f'robot{i}'])
+                time.sleep(2)
+                
         else:
             robot_namespace = robot['name'].lower().replace(' ', '')
-            if robot_namespace == 'robot1':
-                send_return_to_base_goal(robot_namespace, initial_positions[robot_namespace])
-            else:
-                send_return_to_base_goal(robot_namespace, initial_positions[robot_namespace])
+            send_return_to_base_goal(robot_namespace, initial_positions[robot_namespace])
+            time.sleep(2)
     except Exception as e:
         print(f"An error occurred in return_to_base function: {str(e)}")
 
@@ -329,7 +331,7 @@ def terminate_mission_robot(robot=None, unsubscribe=False):
         try: 
             if unsubscribe: 
                 distance_query_action_client = roslibpy.actionlib.ActionClient(client, f"{robot_name}/distance_query",'limo_gazebo_sim/DistanceQueryAction')
-                time.sleep(5)
+                time.sleep(2)
                 goal = roslibpy.actionlib.Goal(distance_query_action_client, roslibpy.Message({}))
                 goal.on('result', lambda message: distance_callback(robot_name, message))
                 goal.send()
@@ -352,7 +354,7 @@ def terminate_mission_robot(robot=None, unsubscribe=False):
                 map_topic.unsubscribe()
         else:
             get_distance_and_stop(robot['name'].lower().replace(' ', ''))
-            if unsubscribe and map_topic.is_subscribed: map_topic.unsubscribe()
+            if unsubscribe and map_topic.is_subscribed: first_map_topic.unsubscribe()
             if unsubscribe and second_map_topic.is_subscribed: second_map_topic.unsubscribe()
             
     except Exception as e:

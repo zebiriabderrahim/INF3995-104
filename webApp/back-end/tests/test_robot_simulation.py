@@ -128,7 +128,7 @@ class RobotSimulation(unittest.TestCase):
 
         self.mock_goal.assert_called_once_with(self.mock_action, {'robot_namespace': '1', 'stop': True})
         self.mock_goal.return_value.send.assert_called_once()
-        self.mock_goal.return_value.wait.assert_called_once_with(5)
+        self.mock_goal.return_value.wait.assert_called_once_with(20)
 
         self.mock_goal.return_value.wait.side_effect = Exception("Timeout occurred")
         with patch('builtins.print') as mock_print:
@@ -189,10 +189,10 @@ class RobotSimulation(unittest.TestCase):
     @patch('services.robot_simulation.send_goal_and_wait')
     @patch('services.robot_simulation.position_callback')
     def test_simulate_robot_mission_robot1(self, mock_position_callback, mock_send_goal, mock_map_callback):
-        self.robot_simulation.map_topic = self.mock_cmd_topic
+        self.robot_simulation.first_map_topic = self.mock_cmd_topic
         self.mock_cmd_topic.is_subscribed = False
         self.robot_simulation.return_base_robots.add('robot1')
-        self.robot_simulation.action_client =self.mock_action.return_value
+        self.robot_simulation.action_client = self.mock_action.return_value
 
         self.robot_simulation.simulate_robot_mission(self.robot_1)
 
@@ -425,7 +425,7 @@ class RobotSimulation(unittest.TestCase):
         self.robot_simulation.map_topic = self.robot_simulation.second_map_topic = self.mock_cmd_topic
         self.mock_cmd_topic.is_subscribed = True
         self.robot_simulation.terminate_mission_robot(self.robot_1, True) 
-        self.assertEqual(self.mock_cmd_topic.unsubscribe.call_count, 3)
+        self.assertEqual(self.mock_cmd_topic.unsubscribe.call_count, 2)
 
 
     @patch('services.robot_simulation.send_goal_and_wait')

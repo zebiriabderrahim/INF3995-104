@@ -1,5 +1,5 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
@@ -10,9 +10,15 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 export class InitialLocationComponent implements OnInit {
   xValue: number = 0.0;
   yValue: number = 0.0;
-  form : FormGroup;
+  form: FormGroup;
 
-  constructor(public dialogRef: MatDialogRef<InitialLocationComponent>, private formBuilder: FormBuilder, @Inject(MAT_DIALOG_DATA) public data: any) {
+  // Constructor to initialize the form with validation rules
+  constructor(
+    public dialogRef: MatDialogRef<InitialLocationComponent>,
+    private formBuilder: FormBuilder,
+    @Inject(MAT_DIALOG_DATA) public data: any
+  ) {
+    // Form initialization with validation rules for xValue and yValue
     this.form = this.formBuilder.group({
       xValue: ['', [
         Validators.required,
@@ -27,13 +33,13 @@ export class InitialLocationComponent implements OnInit {
 
   ngOnInit(): void {}
 
+  // Set default position based on robot ID
   defaultPosition() {
-    let y = 0.0;
-
-    if (this.data.id == 'robot1') y = 1.0
+    let y = (this.data.id == 'robot1') ? 1.0 : 0.0;
+    let x = -4.0;
 
     const positionData = {
-      x: 0.0,
+      x: x,
       y: y,
       z: 0.0,
       w: 0.0,
@@ -42,11 +48,13 @@ export class InitialLocationComponent implements OnInit {
     this.dialogRef.close(positionData);
   }
 
-  submit(): void { 
+  // Submit form data if valid
+  submit(): void {
     if (this.form.valid) {
-      this.xValue = parseFloat(this.xValue.toString()); // -3 to 0
-      this.yValue = parseFloat(this.yValue.toString()); // -3 to 3
-        
+      // Parse form values and close the dialog with position data
+      this.xValue = parseFloat(this.form.value.xValue.toString());
+      this.yValue = parseFloat(this.form.value.yValue.toString());
+
       const positionData = {
         x: this.xValue,
         y: this.yValue,

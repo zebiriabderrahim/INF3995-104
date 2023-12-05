@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges } from '@angular/core';
 import { MissionRoom, Robot, RobotBatteryInfo } from 'src/app/interfaces/models';
 import { CommandService } from 'src/app/services/command-service/command.service';
 import { SocketService } from 'src/app/services/socket-service/socket.service';
@@ -31,6 +31,7 @@ export class RobotComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnInit(): void {
+    // Fetch available rooms and subscribe to relevant socket service events
     this.socketService.getAvailableRooms();
 
 
@@ -81,75 +82,84 @@ export class RobotComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
-  launchMission(robot: Robot) {
-    this.commandService.createMissionRoom(robot);
-  }
+// Function to launch a mission for a robot
+launchMission(robot: Robot) {
+  this.commandService.createMissionRoom(robot);
+}
 
-  identifyRobot(robot: Robot) {
-    this.commandService.identifyRobot(robot);
-  }
+// Function to identify a robot
+identifyRobot(robot: Robot) {
+  this.commandService.identifyRobot(robot);
+}
 
-  isAllRobotsLaunched(rooms: MissionRoom[]): boolean {
-    for (let room of rooms)  
-      if (room.robot.ipAddress === 'simulation'){
-        return true;
-      }
-    return false;
-  }
-
-  viewMission(robot: Robot, isSimulation: boolean) {
-    this.commandService.viewMissionRoom(robot,isSimulation);
-  }
-
-  handleSimulationRobot(robot: Robot) {
-    this.commandService.simulateMissionRobot(robot);
-  }
-
-  isAvailableRoom(type: string | undefined): boolean {
-    if (type === 'sim') {
-        return (
-            this.simulationRooms?.some(room => room.robot.ipAddress === this.robot.ipAddress) ||
-            false
-        );
-    } else {
-        return (
-            this.availableRooms?.some(room => room.robot.ipAddress === this.robot.ipAddress && room.robot.state === 'Active on mission' && !room.otherRobots) ||
-            false
-        );
+// Function to check if all robots are launched in a set of rooms
+areAllRobotsLaunched(rooms: MissionRoom[]): boolean {
+  for (let room of rooms)
+    if (room.robot.ipAddress === 'simulation') {
+      return true;
     }
+  return false;
+}
+
+// Function to view mission details for a robot
+viewMission(robot: Robot, isSimulation: boolean) {
+  this.commandService.viewMissionRoom(robot, isSimulation);
+}
+
+// Function to handle simulation for a robot
+handleSimulationRobot(robot: Robot) {
+  this.commandService.simulateMissionRobot(robot);
+}
+
+// Function to check if a room is available for a robot based on the type ('sim' or undefined)
+isAvailableRoom(type: string | undefined): boolean {
+  if (type === 'sim') {
+      return (
+          this.simulationRooms?.some(room => room.robot.ipAddress === this.robot.ipAddress) ||
+          false
+      );
+  } else {
+      return (
+          this.availableRooms?.some(room => room.robot.ipAddress === this.robot.ipAddress && room.robot.state === 'Active on mission' && !room.otherRobots) ||
+          false
+      );
   }
+}
+// Function to check if both robots are used in a set of rooms
+bothRobotsUsed(rooms:MissionRoom[]) {
+  return (
+    rooms.some(room => room.otherRobots && room.otherRobots?.length > 0) ||
+    false
+  );
+}
 
-  bothRobotsUsed(rooms:MissionRoom[]) {
-    return (
-      rooms.some(room => room.otherRobots && room.otherRobots?.length > 0) ||
-      false
-    );
-  }
+// Function to check if a robot is in a simulated room
+isInSimRoom(robotName: string){
+  return this.simulationRooms.some(room => room.robot.name === robotName );
+}
 
-  isInSimRoom(robotName: string){
-    return this.simulationRooms.some(room => room.robot.name === robotName );
-  }
+// Function to set the initial location for a robot
+setInitialLocation(): void {
+  // Open dialog for setting initial location
+  const dialogRef = this.dialog.open(InitialLocationComponent, {
+    width: '400px',
+    data: {id: this.robot.name.toLowerCase().replace(' ', '')}
+  });
 
+  dialogRef.afterClosed().subscribe(result => {
+   if (result) this.socketService.setInitialPosition(this.robot.name, result) 
+  });
+}
 
-  setInitialLocation(): void {
-    const dialogRef = this.dialog.open(InitialLocationComponent, {
-      width: '400px',
-      data: {id: this.robot.name.toLowerCase().replace(' ', '')}
-    });
+ngOnDestroy(): void {
+  // Unsubscribe from all subscriptions to avoid memory leaks
+  this.batterySubscription?.unsubscribe();
+  this.stopBatterySimulationSubscription?.unsubscribe();
+  this.availableRoomsSubscription?.unsubscribe();
+  this.availableSimRoomsSubscription?.unsubscribe();
+  this.roomDeletedSubscription?.unsubscribe();
+  this.roomCreatedSubscription?.unsubscribe();
+  this.batteryLevelSimulationSubscription?.unsubscribe();
+}
 
-    dialogRef.afterClosed().subscribe(result => {
-     if (result) this.socketService.setInitialPosition(this.robot.name, result) 
-    });
-  }
-
-  ngOnDestroy(): void {
-    this.batterySubscription?.unsubscribe();
-    this.stopBatterySimulationSubscription?.unsubscribe();
-    this.availableRoomsSubscription?.unsubscribe();
-    this.availableSimRoomsSubscription?.unsubscribe();
-    this.roomDeletedSubscription?.unsubscribe();
-    this.roomCreatedSubscription?.unsubscribe();
-    this.batteryLevelSimulationSubscription?.unsubscribe();
-
-  }
 }
