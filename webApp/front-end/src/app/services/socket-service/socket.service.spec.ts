@@ -62,6 +62,7 @@ describe('SocketService', () => {
     socketHelper = new SocketTestHelper();
     socketServiceMock = new SocketClientServiceMock();
     socketServiceMock.socket = socketHelper as unknown as Socket;
+    socketServiceMock.socket.id=  '1234';
 
     TestBed.configureTestingModule({
       imports: [
@@ -80,36 +81,36 @@ describe('SocketService', () => {
     router = TestBed.inject(Router);
     socketService.handleSocket();
   });
-  
+
   it('should be created', () => {
     expect(socketService).toBeTruthy();
   });
-  
+
   it('should not call connect if socket is alive', () => {
     spyOn(socketServiceMock, 'isSocketAlive').and.callFake(() => true);
     const connectSpy = spyOn(socketServiceMock, 'connect');
     socketService.connect();
     expect(connectSpy).not.toHaveBeenCalled();
   });
-  
+
   it('should call connect if socket is not alive', () => {
     spyOn(socketServiceMock, 'isSocketAlive').and.callFake(() => false);
     const connectSpy = spyOn(socketServiceMock, 'connect');
     socketService.connect();
     expect(connectSpy).toHaveBeenCalled();
   });
-  
+
   it('should return true if socket is alive', () => {
     spyOn(socketServiceMock, 'isSocketAlive').and.callFake(() => true);
     expect(socketService.isConnected()).toBeTrue();
   });
-  
+
   it('should return false if socket is not alive', () => {
     spyOn(socketServiceMock, 'isSocketAlive').and.callFake(() => false);
     expect(socketService.isConnected()).toBeFalse();
   });
-  
-  it('should get mission room info', () => { 
+
+  it('should get mission room info', () => {
     const spy = spyOn(socketService.roomInfo, 'asObservable');
     socketService.getMissionRoomInfo();
     expect(spy).toHaveBeenCalled();
@@ -123,7 +124,7 @@ describe('SocketService', () => {
     expect(routerSpy).toHaveBeenCalledWith(['/mission']);
   });
 
-  
+
   it('should pass true to rosConnectionError ', () => {
     const spy = spyOn(socketService.rosConnectionError, 'next');
     socketHelper.peerSideEmit('rosConnectionError', true);
@@ -133,7 +134,7 @@ describe('SocketService', () => {
 
   it('should send viewMissionRoom event', () => {
     const sendSpy = spyOn(socketServiceMock, 'send');
-    socketService.viewMissionRoom(robots[0]);
+    socketService.viewMissionRoom(robots[0],false);
     expect(sendSpy).toHaveBeenCalledWith('viewMissionRoom', robots[0]);
   });
 
@@ -152,7 +153,7 @@ describe('SocketService', () => {
     spyOn(socketService.availableRooms, 'asObservable');
     socketService.getAvailableMissionRoomsInfo();
     expect(socketService.availableRooms.asObservable).toHaveBeenCalled();
-    
+
   });
 
 
@@ -161,24 +162,19 @@ describe('SocketService', () => {
     socketService.getAvailableRooms();
     expect(sendSpy).toHaveBeenCalledWith('getAvailableRooms');
   });
-  
+
   it('should handle createdMissionRoom response', () => {
-    const spy = spyOn(socketService.isRoomCreated, 'next');
     const roomInfoSpy = spyOn(socketService.roomInfo, 'next');
     socketHelper.peerSideEmit('createdMissionRoom', mockRoom);
     expect(socketService.currentRoom).toEqual(mockRoom);
     expect(roomInfoSpy).toHaveBeenCalledWith(mockRoom);
-    expect(spy).toHaveBeenCalledWith(true);
   });
 
   it('should handle set simulation subject to true response', () => {
     const spy = spyOn(socketService.isRoomCreated, 'next');
-    const roomInfoSpy = spyOn(socketService.roomInfo, 'next');
     const simulationSpy = spyOn(socketService.simulation, 'next');
     mockRoom.robot.ipAddress = '192.168.0.sim';
-    socketHelper.peerSideEmit('createdMissionRoom', mockRoom);
-    expect(socketService.currentRoom).toEqual(mockRoom);
-    expect(roomInfoSpy).toHaveBeenCalledWith(mockRoom);
+    socketHelper.peerSideEmit('roomCreated', mockRoom);
     expect(spy).toHaveBeenCalledWith(true);
     expect(simulationSpy).toHaveBeenCalledWith(true);
   });
@@ -226,7 +222,7 @@ describe('SocketService', () => {
     const spy = spyOn(socketService.robotPos, 'next');
     socketHelper.peerSideEmit('recieveSimRobotPos', coordinates);
     expect(spy).toHaveBeenCalledWith(coordinates);
-    
+
   });
 
   it('should stop simulation', () => {
@@ -280,16 +276,16 @@ describe('SocketService', () => {
       state: 'idle',
       batteryLevel: 80,
     };
-  
+
     socketHelper.peerSideEmit('robotBattery', mockRobot);
-      
+
     expect(spy).toHaveBeenCalledWith([...socketService.robots.value, mockRobot]);
-    
+
   });
 
   it('should update robots when receiving a robot battery', () => {
-    const robots = socketService.robots.value; 
-    
+    const robots = socketService.robots.value;
+
     const mockRobot = {
       name: 'Robot 1',
       ipAddress: '192.168.0.110',
@@ -304,20 +300,20 @@ describe('SocketService', () => {
 
   it('should save mission', () => {
     const logs: Log[] = [
-      { 
+      {
         type: "system",
         name: "system",
         message: "Mission arrêtée",
         timestamp: "Nov 03 20:59:39"
       },
-      { 
+      {
         type: "system",
         name: "system",
         message: "Mission arrêtée",
         timestamp: "Nov 03 20:59:59"
       }
     ];
-    
+
     let mission = {
       logs: [{ timestamp: "Nov 03 20:56:23" }, { timestamp: "Nov 03 20:59:39" }],
       map:  [],
@@ -358,7 +354,7 @@ describe('SocketService', () => {
     const sendSpy = spyOn(socketServiceMock, 'send');
     socketService.getBatteryLevelSim(robots[0]);
     expect(sendSpy).toHaveBeenCalledWith('getBatteryLevelSim', robots[0]);
-  });  
+  });
 
   it('should launch all robots', () => {
     const sendSpy = spyOn(socketServiceMock, 'send');
@@ -425,13 +421,49 @@ describe('SocketService', () => {
   });
 
   it('should receiveDistanceSim emit', () => {
+    socketService.currentRoom = mockRoom;
+    socketService.currentRoom.hostId = "1234";
     socketService.type="simulation";
     const spy = spyOn(socketService, 'saveMission');
     socketHelper.peerSideEmit('receiveDistanceSim', "1.8m");
     expect(spy).toHaveBeenCalledWith("simulation","1.8m");
   });
-  
-  
+
+  it('should receive robot 2d position emit', () => {
+    const spy= spyOn(socketService.robotPos, 'next');
+    socketHelper.peerSideEmit('recieveSimRobot2Pos', coordinates);
+    expect(spy).toHaveBeenCalledWith(coordinates);
+  });
+
+  it('should update battery level and execute return to base when batteryLevel is below 30 and executeReturnToBase is false', () => {
+    const mockRobot = { name: 'robot1', ipAddress: '192.168.0.4', state: 'idle', batteryLevel: 25 } as Robot;
+    const currentRobot = { name: 'robot1', ipAddress: '192.168.0.4', state: 'idle', batteryLevel: 100 } as Robot;
+    socketService.robots.next([currentRobot]);
+    socketService.currentRoom = mockRoom;
+
+    spyOn(socketService, 'returnToBase');
+    socketService.executeReturnToBase = false;
+
+    socketHelper.peerSideEmit('robotBattery', mockRobot);
+
+    expect(socketService.robots.value.length).toBe(1);
+    expect(socketService.robots.value[0].batteryLevel).toBe(mockRobot.batteryLevel);
+    expect(socketService.returnToBase).toHaveBeenCalledWith(currentRobot);
+    expect(socketService.executeReturnToBase).toBeTrue();
+  });
+
+  it('should view mission Room in simulation', () => {
+    const sendSpy = spyOn(socketServiceMock, 'send');
+    const routerSpy = spyOn(router, 'navigate');
+    socketService.viewMissionRoom(robots[0],true);
+    expect(sendSpy).toHaveBeenCalledWith('viewMissionRoomSimulation', robots[0]);
+    expect(routerSpy).toHaveBeenCalledWith(['/mission']);
+
+  });
+
+
+
+
 
 
 

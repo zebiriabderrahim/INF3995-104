@@ -25,10 +25,10 @@ describe('RobotEditorComponent', () => {
     commandServiceSpy.getRobotFiles.and.returnValue(of());
     commandServiceSpy.saveRobotFiles.and.returnValue(of());
 
-    socketServiceSpy = jasmine.createSpyObj('SocketService', ['getAvailableSimulatedRoomsInfo', 'getAvailableMissionRoomsInfo']);
+    socketServiceSpy = jasmine.createSpyObj('SocketService', ['getAvailableSimulatedRoomsInfo', 'getAvailableMissionRoomsInfo', 'getAvailableRooms']);
     socketServiceSpy.getAvailableSimulatedRoomsInfo.and.returnValue(of());
     socketServiceSpy.getAvailableMissionRoomsInfo.and.returnValue(of());
-  
+
     await TestBed.configureTestingModule({
       declarations: [ RobotEditorComponent ],
       imports: [MatDialogModule, RouterTestingModule],
@@ -51,14 +51,14 @@ describe('RobotEditorComponent', () => {
   it('should open the editor password dialog on initialization', () => {
     const dialogRefSpy = jasmine.createSpyObj({ afterClosed: of('password') });
     dialogSpy.open.and.returnValue(dialogRefSpy);
-  
+
     component.openEditorPasswordDialog();
     fixture.detectChanges();
-  
+
     expect(dialogSpy.open).toHaveBeenCalledWith(ErrorDialogComponent, {
       width: '300px',
       disableClose: true,
-      data: jasmine.any(Object) 
+      data: jasmine.any(Object)
     });
     expect(commandServiceSpy.getRobotFiles).toHaveBeenCalledWith('password');
   });
@@ -75,7 +75,7 @@ describe('RobotEditorComponent', () => {
       { hostId: '2', robot: mockRobot},
       { hostId: '3', robot: mockRobot},
     ];
-     
+
     socketServiceSpy.getAvailableSimulatedRoomsInfo.and.returnValue(of(mockSimulatedRooms));
     socketServiceSpy.getAvailableMissionRoomsInfo.and.returnValue(of(mockSimulatedRooms));
     component.ngOnInit();
@@ -88,14 +88,14 @@ describe('RobotEditorComponent', () => {
 
   it('should handle dialog closure and load files if password is provided', () => {
     const mockPassword = 'validPassword';
-    const mockFilesData = [{ fileName: 'file1.txt', content: 'Sample Content' }]; 
+    const mockFilesData = [{ fileName: 'file1.txt', content: 'Sample Content' }];
     const dialogRefSpy = jasmine.createSpyObj({ afterClosed: of(mockPassword) });
     dialogSpy.open.and.returnValue(dialogRefSpy);
     commandServiceSpy.getRobotFiles.and.returnValue(of(mockFilesData));
-  
+
     component.openEditorPasswordDialog();
     fixture.detectChanges();
-  
+
     expect(dialogSpy.open).toHaveBeenCalled();
     expect(commandServiceSpy.getRobotFiles).toHaveBeenCalledWith(mockPassword);
     expect(component.isLoading).toBeFalse();
@@ -110,10 +110,10 @@ describe('RobotEditorComponent', () => {
     commandServiceSpy.getRobotFiles.and.returnValue(of('unauthorized'));
     const router = TestBed.inject(Router);
     const navigateSpy = spyOn(router, 'navigate');
-  
+
     component.openEditorPasswordDialog();
     fixture.detectChanges();
-  
+
     expect(dialogSpy.open).toHaveBeenCalled();
     expect(commandServiceSpy.getRobotFiles).toHaveBeenCalledWith(mockPassword);
     expect(navigateSpy).toHaveBeenCalledWith(['/home']);
@@ -131,21 +131,21 @@ describe('RobotEditorComponent', () => {
   it('should not update file content or mark as modified when no file is selected', () => {
     component.selectedFileName = '';
     component.files['testFile.txt'] = 'Original Content';
-  
+
     const newContent = 'Updated Content';
     component.onContentChange(newContent);
-  
+
     expect(component.modified).toBeFalse();
     expect(component.files['testFile.txt']).toEqual('Original Content');
   });
-  
+
   it('should update selected file name and content when file content is available', () => {
     const fileName = 'testFile.txt';
     const fileContent = 'File content';
     component.files = {
       'testFile.txt': fileContent
     };
-  
+
     component.onFileSelect(fileName);
 
     expect(component.selectedFileName).toEqual(fileName);
@@ -153,14 +153,14 @@ describe('RobotEditorComponent', () => {
     expect(component.history).toEqual([fileContent]);
     expect(component.historyIndex).toEqual(0);
   });
-  
+
   it('should fallback to empty string for selected file content when file content is not available', () => {
     const fileName = 'emptyFile.txt';
     component.files = {
       'testFile.txt': 'File content'
     };
-  
-    component.onFileSelect(fileName);  
+
+    component.onFileSelect(fileName);
     expect(component.selectedFileName).toEqual(fileName);
     expect(component.selectedFileContent).toEqual('');
     expect(component.history).toEqual(['']);
@@ -170,7 +170,7 @@ describe('RobotEditorComponent', () => {
   it('should insert a tab character on Tab key press', () => {
 
     component.selectedFileContent = 'Some text';
-  
+
     const mockTextArea = document.createElement('textarea');
     mockTextArea.value = 'Some text';
     mockTextArea.selectionStart = 4;
@@ -196,25 +196,25 @@ describe('RobotEditorComponent', () => {
     const dialogRefSpy = jasmine.createSpyObj({ afterClosed: of(mockPassword) });
     dialogSpy.open.and.returnValue(dialogRefSpy);
     commandServiceSpy.getRobotFiles.and.returnValue(of(mockFilesData));
-  
+
     component.openEditorPasswordDialog();
     fixture.detectChanges();
-  
+
     expect(dialogSpy.open).toHaveBeenCalled();
     expect(commandServiceSpy.getRobotFiles).toHaveBeenCalledWith(mockPassword);
     expect(component.isLoading).toBeFalse();
     expect(component.password).toEqual(mockPassword);
     expect(component.files).toEqual(mockFilesData);
   });
-  
+
   it('should revert to previous content on Ctrl + Z key press', () => {
     component.history = ['First content', 'Second content'];
     component.historyIndex = 1;
     const event = new KeyboardEvent('keydown', { key: 'z', ctrlKey: true });
     spyOn(event, 'preventDefault');
-  
+
     component.onKeyDown(event);
-  
+
     expect(component.historyIndex).toEqual(0);
     expect(component.selectedFileContent).toEqual('First content');
     expect(event.preventDefault).toHaveBeenCalled();
@@ -241,7 +241,7 @@ describe('RobotEditorComponent', () => {
     commandServiceSpy.saveRobotFiles.and.returnValue(of({}));
     component.isSaving = false;
     component.saveFiles();
-  
+
     expect(commandServiceSpy.saveRobotFiles).toHaveBeenCalledWith(mockPassword, mockFiles);
     expect(component.isSaving).toBeFalse();
     expect(component.modified).toBeFalse();
@@ -261,9 +261,9 @@ describe('RobotEditorComponent', () => {
     };
     component.availableRooms = [mockRoom, mockRoom];
     spyOn(component, 'openErrorDialog');
-  
+
     component.openSaveDialog();
-  
+
     expect(component.openErrorDialog).toHaveBeenCalled();
   });
 
@@ -272,9 +272,9 @@ describe('RobotEditorComponent', () => {
     const dialogRefSpy = jasmine.createSpyObj({ afterClosed: of('sauvegarder') });
     dialogSpy.open.and.returnValue(dialogRefSpy);
     spyOn(component, 'saveFiles');
-  
+
     component.openSaveDialog();
-  
+
     expect(dialogSpy.open).toHaveBeenCalledWith(ErrorDialogComponent, {
       width: '300px',
       data: {
@@ -293,9 +293,9 @@ describe('RobotEditorComponent', () => {
     dialogSpy.open.and.returnValue(dialogRefSpy);
     const router = TestBed.inject(Router);
     const navigateSpy = spyOn(router, 'navigate');
-  
+
     component.openQuitDialog();
-  
+
     expect(dialogSpy.open).toHaveBeenCalledWith(ErrorDialogComponent, jasmine.any(Object));
     expect(navigateSpy).toHaveBeenCalledWith(['/home']);
   });
@@ -306,13 +306,13 @@ describe('RobotEditorComponent', () => {
     const dialogRefSpy = jasmine.createSpyObj({ afterClosed: of('sauvegarder') });
     dialogSpy.open.and.returnValue(dialogRefSpy);
     spyOn(component, 'saveFiles');
-  
+
     component.openQuitDialog();
-  
+
     expect(dialogSpy.open).toHaveBeenCalledWith(ErrorDialogComponent, jasmine.any(Object));
     expect(component.saveFiles).toHaveBeenCalled();
   });
-  
+
   it('should open error dialog when choosing to save but rooms are available', () => {
     component.modified = true;
     const robot = {
@@ -330,9 +330,9 @@ describe('RobotEditorComponent', () => {
     const dialogRefSpy = jasmine.createSpyObj({ afterClosed: of('sauvegarder') });
     dialogSpy.open.and.returnValue(dialogRefSpy);
     spyOn(component, 'openErrorDialog');
-  
+
     component.openQuitDialog();
-  
+
     expect(dialogSpy.open).toHaveBeenCalledWith(ErrorDialogComponent, jasmine.any(Object));
     expect(component.openErrorDialog).toHaveBeenCalled();
   });
@@ -341,41 +341,128 @@ describe('RobotEditorComponent', () => {
     component.modified = false;
     const router = TestBed.inject(Router);
     const navigateSpy = spyOn(router, 'navigate');
-  
+
     component.openQuitDialog();
-  
+
     expect(navigateSpy).toHaveBeenCalledWith(['/home']);
   });
-  
+
   it('should add new content to history when historyIndex is -1', () => {
     component.history = [];
     component.historyIndex = -1;
     const newContent = 'New content';
-  
+
     component.updateHistory(newContent);
-  
+
     expect(component.history).toEqual([newContent]);
     expect(component.historyIndex).toEqual(0);
   });
-  
+
   it('should add new content to history when it is different from last entry', () => {
     component.history = ['Existing content'];
     component.historyIndex = 0;
     const newContent = 'New content';
-  
+
     component.updateHistory(newContent);
-  
+
     expect(component.history).toEqual(['Existing content', newContent]);
     expect(component.historyIndex).toEqual(1);
   });
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+
+  it('should open error dialog if "sauvegarder" is selected and availableRooms is not empty', () => {
+    const mockRobot={
+      name: 'robot1',
+      ipAddress: '192.168.0.4',
+      state: 'idle',
+      batteryLevel: 100,
+    };
+    const mockSimulatedRooms: MissionRoom[] = [
+      { hostId: '1', robot: mockRobot},
+      { hostId: '2', robot: mockRobot},
+      { hostId: '3', robot: mockRobot},
+    ];
+
+    const dialogRefSpy = jasmine.createSpyObj({ afterClosed: of('sauvegarder') });
+    dialogSpy.open.and.returnValue(dialogRefSpy);
+    component.availableRooms = mockSimulatedRooms;
+    spyOn(component, 'openErrorDialog');
+
+    component.openSaveDialog();
+
+    expect(dialogSpy.open).toHaveBeenCalledWith(ErrorDialogComponent, jasmine.any(Object));
+    expect(component.openErrorDialog).toHaveBeenCalled();
+  });
+
+  it('should call saveFiles if "sauvegarder" is selected and availableRooms is empty', () => {
+    const dialogRefSpy = jasmine.createSpyObj({ afterClosed: of('sauvegarder') });
+    dialogSpy.open.and.returnValue(dialogRefSpy);
+    component.availableRooms = [];
+    spyOn(component, 'saveFiles');
+
+    component.openSaveDialog();
+
+    expect(component.saveFiles).toHaveBeenCalled();
+  });
+
+  it('should open error dialog if "sauvegarder" is selected and availableRooms is not empty', () => {
+
+
+    const dialogRefSpy = jasmine.createSpyObj({ afterClosed: of('sauvegarder') });
+    dialogSpy.open.and.returnValue(dialogRefSpy);
+    component.availableRooms = [];
+    spyOn(component, 'saveFiles');
+
+    component.openSaveDialog();
+
+    expect(dialogSpy.open).toHaveBeenCalledWith(ErrorDialogComponent, jasmine.any(Object));
+    expect(component.saveFiles).toHaveBeenCalled();
+  });
+
+  it('should open error dialog if "sauvegarder" is selected and availableRooms is not empty', () => {
+    const mockRobot={
+      name: 'robot1',
+      ipAddress: '192.168.0.4',
+      state: 'idle',
+      batteryLevel: 100,
+    };
+    const mockSimulatedRooms: MissionRoom[] = [
+      { hostId: '1', robot: mockRobot},
+      { hostId: '2', robot: mockRobot},
+      { hostId: '3', robot: mockRobot},
+    ];
+    const dialogRefSpy = jasmine.createSpyObj({ afterClosed: of('sauvegarder') });
+    dialogSpy.open.and.returnValue(dialogRefSpy);
+    component.availableRooms = mockSimulatedRooms;
+    spyOn(component, 'openErrorDialog');
+    spyOn(component, 'saveFiles');
+
+    component.openSaveDialog();
+
+    expect(dialogSpy.open).toHaveBeenCalledWith(ErrorDialogComponent, jasmine.any(Object));
+    expect(component.openErrorDialog).toHaveBeenCalled();
+    expect(component['saveFiles']).not.toHaveBeenCalled();
+  });
+
+
+
+  it('should open error dialog component', () => {
+    component.openErrorDialog();
+
+    expect(dialogSpy.open).toHaveBeenCalledWith(
+      ErrorDialogComponent,
+      jasmine.objectContaining({
+        width: '300px',
+        data: jasmine.objectContaining({
+          title: 'Erreur',
+          message: 'Impossible de sauvegarder les fichiers. Veuillez terminer les missions en cours.',
+          close: 'fermer',
+        }),
+      })
+    );
+  });
+
+
+
+
+
 });

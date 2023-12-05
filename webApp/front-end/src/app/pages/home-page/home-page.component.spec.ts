@@ -28,14 +28,12 @@ describe('HomePageComponent', () => {
     state: "on",
     batteryLevel: 100
   });
-  
+
 
   const mockCommandService = {
-    getRobots: () => of([]),
     getMissions: () => of([]),
     identifyRobot: (robot: Robot) => of({}),
     simulateMission: () => of({}),
-    terminateSimulation: () => of({}),
     launchAllRobots:(robots: Robot[]) => of({}),
     viewMission: () => of({}),
   };
@@ -77,9 +75,7 @@ describe('HomePageComponent', () => {
     socketService = TestBed.inject(SocketService);
   });
 
-  // afterEach(() => {
-  //   component.ngOnDestroy();
-  // });
+ 
 
   it('should create', () => {
     expect(component).toBeTruthy();
@@ -95,19 +91,19 @@ describe('HomePageComponent', () => {
   it('ngOnInit should open an Error Dialog if ros connection failed', fakeAsync(() => {
     component.robots = [getTestRobot()];
     const dialogSpy = spyOn((component as any).dialog, 'open').and.stub();
-  
+
     component.ngOnInit();
     tick();
-  
+
     expect(dialogSpy).not.toHaveBeenCalled();
-  
+
     mockSocketService.rosConnectionError.next(true);
     tick();
-  
+
     expect(dialogSpy).toHaveBeenCalledWith(ErrorDialogComponent, jasmine.any(Object));
   }));
-  
-  
+
+
 
   it('handleSimulation should call simulateMission', () => {
     spyOn(commandService, 'simulateMission');
@@ -136,7 +132,7 @@ describe('HomePageComponent', () => {
       state: "on",
       batteryLevel: 100
     });
-    
+
     const getTestMission = (): MissionRoom => ({
       hostId: "0.0.0.0",
       robot: getTestRobot(),
@@ -146,7 +142,7 @@ describe('HomePageComponent', () => {
     const roomsWithOtherRobots: MissionRoom[] = [getTestMission()];
     expect(component.bothRobotsUsed(roomsWithOtherRobots)).toBeTrue();
   });
-  
+
   it('should return true if any room has other robots', () => {
     const getTestRobot =(): Robot => ({
       name: "test",
@@ -154,7 +150,7 @@ describe('HomePageComponent', () => {
       state: "on",
       batteryLevel: 100
     });
-    
+
     const getTestMission = (): MissionRoom => ({
       hostId: "0.0.0.0",
       robot: getTestRobot(),
@@ -163,7 +159,7 @@ describe('HomePageComponent', () => {
     const roomsWithOtherRobots: MissionRoom[] = [getTestMission()];
     expect(component.bothRobotsUsed(roomsWithOtherRobots)).toBeFalsy();
   });
-  
+
 
   it('should update robots and areRobotsOn when robots emits', () => {
     const testRobots: Robot[] = [ {name: 'robot1', ipAddress: '192..168.0.1', state: 'On', batteryLevel: 100},
@@ -187,6 +183,6 @@ describe('HomePageComponent', () => {
     component.viewMission();
     expect(commandService.viewMission).toHaveBeenCalled();
   });
-    
-  
+
+
 });

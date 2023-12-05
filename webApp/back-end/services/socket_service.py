@@ -181,7 +181,6 @@ def handle_return_to_base(robot):
     if isinstance(robot, list):
         for bot in robot:
             socketio.emit("log", {"type": "command", "name": "command", "message": f"{bot['name']} retourne a la base", "timestamp": time.strftime("%b %d %H:%M:%S")}, room='physical')      
-            print('return to base for robot', bot['ipAddress'])
             ros_utilities.return_robot_to_base(bot['ipAddress'])
     else:
         socketio.emit("log", {"type": "command", "name": "command", "message": f"{robot['name']} retourne a la base", "timestamp": time.strftime("%b %d %H:%M:%S")}, room=robot['ipAddress'])      
@@ -219,8 +218,8 @@ def handle_return_to_base_simulation(robot):
                 robot_simulation.terminate_mission_robot({"name": missing_robot}, False)
                 robot_simulation.return_to_base({"name": missing_robot})           
     else: 
-        socketio.emit("log", {"type": "command", "name": "command", "message": f"{robot['name']}: retourne a la base", "timestamp": time.strftime("%b %d %H:%M:%S")}, room=robot['ipAddress'])
         if not robot_simulation.return_base_robots.__contains__(robot['name'].lower().replace(' ', '')):
+            socketio.emit("log", {"type": "command", "name": "command", "message": f"{robot['name']}: retourne a la base", "timestamp": time.strftime("%b %d %H:%M:%S")}, room=robot['ipAddress']+"sim")
             robot_simulation.return_base_robots.add(robot['name'].lower().replace(' ', ''))
             robot_simulation.terminate_mission_robot(robot, False)
             robot_simulation.return_to_base(robot)

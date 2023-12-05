@@ -23,8 +23,7 @@ describe('MissionPageComponent', () => {
   let fixture: ComponentFixture<MissionPageComponent>;
   let socketService: SocketService;
   let router: Router;
-  let socketServiceMock: SocketClientServiceMock;
-  let socketHelper: SocketTestHelper;
+
 
   const mockSocketService = {
    stopMission: () => {},
@@ -171,8 +170,8 @@ describe('MissionPageComponent', () => {
 
   it('should call returnToBaseSimulation for "Robot 1" with low battery', () => {
     spyOn(socketService, 'returnToBaseSimulation');
-    component.handleBatteryLevel('Robot 1', 30); // Example battery level
-    expect(component.robotSimulationBatteryLevel).toBe(30);
+    component.handleBatteryLevel('Robot 1', 29); 
+    expect(component.robotSimulationBatteryLevel).toBe(29);
     expect(socketService.returnToBaseSimulation).toHaveBeenCalledWith({
       ipAddress: '192.168.0.110',
       name: 'Robot 1'
@@ -270,7 +269,7 @@ describe('MissionPageComponent', () => {
   });
 
   it('should update robots and their battery levels', () => {
-    // Initialize the room with a robot
+
     const initialRobot: Robot = { name: 'robot1', ipAddress: '192.168.0.1', state: 'simulation', batteryLevel: 100 };
     const missionRoom: MissionRoom = {
       hostId: "host123",
@@ -309,7 +308,7 @@ describe('MissionPageComponent', () => {
   
     const newRobots: Robot[] = [
       { name: 'robot1', ipAddress: '192.168.0.1', state: 'active', batteryLevel: 80 },
-      { name: 'robot2', ipAddress: '192.168.0.2', state: 'idle', batteryLevel: 60 } // Updated battery level for otherRobot
+      { name: 'robot2', ipAddress: '192.168.0.2', state: 'idle', batteryLevel: 60 } 
     ];
   
     socketService.robots.next(newRobots);

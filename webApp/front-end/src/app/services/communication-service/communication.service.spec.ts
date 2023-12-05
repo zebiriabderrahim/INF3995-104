@@ -55,20 +55,6 @@ describe('CommunicationServiceService', () => {
 
   });
 
-  it('should get all robots', () => {
-    service.getRobots().subscribe({
-      next: (response: Robot[]) => {
-          expect(response).toEqual(robots);
-      },
-      error: fail,
-    });
-
-    const request = httpMock.expectOne(`${baseUrl}/robots`);
-    expect(request.request.method).toBe('GET');
-    request.flush(robots);
-
-  });
-
   it('should get all missions', () => {
     service.getMissions().subscribe({
       next: (response: string[]) => {
@@ -111,21 +97,6 @@ describe('CommunicationServiceService', () => {
 
   });
 
-  it('should terminate a simulation', () => {
-    service.terminateSimulation().subscribe({
-      next: (response: string) => {
-          expect(response).toEqual('Simulation terminated');
-      },
-      error: fail,
-    });
-
-    const request = httpMock.expectOne(`${baseUrl}/terminateSim`);
-    expect(request.request.method).toBe('GET');
-    request.flush('Simulation terminated');
-
-  });
-
-
   it('should return an observable with the provided result', () => {
     const result = 'success';
     const error = new Error('An error occurred');
@@ -143,20 +114,6 @@ describe('CommunicationServiceService', () => {
     errorHandler(error).subscribe((value) => {
       expect(value).toBeUndefined();
     });
-  });
-
-  it('should get the ros connection', () => {
-    service.getRosConnection(robots[0]).subscribe({
-      next: (response: string) => {
-          expect(response).toEqual(robots[0].ipAddress);
-      },
-      error: fail,
-    });
-
-    const request = httpMock.expectOne(`${baseUrl}/robot?ip=${robots[0].ipAddress}`);
-    expect(request.request.method).toBe('GET');
-    request.flush(robots[0].ipAddress);
-
   });
 
   it('should launch a mission', () => {
