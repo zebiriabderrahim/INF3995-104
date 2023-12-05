@@ -6,3 +6,4 @@ sudo chmod 666 /dev/ttyTHS1
 sudo usermod -a -G dialout nvidia
 roslaunch rosbridge_server rosbridge_websocket.launch port:=9090 &
 roslaunch environment_setting launch_cmds.launch &
+
