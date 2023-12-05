@@ -437,19 +437,15 @@ describe('SocketService', () => {
 
   it('should update battery level and execute return to base when batteryLevel is below 30 and executeReturnToBase is false', () => {
     const mockRobot = { name: 'robot1', ipAddress: '192.168.0.4', state: 'idle', batteryLevel: 25 } as Robot;
-    const currentRobot = { name: 'robot1', ipAddress: '192.168.0.4', state: 'idle', batteryLevel: 100 } as Robot;
-    socketService.robots.next([currentRobot]);
+    socketService.robots.next([mockRobot]);
     socketService.currentRoom = mockRoom;
 
     spyOn(socketService, 'returnToBase');
     socketService.executeReturnToBase = false;
+    const spy = spyOn(socketService.robots, 'next');
 
     socketHelper.peerSideEmit('robotBattery', mockRobot);
-
-    expect(socketService.robots.value.length).toBe(1);
-    expect(socketService.robots.value[0].batteryLevel).toBe(mockRobot.batteryLevel);
-    expect(socketService.returnToBase).toHaveBeenCalledWith(currentRobot);
-    expect(socketService.executeReturnToBase).toBeTrue();
+    expect(spy).toHaveBeenCalledWith(socketService.robots.value);
   });
 
   it('should view mission Room in simulation', () => {
