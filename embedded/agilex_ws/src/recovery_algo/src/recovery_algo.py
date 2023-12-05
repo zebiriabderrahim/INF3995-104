@@ -35,10 +35,10 @@ class RecoveryAlgorithm:
         initial_cmd_vel = self.last_cmd_vel
 
         twist = Twist()
-        twist.angular.z = 0.15
+        twist.angular.z = 1.00
 
         rate = rospy.Rate(1)
-        duration = 50
+        duration = 5
         start_time = rospy.Time.now()
 
         while (rospy.Time.now() - start_time).to_sec() < duration:
