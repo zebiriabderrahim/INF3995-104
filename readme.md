@@ -31,6 +31,11 @@ Pour démarrer le robot, exécutez la commande suivante au moment du démarrage 
 ./INF3995-104/start_script.sh
 ```
 
+En cas de problème lors de l'exécution du ./start_script.sh , exécutez la commande suivant:
+```bash
+./INF3995-104/kill.sh
+```
+
 ## Fonctionnement
 L'interface utilisateur affiche quatre options principales :
 - Lancer un robot physique

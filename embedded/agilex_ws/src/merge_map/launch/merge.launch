@@ -1,17 +1,17 @@
 <launch>
-<!-- Initial position for the first turtlebot -->
+<!-- Initial position for the first robot -->
   <arg name="first_tb3_x_pos" default="-1.0"/>
   <arg name="first_tb3_y_pos" default=" 0.0"/>
   <arg name="first_tb3_z_pos" default=" 0.0"/>
   <arg name="first_tb3_yaw"   default=" 0.0"/>
 
-  <!-- Initial position for the second turtlebot -->
+  <!-- Initial position for the second robot -->
   <arg name="second_tb3_x_pos" default="-1.0"/>
   <arg name="second_tb3_y_pos" default=" 1.0"/>
   <arg name="second_tb3_z_pos" default=" 0.0"/>
   <arg name="second_tb3_yaw"   default=" 0.0"/>
 
-  <!-- Pass the first turtlebot's position tb3_0/map_merge  -->
+  <!-- Pass the first robot's position tb3_0/map_merge  -->
   <group ns="/robot1/map_merge">
     <param name="init_pose_x"   value="$(arg first_tb3_x_pos)"/>
     <param name="init_pose_y"   value="$(arg first_tb3_y_pos)"/>
@@ -19,7 +19,7 @@
     <param name="init_pose_yaw" value="$(arg first_tb3_yaw)"  />
   </group>
 
-  <!-- Pass the second turtlebot's position tb3_1/map_merge  -->
+  <!-- Pass the second robot's position tb3_1/map_merge  -->
   <group ns="/robot2/map_merge">
     <param name="init_pose_x"   value="$(arg second_tb3_x_pos)"/>
     <param name="init_pose_y"   value="$(arg second_tb3_y_pos)"/>
