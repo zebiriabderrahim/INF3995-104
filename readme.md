@@ -1,10 +1,10 @@
-# Démonstration vidéos
+# Démonstrations vidéos
 
-Toutes démonstration vidéos des différentes fonctionnalités (simulation/robot-physiques) sont disponible au [lien suivant sur Google Drive](https://drive.google.com/drive/folders/1FRc0I4VLxESOACXQvV_2FOeH5X6hW15U?usp=sharing).
+Toutes les démonstrations vidéos des différentes fonctionnalités (simulation/robot-physique) sont disponibles au [lien suivant sur Google Drive](https://drive.google.com/drive/folders/1FRc0I4VLxESOACXQvV_2FOeH5X6hW15U?usp=sharing).
 
 # Application Web
 
-Le code de l'application web se trouve dans le dossier "webApp" et est organisé en deux parties principales :
+Le code de l'application Web se trouve dans le dossier "webApp" et est organisé en deux parties principales :
 
 ## Front-end
 Le front-end est codé en TypeScript en utilisant le framework Angular. Les pratiques de codage suivantes sont respectées :
@@ -13,11 +13,23 @@ Le front-end est codé en TypeScript en utilisant le framework Angular. Les prat
 - Utilisation de directives et de composants Angular pour une structure modulaire et réutilisable.
 
 ## Back-end
-L'ajout de tout nouveau package nécessaire au fonctionnement du serveur Flask dans le fichier existe dans le fichier `/back-end/requirements.txt`. Ce fichier répertorie toutes les dépendances essentielles pour exécuter le serveur. Maintenir cette liste à jour garantit l'installation correcte de toutes les dépendances requises lors du déploiement du serveur Flask, assurant ainsi la cohérence de l'environnement d'exécution.
+L'ajout de tout nouveau package nécessaire au fonctionnement du serveur Flask existe dans le fichier `/back-end/requirements.txt`. Ce fichier répertorie toutes les dépendances essentielles pour exécuter le serveur. Maintenir cette liste à jour garantit l'installation correcte de toutes les dépendances requises lors du déploiement du serveur Flask, assurant ainsi la cohérence de l'environnement d'exécution.
 
 Le back-end est codé en Python en utilisant le framework Flask. Il est organisé en dossiers de routes, de services et de contrôleurs. Les pratiques de codage suivantes sont appliquées :
 - Utilisation de la convention snake_case pour les noms de variables et de fonctions.
 - Gestion appropriée des exceptions et des erreurs pour des réponses HTTP claires.
+
+## Robot-physique
+
+Tous les fichiers nécessaires au fonctionnement des robots sont situés dans le répertoire suivant :
+```bash
+./INF3995-104/embedded/agilex_ws
+```
+
+Pour démarrer le robot, exécutez la commande suivante au moment du démarrage :
+```bash
+./INF3995-104/start_script.sh
+```
 
 ## Fonctionnement
 L'interface utilisateur affiche quatre options principales :
