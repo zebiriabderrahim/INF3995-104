@@ -24,12 +24,14 @@ class RecoveryAlgorithm:
             if self.zero_velocity_received_time is None:
                 self.zero_velocity_received_time = rospy.Time.now()
         else:
+            # Check if the robot is twisting in place
             if self.is_twisting_in_place(data):
                 self.is_twisting = False
                 return
 
             self.zero_velocity_received_time = None
-
+    
+    #Recovery Behavior
     def twist_robot_right(self):
         self.is_twisting = True
         initial_cmd_vel = self.last_cmd_vel
@@ -40,7 +42,8 @@ class RecoveryAlgorithm:
         rate = rospy.Rate(1)
         duration = 5
         start_time = rospy.Time.now()
-
+        # If received goal has non null coords or 
+        # if the robot is not performing recovery behavior stop twist
         while (rospy.Time.now() - start_time).to_sec() < duration:
             if self.is_significant_movement(self.last_cmd_vel) or self.is_non_twisting_movement(self.last_cmd_vel):
                 self.is_twisting = False
@@ -79,6 +82,8 @@ class RecoveryAlgorithm:
     def run(self):
         rate = rospy.Rate(10)
         while not rospy.is_shutdown():
+            # If only null coords are being published continuously for 5 secs
+            # perform recovery behavior (twisting robot)
             if self.zero_velocity_received_time is not None and not self.is_twisting:
                 if (rospy.Time.now() - self.zero_velocity_received_time) > self.timeout_duration:
                     self.twist_robot_right()
