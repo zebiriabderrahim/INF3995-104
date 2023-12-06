@@ -1,6 +1,8 @@
 import paramiko
 from services import ros_utilities as ros
 
+# modify this list to add more files to be fetched from the robot
+raw_filepath = ['/home/nvidia/INF3995-104/embedded/agilex_ws/src/save_test_file_pkg/src/save_test_file.py','/home/nvidia/INF3995-104/start_script.sh']
 filepaths = {}
 
 def get_robot_files(password):
@@ -56,8 +58,8 @@ def read_robot_filenames():
     """
     Reads and retrieves robot file paths from a file.
 
-    This function reads the 'robotfilepaths.txt' file, containing full paths for robot files.
-    It parses each line, extracting the filename and full path, storing them in a global variable 'filepaths'.
+    This function reads the 'raw_filepath' array, containing full paths for robot files.
+    It then extracts the filenames from the paths and stores them as keys in a dictionary.
 
     If 'filepaths' is empty, it populates it by extracting filenames and paths from the file.
     Once the content is extracted or if 'filepaths' is already populated, it returns the stored filepaths.
@@ -66,11 +68,9 @@ def read_robot_filenames():
     """
     global filepaths
     if len(filepaths) == 0:
-        with open('robotfilepaths.txt', 'r') as file:
-            for line in file:
-                fullpath = line.strip()
-                filename = fullpath.split('/')[-1]
-                filepaths[filename] = fullpath
+        for filepath in raw_filepath:
+            filename = filepath.split('/')[-1]
+            filepaths[filename] = filepath
     return filepaths
 
 
