@@ -3,7 +3,6 @@ import rospy
 import subprocess
 import threading
 from std_msgs.msg import String
-import os
 
 def launch_command_in_thread(launch_command):
     try:
