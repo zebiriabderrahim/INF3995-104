@@ -1,4 +1,25 @@
-# EN
+# Autonomous SLAM System for AgileX LIMO Rover
+
+## Project Overview
+
+This project presents an Autonomous SLAM (Simultaneous Localization and Mapping) System designed for the AgileX LIMO rover. The system leverages the capabilities of ROS (Robot Operating System) to control and manage the operations of the LIMO rover, providing it with the autonomy to navigate and map its environment in real-time. 
+
+The simulation component of the project is realized through Gazebo, a powerful robot simulation environment that allows for the testing and development of the SLAM algorithms in a controlled and safe virtual environment. This enables extensive experimentation and tuning before deployment on the physical rover.
+
+On the software side, the project is structured into a backend and a frontend. The backend is developed in Python, utilizing the Flask framework to handle server operations, communication with ROS, and processing of SLAM data. The frontend is built using Angular, offering a user-friendly interface for real-time visualization of the mapping process, rover control, and system configuration.
+
+## Key Features
+
+- **ROS Integration**: Utilizes ROS to facilitate communication, control, and data exchange between the various components of the SLAM system and the AgileX LIMO rover.
+- **Gazebo Simulation**: Employs Gazebo for realistic simulations of the rover's operations and SLAM algorithms, allowing for safe and efficient development cycles.
+- **Python Backend**: The backend is powered by Python and Flask, ensuring robust server-side operations, including SLAM data processing and API management.
+- **Angular Frontend**: An Angular-based frontend provides an interactive and intuitive interface for system monitoring, rover control, and live SLAM visualization.
+- **Modular Design**: The system architecture is modular, promoting ease of updates, scalability, and integration with additional sensors or modules for enhanced SLAM capabilities.
+
+## Getting Started
+
+Refer to the subsequent sections for detailed instructions on setting up the simulation environment, running the SLAM system, and interacting with the user interface.
+
 # Video Demonstrations
 
 All the video demonstrations of the various features (simulation/physical robot) are available at the [following link on Google Drive](https://drive.google.com/drive/folders/1FRc0I4VLxESOACXQvV_2FOeH5X6hW15U?usp=sharing).
