@@ -1,3 +1,90 @@
+# EN
+# Video Demonstrations
+
+All the video demonstrations of the various features (simulation/physical robot) are available at the [following link on Google Drive](https://drive.google.com/drive/folders/1FRc0I4VLxESOACXQvV_2FOeH5X6hW15U?usp=sharing).
+
+# Web Application
+
+The web application code is located in the "webApp" folder and is organized into two main parts:
+
+## Front-end
+
+The front-end is coded in TypeScript using the Angular framework. The following coding practices are adhered to:
+
+- Use of the camelCase convention for variable and function names.
+- Use of absolute paths for imports.
+- Use of Angular directives and components for a modular and reusable structure.
+
+## Back-end
+
+The addition of any new package necessary for the Flask server's operation is listed in the file `/back-end/requirements.txt`. This file enumerates all the essential dependencies required to run the server. Keeping this list up-to-date ensures the correct installation of all necessary dependencies when deploying the Flask server, thus maintaining the consistency of the runtime environment.
+
+The back-end is coded in Python using the Flask framework and is organized into folders for routes, services, and controllers. The following coding practices are applied:
+
+- Use of the snake_case convention for variable and function names.
+- Proper management of exceptions and errors for clear HTTP responses.
+
+## Physical Robot
+
+All files necessary for the operation of the robots are located in the following directory:
+```bash
+./INF3995-104/embedded/agilex_ws
+```
+To start the robot, execute the following command at startup:
+```bash
+./INF3995-104/start_script.sh
+```
+In case of problems when executing `./start_script.sh`, run the following command:
+```bash
+./INF3995-104/kill.sh
+```
+
+## Operation
+
+The user interface displays four main options:
+
+- Launch a physical robot
+- Start a simulation
+- Identify a robot
+- View the mission history
+- Update the code of physical robots
+
+Each time an operator selects an option, the request is redirected to the server, either in the form of an HTTP request or through socket communication. The server then appropriately handles the request. Depending on whether the simulation has been chosen in the user interface, the server redirects the requests to the physical robots or to the simulation in Gazebo.
+
+## Unit Tests
+
+Unit tests have been written for each feature of the back-end and front-end. Specific commands must be used to execute them:
+
+For the server side, tests have been developed for the main `.py` files, excluding configuration files:
+```bash
+cd webApp/back-end
+```
+```bash
+python -m pytest 
+```
+
+- front-end side: 
+
+```bash
+cd webApp/front-end
+```
+```bash
+npm run test
+```
+Or to get coverage:
+
+```bash
+npm run coverage
+```
+
+# Docker: Launch Everything with One Command
+
+Execute `docker compose up` inside this directory. This will set up the frontend server on port 4100 available on the network, the backend server on port 8000 on localhost, and the Gazebo simulation on localhost, port 9090.
+
+To access the application from other devices on the network, please modify the file `/front-end/src/environments/environment.prod.ts` and set the local IP address of the ground station.
+
+
+# FR
 # Démonstrations vidéos
 
 Toutes les démonstrations vidéos des différentes fonctionnalités (simulation/robot-physique) sont disponibles au [lien suivant sur Google Drive](https://drive.google.com/drive/folders/1FRc0I4VLxESOACXQvV_2FOeH5X6hW15U?usp=sharing).
